@@ -10,11 +10,9 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Area,
-  AreaChart,
+  Bar,
+  BarChart,
   CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
   XAxis,
 } from "recharts";
 import { dashboardApi } from "../../api/dashboard/dashboard-api";
@@ -29,6 +27,12 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "../../components/ui/chart";
 import { Label } from "../../components/ui/label";
 import { cn } from "../../lib/utils";
 
@@ -44,6 +48,17 @@ const chartColors = [
   "#64748b",
   "#a855f7",
 ];
+
+const financialChartConfig: ChartConfig = {
+  receitas: {
+    label: "Receitas",
+    color: "#2563eb",
+  },
+  despesas: {
+    label: "Despesas",
+    color: "#dc2626",
+  },
+};
 
 type AreaMode = "todos" | "receitas" | "despesas";
 type ReportMode = "anual" | "mensal";
@@ -335,72 +350,52 @@ export function RelatoriosPage() {
               Carregando grafico...
             </div>
           ) : (
-            <div className="h-80 w-full">
-              <ResponsiveContainer height="100%" width="100%">
-                <AreaChart
-                  data={areaChartData}
-                  margin={{ bottom: 0, left: 0, right: 10, top: 10 }}
-                >
-                  <defs>
-                    <linearGradient id="receitasGradient" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.35} />
-                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0.02} />
-                    </linearGradient>
-                    <linearGradient id="despesasGradient" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="5%" stopColor="#dc2626" stopOpacity={0.32} />
-                      <stop offset="95%" stopColor="#dc2626" stopOpacity={0.02} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid
-                    stroke="hsl(var(--border))"
-                    strokeDasharray="4 4"
-                    vertical={false}
-                  />
-                  <XAxis
-                    axisLine={false}
-                    dataKey="mes"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                    tickLine={false}
-                    tickMargin={10}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: "hsl(var(--popover))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: 8,
-                      color: "hsl(var(--popover-foreground))",
-                    }}
-                    formatter={(value, name) => [
-                      formatCurrency(Number(value)),
-                      name === "receitas" ? "Receitas" : "Despesas",
-                    ]}
-                    labelStyle={{ color: "hsl(var(--foreground))" }}
-                  />
-                  {(areaMode === "todos" || areaMode === "receitas") && (
-                    <Area
-                      dataKey="receitas"
-                      fill="url(#receitasGradient)"
-                      fillOpacity={1}
-                      name="receitas"
-                      stroke="#2563eb"
-                      strokeWidth={2}
-                      type="monotone"
+            <ChartContainer className="h-80 w-full" config={financialChartConfig}>
+              <BarChart
+                accessibilityLayer
+                data={areaChartData}
+                margin={{ bottom: 0, left: 0, right: 10, top: 10 }}
+              >
+                <CartesianGrid
+                  stroke="hsl(var(--border))"
+                  strokeDasharray="4 4"
+                  vertical={false}
+                />
+                <XAxis
+                  axisLine={false}
+                  dataKey="mes"
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                  tickLine={false}
+                  tickMargin={10}
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      formatter={(value) => formatCurrency(Number(value))}
+                      labelFormatter={(label) => String(label).toUpperCase()}
+                      nameFormatter={(name) => financialChartConfig[name]?.label ?? name}
                     />
-                  )}
-                  {(areaMode === "todos" || areaMode === "despesas") && (
-                    <Area
-                      dataKey="despesas"
-                      fill="url(#despesasGradient)"
-                      fillOpacity={1}
-                      name="despesas"
-                      stroke="#dc2626"
-                      strokeWidth={2}
-                      type="monotone"
-                    />
-                  )}
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+                  }
+                />
+                {(areaMode === "todos" || areaMode === "receitas") && (
+                  <Bar
+                    dataKey="receitas"
+                    name="receitas"
+                    fill="var(--color-receitas)"
+                    radius={4}
+                  />
+                )}
+                {(areaMode === "todos" || areaMode === "despesas") && (
+                  <Bar
+                    dataKey="despesas"
+                    name="despesas"
+                    fill="var(--color-despesas)"
+                    radius={4}
+                  />
+                )}
+              </BarChart>
+            </ChartContainer>
           )}
         </CardContent>
       </Card>

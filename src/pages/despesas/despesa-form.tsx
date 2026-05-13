@@ -24,6 +24,11 @@ import {
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Select } from "../../components/ui/select";
+import {
+  normalizeOptionalText,
+  normalizeRequiredText,
+  toUppercaseText,
+} from "../../lib/text";
 import { cn } from "../../lib/utils";
 import { defaultExpenseCategories, getCategoryIcon } from "./category-icons";
 import {
@@ -41,7 +46,7 @@ type DespesaFormProps = {
   onCancel?: () => void;
 };
 
-const fallbackCategorias = defaultExpenseCategories;
+const fallbackCategorias = defaultExpenseCategories.map(toUppercaseText);
 
 export function DespesaForm({
   mode,
@@ -51,9 +56,11 @@ export function DespesaForm({
   onCancel,
 }: DespesaFormProps) {
   const navigate = useNavigate();
-  const [nome, setNome] = useState(despesa?.nome ?? "");
+  const [nome, setNome] = useState(despesa?.nome ? toUppercaseText(despesa.nome) : "");
   const [valor, setValor] = useState(despesa ? moneyToInput(despesa.valor) : "");
-  const [categoria, setCategoria] = useState(despesa?.categoria ?? "");
+  const [categoria, setCategoria] = useState(
+    despesa?.categoria ? toUppercaseText(despesa.categoria) : "",
+  );
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamentoDespesa>(
     despesa?.formaPagamento ?? "DINHEIRO",
   );
@@ -80,7 +87,9 @@ export function DespesaForm({
     async function carregarOpcoes() {
       try {
         const data = await despesasApi.listarOpcoes();
-        setCategorias(Array.from(new Set([...data.categorias, ...fallbackCategorias])));
+        setCategorias(
+          Array.from(new Set([...data.categorias, ...fallbackCategorias].map(toUppercaseText))),
+        );
       } catch {
         setCategorias(fallbackCategorias);
       }
@@ -93,7 +102,12 @@ export function DespesaForm({
     async function carregarCartoes() {
       try {
         const data = await cartoesApi.listar();
-        setCartoes(data.cartoes);
+        setCartoes(
+          data.cartoes.map((cartao) => ({
+            ...cartao,
+            nome: toUppercaseText(cartao.nome),
+          })),
+        );
       } catch {
         setCartoes([]);
       }
@@ -109,9 +123,16 @@ export function DespesaForm({
 
     const valorNumerico = parseMoney(valor);
     const parcelas = numeroParcelas ? Number(numeroParcelas) : undefined;
+    const nomeNormalizado = normalizeRequiredText(nome);
+    const categoriaNormalizada = normalizeOptionalText(categoria);
 
     if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
       setError("Informe um valor maior que zero.");
+      return;
+    }
+
+    if (!nomeNormalizado) {
+      setError("Informe o nome da despesa.");
       return;
     }
 
@@ -129,9 +150,9 @@ export function DespesaForm({
 
     try {
       const payload = {
-        nome,
+        nome: nomeNormalizado,
         valor: valorNumerico,
-        categoria: categoria || null,
+        categoria: categoriaNormalizada,
         formaPagamento,
         cartaoCreditoId:
           formaPagamento === "CARTAO_CREDITO" ? cartaoCreditoId : null,
@@ -191,7 +212,7 @@ export function DespesaForm({
                 <Input
                   id="nome"
                   value={nome}
-                  onChange={(event) => setNome(event.target.value)}
+                  onChange={(event) => setNome(toUppercaseText(event.target.value))}
                   placeholder="Ex: Internet, aluguel, mercado"
                   required
                 />
@@ -364,7 +385,7 @@ export function DespesaForm({
                     selected &&
                       "border-destructive/50 bg-destructive/10 text-destructive ring-2 ring-destructive/10",
                   )}
-                  onClick={() => setCategoria(opcao)}
+                  onClick={() => setCategoria(toUppercaseText(opcao))}
                 >
                   <span
                     className={cn(
@@ -381,7 +402,7 @@ export function DespesaForm({
           </div>
           <Input
             value={categoria}
-            onChange={(event) => setCategoria(event.target.value)}
+            onChange={(event) => setCategoria(toUppercaseText(event.target.value))}
             placeholder="Ou digite uma categoria personalizada"
           />
         </CardContent>

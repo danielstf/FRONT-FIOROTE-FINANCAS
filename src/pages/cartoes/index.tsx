@@ -13,6 +13,7 @@ import {
 } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { normalizeRequiredText, toUppercaseText } from "../../lib/text";
 
 export function CartoesPage() {
   const [cartoes, setCartoes] = useState<CartaoCredito[]>([]);
@@ -30,7 +31,12 @@ export function CartoesPage() {
 
     try {
       const data = await cartoesApi.listar();
-      setCartoes(data.cartoes);
+      setCartoes(
+        data.cartoes.map((cartao) => ({
+          ...cartao,
+          nome: toUppercaseText(cartao.nome),
+        })),
+      );
     } catch (requestError) {
       setError(getApiErrorMessage(requestError));
     } finally {
@@ -45,11 +51,18 @@ export function CartoesPage() {
     setSaving(true);
 
     try {
+      const nomeNormalizado = normalizeRequiredText(nome);
+
+      if (!nomeNormalizado) {
+        setError("Informe o nome do cartao.");
+        return;
+      }
+
       if (editando) {
-        await cartoesApi.editar(editando.id, { nome });
+        await cartoesApi.editar(editando.id, { nome: nomeNormalizado });
         setMessage("Cartao atualizado com sucesso.");
       } else {
-        await cartoesApi.criar({ nome });
+        await cartoesApi.criar({ nome: nomeNormalizado });
         setMessage("Cartao cadastrado com sucesso.");
       }
 
@@ -85,7 +98,7 @@ export function CartoesPage() {
 
   function iniciarEdicao(cartao: CartaoCredito) {
     setEditando(cartao);
-    setNome(cartao.nome);
+    setNome(toUppercaseText(cartao.nome));
     setMessage("");
     setError("");
   }
@@ -139,7 +152,7 @@ export function CartoesPage() {
                 <Input
                   id="nome-cartao"
                   value={nome}
-                  onChange={(event) => setNome(event.target.value)}
+                  onChange={(event) => setNome(toUppercaseText(event.target.value))}
                   placeholder="Ex: Nubank, Inter, Itau"
                   required
                 />

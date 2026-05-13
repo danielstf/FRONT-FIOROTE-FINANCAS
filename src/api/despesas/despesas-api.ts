@@ -4,6 +4,7 @@ import type {
   CriarDespesaResponse,
   Despesa,
   EditarDespesaPayload,
+  ExcluirDespesaParams,
   ListarDespesasParams,
   ListarDespesasResponse,
   OpcoesDespesaResponse,
@@ -45,7 +46,7 @@ export const despesasApi = {
     return data;
   },
 
-  async excluir(despesaId: string) {
-    await api.delete(`/despesas/${despesaId}`);
+  async excluir(despesaId: string, params?: ExcluirDespesaParams) {
+    await api.delete(`/despesas/${despesaId}`, { params });
   },
 };

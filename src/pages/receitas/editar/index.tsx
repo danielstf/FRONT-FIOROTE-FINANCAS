@@ -14,6 +14,7 @@ import {
 } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
+import { normalizeRequiredText, toUppercaseText } from "../../../lib/text";
 
 function parseMoney(value: string) {
   const normalized = value.replace(/\./g, "").replace(",", ".");
@@ -47,7 +48,7 @@ export function EditarReceitaPage() {
 
       try {
         const receita = await receitasApi.obter(receitaId);
-        setNome(receita.nome);
+        setNome(toUppercaseText(receita.nome));
         setValor(moneyToInput(receita.valor));
         setMes(receita.mes);
       } catch (requestError) {
@@ -69,9 +70,15 @@ export function EditarReceitaPage() {
     setMessage("");
 
     const valorNumerico = parseMoney(valor);
+    const nomeNormalizado = normalizeRequiredText(nome);
 
     if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
       setError("Informe um valor maior que zero.");
+      return;
+    }
+
+    if (!nomeNormalizado) {
+      setError("Informe o nome da receita.");
       return;
     }
 
@@ -79,7 +86,7 @@ export function EditarReceitaPage() {
 
     try {
       await receitasApi.editar(receitaId, {
-        nome,
+        nome: nomeNormalizado,
         valor: valorNumerico,
         mes,
       });
@@ -131,7 +138,7 @@ export function EditarReceitaPage() {
                 <Input
                   id="nome"
                   value={nome}
-                  onChange={(event) => setNome(event.target.value)}
+                  onChange={(event) => setNome(toUppercaseText(event.target.value))}
                   placeholder="Ex: Salário, renda extra, venda"
                   required
                 />

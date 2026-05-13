@@ -49,6 +49,10 @@ export type ListarDespesasParams = {
   paga?: boolean;
 };
 
+export type ExcluirDespesaParams = {
+  excluirParcelas?: boolean;
+};
+
 export type CriarDespesaResponse = {
   despesas: Despesa[];
 };

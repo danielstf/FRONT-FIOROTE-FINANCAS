@@ -67,6 +67,10 @@ export function DespesasPage() {
       return maior;
     }, null);
   }, [despesas]);
+  const despesaExcluindoParceladaNoCartao = Boolean(
+    despesaExcluindo?.parcelamentoId &&
+      despesaExcluindo.formaPagamento === "CARTAO_CREDITO",
+  );
 
   async function carregarDespesas(
     mesSelecionado = mes,
@@ -121,7 +125,9 @@ export function DespesasPage() {
     setError("");
 
     try {
-      await despesasApi.excluir(despesaExcluindo.id);
+      await despesasApi.excluir(despesaExcluindo.id, {
+        excluirParcelas: despesaExcluindoParceladaNoCartao || undefined,
+      });
       setDespesaExcluindo(null);
       await carregarDespesas();
     } catch (requestError) {
@@ -503,7 +509,9 @@ export function DespesasPage() {
           <DialogHeader>
             <DialogTitle>Excluir despesa</DialogTitle>
             <DialogDescription>
-              Esta acao remove a despesa selecionada definitivamente.
+              {despesaExcluindoParceladaNoCartao
+                ? "Esta despesa faz parte de uma compra parcelada no cartao. Ao confirmar, todas as parcelas deste parcelamento serao excluidas."
+                : "Esta acao remove a despesa selecionada definitivamente."}
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-lg border border-border bg-muted/35 p-4 text-sm">
@@ -511,6 +519,21 @@ export function DespesasPage() {
             <p className="mt-1 text-red-600 dark:text-red-400">
               {formatCurrency(despesaExcluindo?.valor ?? 0)}
             </p>
+            {despesaExcluindoParceladaNoCartao &&
+              despesaExcluindo?.parcelaAtual &&
+              despesaExcluindo.numeroParcelas && (
+                <div className="mt-3 rounded-md border border-destructive/25 bg-destructive/10 p-3 text-destructive">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <p>
+                      Voce esta excluindo a parcela {despesaExcluindo.parcelaAtual}/
+                      {despesaExcluindo.numeroParcelas}. Todas as{" "}
+                      {despesaExcluindo.numeroParcelas} parcelas vinculadas a este
+                      cartao serao removidas.
+                    </p>
+                  </div>
+                </div>
+              )}
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <Button
@@ -529,7 +552,9 @@ export function DespesasPage() {
               {busyId === despesaExcluindo?.id && (
                 <Loader2 className="h-4 w-4 animate-spin" />
               )}
-              Excluir
+              {despesaExcluindoParceladaNoCartao
+                ? "Excluir todas as parcelas"
+                : "Excluir"}
             </Button>
           </div>
         </DialogContent>

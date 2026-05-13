@@ -15,6 +15,7 @@ import {
 } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { normalizeRequiredText, toUppercaseText } from "../../lib/text";
 
 type ReceitaFormProps = {
   mode?: "create" | "edit";
@@ -50,7 +51,7 @@ export function ReceitaForm({
   showSuggestions = true,
 }: ReceitaFormProps) {
   const navigate = useNavigate();
-  const [nome, setNome] = useState(receita?.nome ?? "");
+  const [nome, setNome] = useState(receita?.nome ? toUppercaseText(receita.nome) : "");
   const [valor, setValor] = useState(receita ? moneyToInput(receita.valor) : "");
   const [mes, setMes] = useState(receita?.mes ?? defaultMonth ?? getCurrentMonth);
   const [opcoes, setOpcoes] = useState<string[]>([]);
@@ -62,7 +63,7 @@ export function ReceitaForm({
     async function carregarOpcoes() {
       try {
         const data = await receitasApi.listarOpcoes();
-        setOpcoes(data.opcoes);
+        setOpcoes(data.opcoes.map(toUppercaseText));
       } catch {
         setOpcoes([]);
       }
@@ -77,9 +78,15 @@ export function ReceitaForm({
     setMessage("");
 
     const valorNumerico = parseMoney(valor);
+    const nomeNormalizado = normalizeRequiredText(nome);
 
     if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
       setError("Informe um valor maior que zero.");
+      return;
+    }
+
+    if (!nomeNormalizado) {
+      setError("Informe o nome da receita.");
       return;
     }
 
@@ -88,13 +95,13 @@ export function ReceitaForm({
     try {
       if (mode === "edit" && receita) {
         await receitasApi.editar(receita.id, {
-          nome,
+          nome: nomeNormalizado,
           valor: valorNumerico,
           mes,
         });
       } else {
         await receitasApi.criar({
-          nome,
+          nome: nomeNormalizado,
           valor: valorNumerico,
           mes,
         });
@@ -143,7 +150,7 @@ export function ReceitaForm({
                 id="nome-receita"
                 list="opcoes-receita"
                 value={nome}
-                onChange={(event) => setNome(event.target.value)}
+                onChange={(event) => setNome(toUppercaseText(event.target.value))}
                 placeholder="Ex: Salario, renda extra, venda"
                 required
               />
@@ -222,7 +229,7 @@ export function ReceitaForm({
                   key={opcao}
                   type="button"
                   className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                  onClick={() => setNome(opcao)}
+                  onClick={() => setNome(toUppercaseText(opcao))}
                 >
                   {opcao}
                 </button>
