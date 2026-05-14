@@ -35,9 +35,10 @@ import {
 } from "../../components/ui/dialog";
 import { cn } from "../../lib/utils";
 import { DespesaForm } from "./despesa-form";
-import { getCategoryIcon } from "./category-icons";
+import { getCategoryColor, getCategoryIcon } from "./category-icons";
 import {
   formaPagamentoLabel,
+  formasPagamentoOptions,
   formatCurrency,
   formatDate,
   formatMonthName,
@@ -60,6 +61,7 @@ export function DespesasPage() {
   const [cadastroAberto, setCadastroAberto] = useState(false);
   const [despesaEditando, setDespesaEditando] = useState<Despesa | null>(null);
   const [despesaExcluindo, setDespesaExcluindo] = useState<Despesa | null>(null);
+  const [escopoExclusao, setEscopoExclusao] = useState<"mes" | "todas">("mes");
   const [error, setError] = useState("");
 
   const maiorDespesa = useMemo(() => {
@@ -72,6 +74,7 @@ export function DespesasPage() {
     despesaExcluindo?.parcelamentoId &&
       despesaExcluindo.formaPagamento === "CARTAO_CREDITO",
   );
+  const despesaExcluindoRecorrente = Boolean(despesaExcluindo?.fixa);
 
   async function carregarDespesas(
     mesSelecionado = mes,
@@ -131,10 +134,17 @@ export function DespesasPage() {
     try {
       await despesasApi.excluir(despesaExcluindo.id, {
         excluirParcelas: despesaExcluindoParceladaNoCartao || undefined,
+        escopo:
+          despesaExcluindoParceladaNoCartao || despesaExcluindoRecorrente
+            ? escopoExclusao
+            : undefined,
+        mes,
       });
       toast.success(
         despesaExcluindoParceladaNoCartao
           ? "Parcelas excluídas com sucesso."
+          : despesaExcluindoRecorrente && escopoExclusao === "mes"
+            ? "Despesa removida deste mês."
           : "Despesa excluída com sucesso.",
       );
       setDespesaExcluindo(null);
@@ -200,8 +210,11 @@ export function DespesasPage() {
                   }}
                 >
                   <option value="">Todas</option>
-                  <option value="DINHEIRO">Dinheiro</option>
-                  <option value="CARTAO_CREDITO">Cartão de crédito</option>
+                  {formasPagamentoOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </Select>
               </div>
               <div className="space-y-2">
@@ -342,11 +355,18 @@ export function DespesasPage() {
                     )}
                   >
                     <div className="flex gap-3">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-destructive/10 text-destructive">
+                      <div
+                        className={cn(
+                          "flex h-10 w-10 shrink-0 items-center justify-center rounded-md",
+                          despesa.vencida && !despesa.paga
+                            ? "bg-destructive/10 text-destructive"
+                            : getCategoryColor(despesa.categoria),
+                        )}
+                      >
                         {despesa.vencida && !despesa.paga ? (
-                          <AlertTriangle className="h-5 w-5" />
+                          <AlertTriangle className="h-4 w-4" />
                         ) : (
-                          <CategoryIcon className="h-5 w-5" />
+                          <CategoryIcon className="h-4 w-4" />
                         )}
                       </div>
                       <div className="min-w-0">
@@ -363,7 +383,14 @@ export function DespesasPage() {
                         </div>
                         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                           <span className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1">
-                            <CategoryIcon className="h-3.5 w-3.5" />
+                            <span
+                              className={cn(
+                                "inline-flex h-5 w-5 items-center justify-center rounded-md",
+                                getCategoryColor(despesa.categoria),
+                              )}
+                            >
+                              <CategoryIcon className="h-3 w-3" />
+                            </span>
                             {despesa.categoria ?? "Sem categoria"}
                           </span>
                           <span className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1">
@@ -445,7 +472,10 @@ export function DespesasPage() {
                           className="h-9 w-9 px-0 text-destructive hover:text-destructive"
                           title="Excluir"
                           variant="outline"
-                          onClick={() => setDespesaExcluindo(despesa)}
+                          onClick={() => {
+                            setEscopoExclusao("mes");
+                            setDespesaExcluindo(despesa);
+                          }}
                           disabled={busyId === despesa.id}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -461,10 +491,10 @@ export function DespesasPage() {
       </Card>
 
       <Dialog open={cadastroAberto} onOpenChange={setCadastroAberto}>
-        <DialogContent className="max-w-7xl">
-          <DialogHeader>
-            <DialogTitle>Nova despesa</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="max-h-[calc(100vh-0.75rem)] max-w-[min(1180px,calc(100vw-0.75rem))] gap-2 overflow-y-auto p-3">
+          <DialogHeader className="space-y-0.5">
+            <DialogTitle className="text-xl">Nova despesa</DialogTitle>
+            <DialogDescription className="text-xs">
               Cadastre uma conta sem sair da lista de despesas.
             </DialogDescription>
           </DialogHeader>
@@ -486,10 +516,10 @@ export function DespesasPage() {
           if (!open) setDespesaEditando(null);
         }}
       >
-        <DialogContent className="max-w-7xl">
-          <DialogHeader>
-            <DialogTitle>Editar despesa</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="max-h-[calc(100vh-0.75rem)] max-w-[min(1180px,calc(100vw-0.75rem))] gap-2 overflow-y-auto p-3">
+          <DialogHeader className="space-y-0.5">
+            <DialogTitle className="text-xl">Editar despesa</DialogTitle>
+            <DialogDescription className="text-xs">
               Atualize a conta sem sair da lista de despesas.
             </DialogDescription>
           </DialogHeader>
@@ -520,6 +550,8 @@ export function DespesasPage() {
             <DialogDescription>
               {despesaExcluindoParceladaNoCartao
                 ? "Esta despesa faz parte de uma compra parcelada no cartão. Ao confirmar, todas as parcelas deste parcelamento serão excluídas."
+                : despesaExcluindoRecorrente
+                  ? "Esta despesa é fixa. Escolha se deseja remover apenas deste mês ou excluir todas as recorrências."
                 : "Esta ação remove a despesa selecionada definitivamente."}
             </DialogDescription>
           </DialogHeader>
@@ -535,7 +567,7 @@ export function DespesasPage() {
                   <div className="flex items-start gap-2">
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                     <p>
-                      Voce esta excluindo a parcela {despesaExcluindo.parcelaAtual}/
+                      Você está excluindo a parcela {despesaExcluindo.parcelaAtual}/
                       {despesaExcluindo.numeroParcelas}. Todas as{" "}
                       {despesaExcluindo.numeroParcelas} parcelas vinculadas a este
                       cartão serão removidas.
@@ -543,6 +575,42 @@ export function DespesasPage() {
                   </div>
                 </div>
               )}
+            {despesaExcluindoRecorrente && !despesaExcluindoParceladaNoCartao && (
+              <div className="mt-3 grid gap-2 text-sm">
+                <label className="flex cursor-pointer items-start gap-2 rounded-md border border-border bg-background p-3">
+                  <input
+                    className="mt-1 h-4 w-4 accent-primary"
+                    type="radio"
+                    name="escopoExclusao"
+                    value="mes"
+                    checked={escopoExclusao === "mes"}
+                    onChange={() => setEscopoExclusao("mes")}
+                  />
+                  <span>
+                    <span className="block font-medium">Remover somente deste mês</span>
+                    <span className="text-xs text-muted-foreground">
+                      Mantém a despesa fixa para os próximos meses.
+                    </span>
+                  </span>
+                </label>
+                <label className="flex cursor-pointer items-start gap-2 rounded-md border border-border bg-background p-3">
+                  <input
+                    className="mt-1 h-4 w-4 accent-primary"
+                    type="radio"
+                    name="escopoExclusao"
+                    value="todas"
+                    checked={escopoExclusao === "todas"}
+                    onChange={() => setEscopoExclusao("todas")}
+                  />
+                  <span>
+                    <span className="block font-medium">Excluir todas</span>
+                    <span className="text-xs text-muted-foreground">
+                      Remove a despesa fixa definitivamente.
+                    </span>
+                  </span>
+                </label>
+              </div>
+            )}
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <Button
@@ -563,6 +631,8 @@ export function DespesasPage() {
               )}
               {despesaExcluindoParceladaNoCartao
                 ? "Excluir todas as parcelas"
+                : despesaExcluindoRecorrente && escopoExclusao === "mes"
+                  ? "Remover deste mês"
                 : "Excluir"}
             </Button>
           </div>

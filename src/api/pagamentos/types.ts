@@ -9,6 +9,8 @@ export type PremiumStatusResponse = {
   plano: "FREE" | "PREMIUM";
   premium: boolean;
   exibirAnuncios: boolean;
+  premiumExpiraEm: string | null;
+  premiumDiasRestantes: number;
   ultimoPagamento: {
     id: string;
     status: PagamentoStatus;

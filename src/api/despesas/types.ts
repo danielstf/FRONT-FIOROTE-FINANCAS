@@ -1,4 +1,10 @@
-export type FormaPagamentoDespesa = "DINHEIRO" | "CARTAO_CREDITO";
+export type FormaPagamentoDespesa =
+  | "DINHEIRO"
+  | "CARTAO_CREDITO"
+  | "CARTAO_DEBITO"
+  | "VALE_ALIMENTACAO"
+  | "VALE_REFEICAO"
+  | "BOLETO";
 
 export type CartaoCreditoResumo = {
   id: string;
@@ -51,6 +57,8 @@ export type ListarDespesasParams = {
 
 export type ExcluirDespesaParams = {
   excluirParcelas?: boolean;
+  escopo?: "mes" | "todas";
+  mes?: string;
 };
 
 export type CriarDespesaResponse = {

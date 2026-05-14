@@ -30,4 +30,15 @@ export function dateToMonth(value?: string | null) {
 export const formaPagamentoLabel: Record<FormaPagamentoDespesa, string> = {
   DINHEIRO: "Dinheiro",
   CARTAO_CREDITO: "Cartão de crédito",
+  CARTAO_DEBITO: "Cartão de débito",
+  VALE_ALIMENTACAO: "Vale alimentação",
+  VALE_REFEICAO: "Vale refeição",
+  BOLETO: "Boleto",
 };
+
+export const formasPagamentoOptions = Object.entries(formaPagamentoLabel).map(
+  ([value, label]) => ({
+    value: value as FormaPagamentoDespesa,
+    label,
+  }),
+);

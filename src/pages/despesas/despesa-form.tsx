@@ -32,9 +32,14 @@ import {
 } from "../../lib/text";
 import { formatMoneyInput } from "../../lib/money";
 import { cn } from "../../lib/utils";
-import { defaultExpenseCategories, getCategoryIcon } from "./category-icons";
+import {
+  defaultExpenseCategories,
+  getCategoryColor,
+  getCategoryIcon,
+} from "./category-icons";
 import {
   dateToMonth,
+  formasPagamentoOptions,
   getCurrentMonth,
   moneyToInput,
   parseMoney,
@@ -187,27 +192,27 @@ export function DespesaForm({
 
   return (
     <form
-      className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_400px]"
+      className="grid gap-3"
       onSubmit={handleSubmit}
     >
-      <Card className="overflow-hidden shadow-sm">
-        <CardHeader>
+      <Card className="order-2 overflow-hidden shadow-sm">
+        <CardHeader className="p-3">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-md bg-destructive/10 text-destructive">
-              <CreditCard className="h-5 w-5" />
+            <span className="flex h-9 w-9 items-center justify-center rounded-md bg-destructive/10 text-destructive">
+              <CreditCard className="h-4 w-4" />
             </span>
             <div>
-              <CardTitle>Dados da despesa</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg">Dados da despesa</CardTitle>
+              <CardDescription className="text-xs">
                 Cadastre vencimento, mês de referência, recorrência e parcelamento.
               </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-5">
-            <div className="grid gap-4 md:grid-cols-[minmax(0,1.35fr)_minmax(180px,0.65fr)]">
-              <div className="space-y-2">
+        <CardContent className="p-3 pt-0">
+          <div className="grid gap-3">
+            <div className="grid gap-3 md:grid-cols-[minmax(0,1.35fr)_minmax(160px,0.65fr)]">
+              <div className="space-y-1.5">
                 <Label htmlFor="nome">Nome</Label>
                 <Input
                   id="nome"
@@ -217,7 +222,7 @@ export function DespesaForm({
                   required
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="valor">Valor</Label>
                 <Input
                   id="valor"
@@ -230,12 +235,12 @@ export function DespesaForm({
               </div>
             </div>
 
-            <div className="grid gap-4 rounded-lg border border-border bg-muted/35 p-4 md:grid-cols-2 xl:grid-cols-3">
-              <div className="space-y-2">
+            <div className="grid gap-3 rounded-lg border border-border bg-muted/35 p-2.5 md:grid-cols-2 xl:grid-cols-3">
+              <div className="space-y-1.5">
                 <Label>Mês de referência</Label>
                 <MonthPicker value={mes} onChange={setMes} />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="dataVencimento">Vencimento</Label>
                 <Input
                   id="dataVencimento"
@@ -244,7 +249,7 @@ export function DespesaForm({
                   onChange={(event) => setDataVencimento(event.target.value)}
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="formaPagamento">Forma</Label>
                 <Select
                   id="formaPagamento"
@@ -252,17 +257,20 @@ export function DespesaForm({
                   onChange={(event) => {
                     const value = event.target.value as FormaPagamentoDespesa;
                     setFormaPagamento(value);
-                    if (value === "DINHEIRO") setCartaoCreditoId("");
+                    if (value !== "CARTAO_CREDITO") setCartaoCreditoId("");
                   }}
                 >
-                  <option value="DINHEIRO">Dinheiro</option>
-                  <option value="CARTAO_CREDITO">Cartão de crédito</option>
+                  {formasPagamentoOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </Select>
               </div>
             </div>
 
             {formaPagamento === "CARTAO_CREDITO" && (
-              <div className="animate-in fade-in-0 slide-in-from-top-1 space-y-2 rounded-lg border border-border bg-card p-4 shadow-sm">
+              <div className="animate-in fade-in-0 slide-in-from-top-1 space-y-1.5 rounded-lg border border-border bg-card p-2.5 shadow-sm">
                 <Label htmlFor="cartaoCreditoId">Cartão de crédito</Label>
                 <Select
                   id="cartaoCreditoId"
@@ -285,14 +293,13 @@ export function DespesaForm({
               </div>
             )}
 
-            <div className="grid gap-4 rounded-lg border border-border bg-muted/35 p-4 md:grid-cols-2">
+            <div className="grid gap-3 rounded-lg border border-border bg-muted/35 p-2.5 md:grid-cols-2">
               <label className="flex cursor-pointer items-start gap-3">
                 <input
                   type="checkbox"
                   checked={fixa}
                   onChange={(event) => setFixa(event.target.checked)}
                   className="mt-1 h-4 w-4 accent-emerald-600"
-                  disabled={Boolean(numeroParcelas)}
                 />
                 <span>
                   <span className="flex items-center gap-2 text-sm font-medium">
@@ -305,17 +312,14 @@ export function DespesaForm({
                 </span>
               </label>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="numeroParcelas">Parcelas</Label>
                 <Input
                   id="numeroParcelas"
                   type="number"
                   min="2"
                   value={numeroParcelas}
-                  onChange={(event) => {
-                    setNumeroParcelas(event.target.value);
-                    if (event.target.value) setFixa(false);
-                  }}
+                  onChange={(event) => setNumeroParcelas(event.target.value)}
                   placeholder="Ex: 6"
                   disabled={mode === "edit"}
                 />
@@ -348,19 +352,16 @@ export function DespesaForm({
         </CardContent>
       </Card>
 
-      <Card className="self-start overflow-hidden shadow-sm lg:sticky lg:top-4">
-        <CardHeader className="p-5">
+      <Card className="order-1 self-start overflow-hidden shadow-sm">
+        <CardHeader className="p-3 pb-2">
           <div className="flex items-center gap-3">
             <div>
-              <CardTitle>Categoria</CardTitle>
-              <CardDescription>
-                Escolha um tipo para organizar melhor seus relatórios.
-              </CardDescription>
+              <CardTitle className="text-lg">Categoria</CardTitle>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3 p-5 pt-0">
-          <div className="grid max-h-[min(52vh,520px)] gap-2 overflow-y-auto rounded-lg border border-border bg-muted/25 p-2 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
+        <CardContent className="space-y-2 p-3 pt-0">
+          <div className="grid max-h-[26vh] gap-1.5 overflow-y-auto rounded-lg border border-border bg-muted/25 p-1.5 sm:grid-cols-4 lg:grid-cols-8 xl:grid-cols-10">
             {categorias.map((opcao) => {
               const Icon = getCategoryIcon(opcao);
               const selected = categoria === opcao;
@@ -370,7 +371,7 @@ export function DespesaForm({
                   key={opcao}
                   type="button"
                   className={cn(
-                    "group flex min-h-12 items-center gap-3 rounded-md border border-border bg-background p-2.5 text-left text-sm shadow-sm transition-all hover:-translate-y-0.5 hover:border-destructive/35 hover:bg-destructive/5 hover:shadow-md",
+                    "group flex min-h-7 items-center gap-1 rounded-md border border-border bg-background px-1 py-0.5 text-left leading-none shadow-sm transition-all hover:border-destructive/35 hover:bg-destructive/5",
                     selected &&
                       "border-destructive/50 bg-destructive/10 text-destructive ring-2 ring-destructive/10",
                   )}
@@ -378,13 +379,16 @@ export function DespesaForm({
                 >
                   <span
                     className={cn(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors group-hover:bg-destructive/10 group-hover:text-destructive",
-                      selected && "bg-destructive/10 text-destructive",
+                      "flex h-5 w-5 shrink-0 items-center justify-center rounded-md transition-colors",
+                      getCategoryColor(opcao),
+                      selected && "ring-2 ring-destructive/20",
                     )}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-2.5 w-2.5" />
                   </span>
-                  <span className="min-w-0 truncate font-medium">{opcao}</span>
+                  <span className="min-w-0 truncate text-[10px] font-medium leading-none">
+                    {opcao}
+                  </span>
                 </button>
               );
             })}

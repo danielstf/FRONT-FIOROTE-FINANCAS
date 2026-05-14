@@ -42,6 +42,12 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function formatDateOnly(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+  }).format(new Date(value));
+}
+
 export function PremiumPage() {
   const [premiumStatus, setPremiumStatus] =
     useState<PremiumStatusResponse | null>(null);
@@ -144,7 +150,7 @@ export function PremiumPage() {
                 <div>
                   <p className="font-semibold">Validade mensal</p>
                   <p className="text-muted-foreground">
-                    Ainda falta configurar expiração mensal no backend.
+                    O Premium fica ativo por 30 dias após a confirmação.
                   </p>
                 </div>
               </div>
@@ -167,6 +173,20 @@ export function PremiumPage() {
                   {premiumStatus?.exibirAnuncios ? "Ativos" : "Removidos"}
                 </p>
               </div>
+              <div className="rounded-md border border-border p-3">
+                <p className="text-muted-foreground">Expira em</p>
+                <p className="mt-1 font-semibold">
+                  {premiumStatus?.premiumExpiraEm
+                    ? formatDateOnly(premiumStatus.premiumExpiraEm)
+                    : "..."}
+                </p>
+              </div>
+              <div className="rounded-md border border-border p-3">
+                <p className="text-muted-foreground">Dias restantes</p>
+                <p className="mt-1 font-semibold">
+                  {premiumStatus?.premium ? premiumStatus.premiumDiasRestantes : 0}
+                </p>
+              </div>
             </div>
 
             {premiumStatus?.premium ? (
@@ -175,14 +195,20 @@ export function PremiumPage() {
                 Seu plano Premium já está ativo.
               </div>
             ) : (
-              <Button onClick={criarCheckout} disabled={loadingCheckout || loadingStatus}>
-                {loadingCheckout ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <CreditCard className="h-4 w-4" />
-                )}
-                Pagar com Mercado Pago
-              </Button>
+              <div className="space-y-3">
+                <Button onClick={criarCheckout} disabled={loadingCheckout || loadingStatus}>
+                  {loadingCheckout ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CreditCard className="h-4 w-4" />
+                  )}
+                  Pagar com Mercado Pago
+                </Button>
+                <p className="max-w-xl text-xs text-muted-foreground">
+                  Pagamento automático mensal exige assinatura recorrente no Mercado Pago.
+                  Hoje o sistema usa checkout avulso mensal.
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>
