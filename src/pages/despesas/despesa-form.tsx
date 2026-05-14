@@ -7,6 +7,7 @@ import {
   Repeat2,
   Save,
 } from "lucide-react";
+import { toast } from "sonner";
 import { cartoesApi } from "../../api/cartoes/cartoes-api";
 import type { CartaoCredito } from "../../api/cartoes/types";
 import type { Despesa, FormaPagamentoDespesa } from "../../api/despesas/types";
@@ -29,6 +30,7 @@ import {
   normalizeRequiredText,
   toUppercaseText,
 } from "../../lib/text";
+import { formatMoneyInput } from "../../lib/money";
 import { cn } from "../../lib/utils";
 import { defaultExpenseCategories, getCategoryIcon } from "./category-icons";
 import {
@@ -128,21 +130,25 @@ export function DespesaForm({
 
     if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
       setError("Informe um valor maior que zero.");
+      toast.error("Informe um valor maior que zero.");
       return;
     }
 
     if (!nomeNormalizado) {
       setError("Informe o nome da despesa.");
+      toast.error("Informe o nome da despesa.");
       return;
     }
 
     if (parcelas !== undefined && (!Number.isInteger(parcelas) || parcelas <= 1)) {
       setError("Para parcelar, informe 2 parcelas ou mais.");
+      toast.error("Para parcelar, informe 2 parcelas ou mais.");
       return;
     }
 
     if (formaPagamento === "CARTAO_CREDITO" && !cartaoCreditoId) {
       setError("Selecione o cartao de credito desta despesa.");
+      toast.error("Selecione o cartão de crédito desta despesa.");
       return;
     }
 
@@ -165,10 +171,16 @@ export function DespesaForm({
       if (mode === "edit" && despesa) {
         await despesasApi.editar(despesa.id, payload);
         setMessage("Despesa atualizada com sucesso.");
+        toast.success("Despesa atualizada com sucesso.");
       } else {
         await despesasApi.criar(payload);
         setMessage(
           parcelas ? "Despesas parceladas cadastradas com sucesso." : "Despesa cadastrada com sucesso.",
+        );
+        toast.success(
+          parcelas
+            ? "Despesas parceladas cadastradas com sucesso."
+            : "Despesa cadastrada com sucesso.",
         );
       }
 
@@ -179,7 +191,9 @@ export function DespesaForm({
 
       window.setTimeout(() => navigate("/app/despesas"), 700);
     } catch (requestError) {
-      setError(getApiErrorMessage(requestError));
+      const errorMessage = getApiErrorMessage(requestError);
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -223,7 +237,7 @@ export function DespesaForm({
                   id="valor"
                   inputMode="decimal"
                   value={valor}
-                  onChange={(event) => setValor(event.target.value)}
+                  onChange={(event) => setValor(formatMoneyInput(event.target.value))}
                   placeholder="0,00"
                   required
                 />

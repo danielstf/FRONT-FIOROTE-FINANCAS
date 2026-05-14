@@ -11,6 +11,7 @@ import {
   ThumbsUp,
   Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { despesasApi } from "../../api/despesas/despesas-api";
 import type { Despesa, FormaPagamentoDespesa } from "../../api/despesas/types";
 import { getApiErrorMessage } from "../../api/errors";
@@ -111,9 +112,14 @@ export function DespesasPage() {
 
     try {
       await despesasApi.alterarPagamento(despesa.id, !despesa.paga);
+      toast.success(
+        despesa.paga ? "Despesa marcada como pendente." : "Despesa marcada como paga.",
+      );
       await carregarDespesas();
     } catch (requestError) {
-      setError(getApiErrorMessage(requestError));
+      const errorMessage = getApiErrorMessage(requestError);
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setBusyId(null);
     }
@@ -128,10 +134,17 @@ export function DespesasPage() {
       await despesasApi.excluir(despesaExcluindo.id, {
         excluirParcelas: despesaExcluindoParceladaNoCartao || undefined,
       });
+      toast.success(
+        despesaExcluindoParceladaNoCartao
+          ? "Parcelas excluídas com sucesso."
+          : "Despesa excluída com sucesso.",
+      );
       setDespesaExcluindo(null);
       await carregarDespesas();
     } catch (requestError) {
-      setError(getApiErrorMessage(requestError));
+      const errorMessage = getApiErrorMessage(requestError);
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setBusyId(null);
     }

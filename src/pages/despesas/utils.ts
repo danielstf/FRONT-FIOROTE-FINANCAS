@@ -1,23 +1,5 @@
 import type { FormaPagamentoDespesa } from "../../api/despesas/types";
-
-export function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
-}
-
-export function parseMoney(value: string) {
-  const normalized = value.replace(/\./g, "").replace(",", ".");
-  return Number(normalized);
-}
-
-export function moneyToInput(value: number) {
-  return value.toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
+export { formatCurrency, moneyToInput, parseMoney } from "../../lib/money";
 
 export function formatDate(value: string | null) {
   if (!value) return "Sem vencimento";

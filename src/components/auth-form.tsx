@@ -103,7 +103,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         },
       });
 
-      googleButtonRef.current.innerHTML = "";
+      googleButtonRef.current.replaceChildren();
       window.google.accounts.id.renderButton(googleButtonRef.current, {
         size: "large",
         text: isLogin ? "signin_with" : "signup_with",

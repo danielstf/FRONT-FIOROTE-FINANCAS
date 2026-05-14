@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lightbulb, Loader2, Save, TrendingUp } from "lucide-react";
+import { toast } from "sonner";
 import { getApiErrorMessage } from "../../api/errors";
 import { receitasApi } from "../../api/receitas/receitas-api";
 import type { Receita } from "../../api/receitas/types";
@@ -15,6 +16,7 @@ import {
 } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { formatMoneyInput, moneyToInput, parseMoney } from "../../lib/money";
 import { normalizeRequiredText, toUppercaseText } from "../../lib/text";
 
 type ReceitaFormProps = {
@@ -28,18 +30,6 @@ type ReceitaFormProps = {
 
 function getCurrentMonth() {
   return new Date().toISOString().slice(0, 7);
-}
-
-function parseMoney(value: string) {
-  const normalized = value.replace(/\./g, "").replace(",", ".");
-  return Number(normalized);
-}
-
-function moneyToInput(value: number) {
-  return value.toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }
 
 export function ReceitaForm({
@@ -82,11 +72,13 @@ export function ReceitaForm({
 
     if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
       setError("Informe um valor maior que zero.");
+      toast.error("Informe um valor maior que zero.");
       return;
     }
 
     if (!nomeNormalizado) {
       setError("Informe o nome da receita.");
+      toast.error("Informe o nome da receita.");
       return;
     }
 
@@ -112,6 +104,11 @@ export function ReceitaForm({
           ? "Receita atualizada com sucesso."
           : "Receita cadastrada com sucesso.",
       );
+      toast.success(
+        mode === "edit"
+          ? "Receita atualizada com sucesso."
+          : "Receita cadastrada com sucesso.",
+      );
 
       if (onSuccess) {
         onSuccess(mes);
@@ -120,7 +117,9 @@ export function ReceitaForm({
 
       window.setTimeout(() => navigate(`/app/receitas?mes=${mes}`), 700);
     } catch (requestError) {
-      setError(getApiErrorMessage(requestError));
+      const errorMessage = getApiErrorMessage(requestError);
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -168,7 +167,7 @@ export function ReceitaForm({
                   id="valor-receita"
                   inputMode="decimal"
                   value={valor}
-                  onChange={(event) => setValor(event.target.value)}
+                  onChange={(event) => setValor(formatMoneyInput(event.target.value))}
                   placeholder="0,00"
                   required
                 />

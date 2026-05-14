@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { CreditCard, Loader2, Pencil, Plus, Save, Trash2, X } from "lucide-react";
+import { toast } from "sonner";
 import { cartoesApi } from "../../api/cartoes/cartoes-api";
 import type { CartaoCredito } from "../../api/cartoes/types";
 import { getApiErrorMessage } from "../../api/errors";
@@ -55,22 +56,27 @@ export function CartoesPage() {
 
       if (!nomeNormalizado) {
         setError("Informe o nome do cartao.");
+        toast.error("Informe o nome do cartão.");
         return;
       }
 
       if (editando) {
         await cartoesApi.editar(editando.id, { nome: nomeNormalizado });
         setMessage("Cartao atualizado com sucesso.");
+        toast.success("Cartão atualizado com sucesso.");
       } else {
         await cartoesApi.criar({ nome: nomeNormalizado });
         setMessage("Cartao cadastrado com sucesso.");
+        toast.success("Cartão cadastrado com sucesso.");
       }
 
       setNome("");
       setEditando(null);
       await carregarCartoes();
     } catch (requestError) {
-      setError(getApiErrorMessage(requestError));
+      const errorMessage = getApiErrorMessage(requestError);
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -88,9 +94,12 @@ export function CartoesPage() {
     try {
       await cartoesApi.excluir(cartao.id);
       setMessage("Cartao excluido com sucesso.");
+      toast.success("Cartão excluído com sucesso.");
       await carregarCartoes();
     } catch (requestError) {
-      setError(getApiErrorMessage(requestError));
+      const errorMessage = getApiErrorMessage(requestError);
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setBusyId(null);
     }

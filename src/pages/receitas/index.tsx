@@ -9,6 +9,7 @@ import {
   Trash2,
   TrendingUp,
 } from "lucide-react";
+import { toast } from "sonner";
 import { getApiErrorMessage } from "../../api/errors";
 import { receitasApi } from "../../api/receitas/receitas-api";
 import type { Receita } from "../../api/receitas/types";
@@ -96,7 +97,9 @@ export function ReceitasPage() {
       setTotal(data.total);
       setSearchParams({ mes: mesSelecionado });
     } catch (requestError) {
-      setError(getApiErrorMessage(requestError));
+      const errorMessage = getApiErrorMessage(requestError);
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -109,10 +112,13 @@ export function ReceitasPage() {
 
     try {
       await receitasApi.excluir(receitaExcluindo.id);
+      toast.success("Receita excluída com sucesso.");
       setReceitaExcluindo(null);
       await carregarReceitas(mes);
     } catch (requestError) {
-      setError(getApiErrorMessage(requestError));
+      const errorMessage = getApiErrorMessage(requestError);
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setDeletingId(null);
     }

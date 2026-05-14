@@ -14,19 +14,8 @@ import {
 } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
+import { formatMoneyInput, moneyToInput, parseMoney } from "../../../lib/money";
 import { normalizeRequiredText, toUppercaseText } from "../../../lib/text";
-
-function parseMoney(value: string) {
-  const normalized = value.replace(/\./g, "").replace(",", ".");
-  return Number(normalized);
-}
-
-function moneyToInput(value: number) {
-  return value.toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
 
 export function EditarReceitaPage() {
   const navigate = useNavigate();
@@ -151,7 +140,7 @@ export function EditarReceitaPage() {
                     id="valor"
                     inputMode="decimal"
                     value={valor}
-                    onChange={(event) => setValor(event.target.value)}
+                    onChange={(event) => setValor(formatMoneyInput(event.target.value))}
                     placeholder="0,00"
                     required
                   />
