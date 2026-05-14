@@ -29,5 +29,5 @@ export function dateToMonth(value?: string | null) {
 
 export const formaPagamentoLabel: Record<FormaPagamentoDespesa, string> = {
   DINHEIRO: "Dinheiro",
-  CARTAO_CREDITO: "Cartao de credito",
+  CARTAO_CREDITO: "Cartão de crédito",
 };

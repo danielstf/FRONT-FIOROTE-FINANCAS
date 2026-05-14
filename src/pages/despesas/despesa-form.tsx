@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+﻿import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -147,7 +147,7 @@ export function DespesaForm({
     }
 
     if (formaPagamento === "CARTAO_CREDITO" && !cartaoCreditoId) {
-      setError("Selecione o cartao de credito desta despesa.");
+      setError("Selecione o cartão de crédito desta despesa.");
       toast.error("Selecione o cartão de crédito desta despesa.");
       return;
     }
@@ -213,7 +213,7 @@ export function DespesaForm({
             <div>
               <CardTitle>Dados da despesa</CardTitle>
               <CardDescription>
-                Cadastre vencimento, mes de referencia, recorrencia e parcelamento.
+                Cadastre vencimento, mês de referência, recorrência e parcelamento.
               </CardDescription>
             </div>
           </div>
@@ -246,7 +246,7 @@ export function DespesaForm({
 
             <div className="grid gap-4 rounded-lg border border-border bg-muted/35 p-4 md:grid-cols-2 xl:grid-cols-3">
               <div className="space-y-2">
-                <Label>Mes de referencia</Label>
+                <Label>Mês de referência</Label>
                 <MonthPicker value={mes} onChange={setMes} />
               </div>
               <div className="space-y-2">
@@ -354,7 +354,7 @@ export function DespesaForm({
                 ) : (
                   <Save className="h-4 w-4" />
                 )}
-                {mode === "edit" ? "Salvar alteracoes" : "Salvar despesa"}
+                {mode === "edit" ? "Salvar alterações" : "Salvar despesa"}
               </Button>
               {onCancel ? (
                 <Button type="button" variant="outline" onClick={onCancel}>
@@ -379,7 +379,7 @@ export function DespesaForm({
             <div>
               <CardTitle>Categoria</CardTitle>
               <CardDescription>
-                Escolha um tipo para organizar melhor seus relatorios.
+                Escolha um tipo para organizar melhor seus relatórios.
               </CardDescription>
             </div>
           </div>

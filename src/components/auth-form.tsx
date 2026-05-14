@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+﻿import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -85,7 +85,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         client_id: clientId,
         callback: async (response) => {
           if (!response.credential) {
-            setError("Nao foi possivel obter o token do Google.");
+            setError("Não foi possível obter o token do Google.");
             return;
           }
 
@@ -177,7 +177,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             <div ref={googleButtonRef} className="min-h-10 w-full" />
           ) : (
             <Button className="w-full" disabled variant="outline">
-              Google nao configurado
+              Google não configurado
             </Button>
           )}
         </div>
@@ -214,7 +214,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="voce@email.com"
+                placeholder="usuario@email.com"
                 className="pl-9"
                 required
               />

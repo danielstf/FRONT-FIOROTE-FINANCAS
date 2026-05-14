@@ -18,8 +18,8 @@ export function CadastroReceitaPage() {
               </h1>
             </div>
             <p className="max-w-xl text-sm text-muted-foreground">
-              Cadastre entradas como salario, renda extra, vendas ou qualquer
-              outro recebimento do mes.
+              Cadastre entradas como salário, renda extra, vendas ou qualquer
+              outro recebimento do mês.
             </p>
           </div>
           <Button asChild variant="outline">

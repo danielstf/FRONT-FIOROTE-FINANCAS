@@ -1,4 +1,4 @@
-import {
+﻿import {
   AlertTriangle,
   ArrowUpRight,
   BadgeCheck,
@@ -83,7 +83,7 @@ export function DashboardPage() {
       label: "Despesas",
       value: formatCurrency(totalDespesas),
       icon: ReceiptText,
-      description: "Total cadastrado no mes",
+      description: "Total cadastrado no mês",
       className: "text-red-600 dark:text-red-400",
       iconClassName: "bg-red-500/10 text-red-600 dark:text-red-400",
     },
@@ -149,13 +149,13 @@ export function DashboardPage() {
               </h1>
             </div>
             <p className="text-sm text-muted-foreground">
-              Ola, {session?.usuario.nome}. Resumo financeiro de{" "}
+              Olá, {session?.usuario.nome}. Resumo financeiro de{" "}
               <span className="capitalize">{formatMonthName(mes)}</span>.
             </p>
           </div>
 
           <div className="mx-auto w-full max-w-sm space-y-2 text-center">
-            <Label className="justify-center">Mes de referencia</Label>
+            <Label className="justify-center">Mês de referência</Label>
             <MonthPicker
               className="mx-auto"
               value={mes}
@@ -205,7 +205,7 @@ export function DashboardPage() {
       <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Receitas do mes</CardTitle>
+            <CardTitle>Receitas do mês</CardTitle>
             <CardDescription>
               Entradas cadastradas em{" "}
               <span className="capitalize">{formatMonthName(mes)}</span>.
@@ -222,7 +222,7 @@ export function DashboardPage() {
             {!loading && receitas.length === 0 && (
               <div className="rounded-lg border border-dashed border-border bg-muted/35 p-6 text-center">
                 <p className="font-medium text-foreground">
-                  Nenhuma receita neste mes.
+                  Nenhuma receita neste mês.
                 </p>
               </div>
             )}
@@ -261,7 +261,7 @@ export function DashboardPage() {
           <CardHeader>
             <CardTitle>Despesas pendentes</CardTitle>
             <CardDescription>
-              Somente contas nao pagas de{" "}
+              Somente contas não pagas de{" "}
               <span className="capitalize">{formatMonthName(mes)}</span>.
             </CardDescription>
           </CardHeader>
@@ -276,7 +276,7 @@ export function DashboardPage() {
             {!loading && despesasPendentes.length === 0 && (
               <div className="rounded-lg border border-dashed border-border bg-muted/35 p-6 text-center">
                 <p className="font-medium text-foreground">
-                  Nenhuma despesa pendente neste mes.
+                  Nenhuma despesa pendente neste mês.
                 </p>
               </div>
             )}

@@ -49,7 +49,7 @@ export function ConfiguracoesPage() {
     setPasswordMessage("");
 
     if (novaSenha !== confirmarSenha) {
-      setPasswordError("A confirmacao da senha nao confere.");
+      setPasswordError("A confirmação da senha não confere.");
       return;
     }
 
@@ -77,10 +77,10 @@ export function ConfiguracoesPage() {
           </span>
           <div>
             <h1 className="text-3xl font-semibold tracking-normal text-card-foreground">
-              Configuracoes
+              Configurações
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Atualize seus dados de acesso e preferencias da conta.
+              Atualize seus dados de acesso e preferências da conta.
             </p>
           </div>
         </div>
@@ -94,7 +94,7 @@ export function ConfiguracoesPage() {
                 <UserRound className="h-5 w-5" />
               </span>
               <div>
-                <CardTitle>Dados do usuario</CardTitle>
+                <CardTitle>Dados do usuário</CardTitle>
                 <CardDescription>Altere o nome exibido no sistema.</CardDescription>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+﻿import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { getApiErrorMessage } from "../../../api/errors";
@@ -146,7 +146,7 @@ export function EditarReceitaPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Mes</Label>
+                  <Label>Mês</Label>
                   <MonthPicker value={mes} onChange={setMes} />
                 </div>
               </div>

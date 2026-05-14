@@ -29,17 +29,17 @@ const features = [
   },
   {
     title: "Dashboard mensal",
-    description: "Veja saldo, pendencias, contas vencidas e movimentacao do mes.",
+    description: "Veja saldo, pendências, contas vencidas e movimentação do mês.",
     icon: BarChart3,
   },
   {
-    title: "Relatorios visuais",
+    title: "Relatórios visuais",
     description: "Graficos de area, pizza e comparativos mensais e anuais.",
     icon: PieChart,
   },
   {
-    title: "Cartoes salvos",
-    description: "Organize gastos no credito por cartao cadastrado na sua conta.",
+    title: "Cartões salvos",
+    description: "Organize gastos no crédito por cartão cadastrado na sua conta.",
     icon: CreditCard,
   },
 ];
@@ -88,8 +88,8 @@ export function LandingPage() {
                 Minhas Financas Fiorote
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-                Controle receitas, despesas, cartoes, relatorios e premium em uma
-                interface profissional feita para enxergar o mes com clareza.
+                Controle receitas, despesas, cartões, relatórios e premium em uma
+                interface profissional feita para enxergar o mês com clareza.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -158,7 +158,7 @@ export function LandingPage() {
         <div className="mb-8 max-w-2xl space-y-2">
           <h2 className="text-3xl font-semibold tracking-normal">Funcoes principais</h2>
           <p className="text-muted-foreground">
-            Tudo que voce precisa para fechar o mes, acompanhar atrasos e tomar
+            Tudo que você precisa para fechar o mês, acompanhar atrasos e tomar
             decisoes melhores.
           </p>
         </div>
@@ -188,7 +188,7 @@ export function LandingPage() {
               <p className="text-4xl font-semibold">R$ 0</p>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>Receitas e despesas</li>
-                <li>Relatorios mensais e anuais</li>
+                <li>Relatórios mensais e anuais</li>
                 <li>Anuncios do sistema</li>
               </ul>
               <Button asChild className="w-full" variant="outline">
@@ -204,7 +204,7 @@ export function LandingPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-4xl font-semibold">
-                R$ 19,90 <span className="text-sm text-muted-foreground">/mes</span>
+                R$ 19,90 <span className="text-sm text-muted-foreground">/mês</span>
               </p>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>Sem anuncios</li>
@@ -222,10 +222,10 @@ export function LandingPage() {
       <section className="mx-auto w-full max-w-7xl px-4 py-16 lg:px-6" id="seguranca">
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Organizacao para o dia a dia</CardTitle>
+            <CardTitle>Organização para o dia a dia</CardTitle>
             <CardDescription>
-              O sistema foi pensado para uso recorrente: mes de referencia,
-              vencimentos, cartoes e relatorios ficam conectados em um fluxo simples.
+              O sistema foi pensado para uso recorrente: mês de referência,
+              vencimentos, cartões e relatórios ficam conectados em um fluxo simples.
             </CardDescription>
           </CardHeader>
           <CardContent>

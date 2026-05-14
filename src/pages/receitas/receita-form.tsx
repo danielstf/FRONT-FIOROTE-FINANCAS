@@ -136,7 +136,7 @@ export function ReceitaForm({
             <div>
               <CardTitle>Dados da receita</CardTitle>
               <CardDescription>
-                Informe nome, valor e mes de referencia da entrada.
+                Informe nome, valor e mês de referência da entrada.
               </CardDescription>
             </div>
           </div>
@@ -173,7 +173,7 @@ export function ReceitaForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Mes</Label>
+                <Label>Mês</Label>
                 <MonthPicker value={mes} onChange={setMes} />
               </div>
             </div>
@@ -196,7 +196,7 @@ export function ReceitaForm({
                 ) : (
                   <Save className="h-4 w-4" />
                 )}
-                {mode === "edit" ? "Salvar alteracoes" : "Salvar receita"}
+                {mode === "edit" ? "Salvar alterações" : "Salvar receita"}
               </Button>
               {onCancel && (
                 <Button type="button" variant="outline" onClick={onCancel}>
@@ -216,7 +216,7 @@ export function ReceitaForm({
                 <Lightbulb className="h-5 w-5" />
               </span>
               <div>
-                <CardTitle>Sugestoes</CardTitle>
+                <CardTitle>Sugestões</CardTitle>
                 <CardDescription>Use uma opcao da API para preencher rapido.</CardDescription>
               </div>
             </div>

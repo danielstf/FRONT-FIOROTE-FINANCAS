@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+﻿import { useEffect, useState, type FormEvent } from "react";
 import { CreditCard, Loader2, Pencil, Plus, Save, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { cartoesApi } from "../../api/cartoes/cartoes-api";
@@ -55,18 +55,18 @@ export function CartoesPage() {
       const nomeNormalizado = normalizeRequiredText(nome);
 
       if (!nomeNormalizado) {
-        setError("Informe o nome do cartao.");
+        setError("Informe o nome do cartão.");
         toast.error("Informe o nome do cartão.");
         return;
       }
 
       if (editando) {
         await cartoesApi.editar(editando.id, { nome: nomeNormalizado });
-        setMessage("Cartao atualizado com sucesso.");
+        setMessage("Cartão atualizado com sucesso.");
         toast.success("Cartão atualizado com sucesso.");
       } else {
         await cartoesApi.criar({ nome: nomeNormalizado });
-        setMessage("Cartao cadastrado com sucesso.");
+        setMessage("Cartão cadastrado com sucesso.");
         toast.success("Cartão cadastrado com sucesso.");
       }
 
@@ -83,7 +83,7 @@ export function CartoesPage() {
   }
 
   async function excluirCartao(cartao: CartaoCredito) {
-    const confirmed = window.confirm(`Excluir o cartao "${cartao.nome}"?`);
+    const confirmed = window.confirm(`Excluir o cartão "${cartao.nome}"?`);
 
     if (!confirmed) return;
 
@@ -93,7 +93,7 @@ export function CartoesPage() {
 
     try {
       await cartoesApi.excluir(cartao.id);
-      setMessage("Cartao excluido com sucesso.");
+      setMessage("Cartão excluído com sucesso.");
       toast.success("Cartão excluído com sucesso.");
       await carregarCartoes();
     } catch (requestError) {
@@ -130,10 +130,10 @@ export function CartoesPage() {
           </span>
           <div>
             <h1 className="text-3xl font-semibold tracking-normal text-card-foreground">
-              Cartoes
+              Cartões
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Cadastre os cartoes da conta para usar em despesas no credito.
+              Cadastre os cartões da conta para usar em despesas no crédito.
             </p>
           </div>
         </div>
@@ -147,9 +147,9 @@ export function CartoesPage() {
                 {editando ? <Pencil className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
               </span>
               <div>
-                <CardTitle>{editando ? "Editar cartao" : "Novo cartao"}</CardTitle>
+                <CardTitle>{editando ? "Editar cartão" : "Novo cartão"}</CardTitle>
                 <CardDescription>
-                  O nome aparece no cadastro de despesas com cartao de credito.
+                  O nome aparece no cadastro de despesas com cartão de crédito.
                 </CardDescription>
               </div>
             </div>
@@ -157,7 +157,7 @@ export function CartoesPage() {
           <CardContent>
             <form className="grid gap-4" onSubmit={salvarCartao}>
               <div className="space-y-2">
-                <Label htmlFor="nome-cartao">Nome do cartao</Label>
+                <Label htmlFor="nome-cartao">Nome do cartão</Label>
                 <Input
                   id="nome-cartao"
                   value={nome}
@@ -185,7 +185,7 @@ export function CartoesPage() {
                   ) : (
                     <Save className="h-4 w-4" />
                   )}
-                  {editando ? "Salvar alteracoes" : "Cadastrar cartao"}
+                  {editando ? "Salvar alterações" : "Cadastrar cartão"}
                 </Button>
                 {editando && (
                   <Button type="button" variant="outline" onClick={cancelarEdicao}>
@@ -200,24 +200,24 @@ export function CartoesPage() {
 
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Cartoes cadastrados</CardTitle>
+            <CardTitle>Cartões cadastrados</CardTitle>
             <CardDescription>
-              Estes cartoes ficam salvos na sua conta e aparecem no select de despesas.
+              Estes cartões ficam salvos na sua conta e aparecem no seletor de despesas.
             </CardDescription>
           </CardHeader>
           <CardContent>
             {loading && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Carregando cartoes...
+                Carregando cartões...
               </div>
             )}
 
             {!loading && cartoes.length === 0 && (
               <div className="rounded-lg border border-dashed border-border bg-muted/35 p-8 text-center">
-                <p className="font-medium text-foreground">Nenhum cartao cadastrado.</p>
+                <p className="font-medium text-foreground">Nenhum cartão cadastrado.</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Cadastre seu primeiro cartao para usar em despesas no credito.
+                  Cadastre seu primeiro cartão para usar em despesas no crédito.
                 </p>
               </div>
             )}
@@ -245,7 +245,7 @@ export function CartoesPage() {
                     <div className="flex gap-2">
                       <Button
                         className="h-9 w-9 px-0"
-                        title="Editar cartao"
+                        title="Editar cartão"
                         variant="outline"
                         onClick={() => iniciarEdicao(cartao)}
                       >
@@ -253,7 +253,7 @@ export function CartoesPage() {
                       </Button>
                       <Button
                         className="h-9 w-9 px-0 text-destructive hover:text-destructive"
-                        title="Excluir cartao"
+                        title="Excluir cartão"
                         variant="outline"
                         onClick={() => excluirCartao(cartao)}
                         disabled={busyId === cartao.id}

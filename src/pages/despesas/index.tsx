@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   CalendarDays,
@@ -183,7 +183,7 @@ export function DespesasPage() {
 
             <div className="grid gap-3 rounded-lg border border-border bg-muted/35 p-4 sm:grid-cols-3">
               <div className="space-y-2">
-                <Label>Mes</Label>
+                <Label>Mês</Label>
                 <MonthPicker
                   value={mes}
                   onChange={(value) => {
@@ -205,7 +205,7 @@ export function DespesasPage() {
                 >
                   <option value="">Todas</option>
                   <option value="DINHEIRO">Dinheiro</option>
-                  <option value="CARTAO_CREDITO">Cartao de credito</option>
+                  <option value="CARTAO_CREDITO">Cartão de crédito</option>
                 </Select>
               </div>
               <div className="space-y-2">
@@ -280,7 +280,7 @@ export function DespesasPage() {
         <Card className="shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
-              <CardDescription>Lancamentos</CardDescription>
+              <CardDescription>Lançamentos</CardDescription>
               <CardTitle className="text-red-600 dark:text-red-400">
                 {despesas.length}
               </CardTitle>
@@ -322,7 +322,7 @@ export function DespesasPage() {
             <div className="rounded-lg border border-dashed border-border bg-muted/35 p-8 text-center">
               <p className="font-medium text-foreground">Nenhuma despesa encontrada.</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Cadastre uma conta para iniciar o controle do mes.
+                Cadastre uma conta para iniciar o controle do mês.
               </p>
               <Button className="mt-4" onClick={() => setCadastroAberto(true)}>
                 <Plus className="h-4 w-4" />
@@ -523,8 +523,8 @@ export function DespesasPage() {
             <DialogTitle>Excluir despesa</DialogTitle>
             <DialogDescription>
               {despesaExcluindoParceladaNoCartao
-                ? "Esta despesa faz parte de uma compra parcelada no cartao. Ao confirmar, todas as parcelas deste parcelamento serao excluidas."
-                : "Esta acao remove a despesa selecionada definitivamente."}
+                ? "Esta despesa faz parte de uma compra parcelada no cartão. Ao confirmar, todas as parcelas deste parcelamento serão excluídas."
+                : "Esta ação remove a despesa selecionada definitivamente."}
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-lg border border-border bg-muted/35 p-4 text-sm">
@@ -542,7 +542,7 @@ export function DespesasPage() {
                       Voce esta excluindo a parcela {despesaExcluindo.parcelaAtual}/
                       {despesaExcluindo.numeroParcelas}. Todas as{" "}
                       {despesaExcluindo.numeroParcelas} parcelas vinculadas a este
-                      cartao serao removidas.
+                      cartão serão removidas.
                     </p>
                   </div>
                 </div>

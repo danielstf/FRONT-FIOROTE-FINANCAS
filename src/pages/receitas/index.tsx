@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   ArrowUpRight,
@@ -144,13 +144,13 @@ export function ReceitasPage() {
                 </h1>
               </div>
               <p className="max-w-2xl text-sm text-muted-foreground">
-                Acompanhe suas entradas por mes, edite lancamentos e mantenha o
+                Acompanhe suas entradas por mês, edite lançamentos e mantenha o
                 total mensal sempre limpo.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <div className="space-y-2">
-                <Label>Mes de referencia</Label>
+                <Label>Mês de referência</Label>
                 <MonthPicker
                   value={mes}
                   onChange={(selectedMonth) => {
@@ -175,7 +175,7 @@ export function ReceitasPage() {
             </p>
             <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
               <div className="rounded-md border border-border bg-card p-3">
-                <p className="text-muted-foreground">Lancamentos</p>
+                <p className="text-muted-foreground">Lançamentos</p>
                 <p className="mt-1 text-xl font-semibold text-blue-600 dark:text-blue-400">
                   {receitas.length}
                 </p>
@@ -224,7 +224,7 @@ export function ReceitasPage() {
           {!loading && receitas.length === 0 && (
             <div className="rounded-lg border border-dashed border-border bg-muted/35 p-8 text-center">
               <p className="font-medium text-foreground">
-                Nenhuma receita cadastrada para este mes.
+                Nenhuma receita cadastrada para este mês.
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Comece adicionando uma entrada para compor o total mensal.
@@ -358,7 +358,7 @@ export function ReceitasPage() {
           <DialogHeader>
             <DialogTitle>Excluir receita</DialogTitle>
             <DialogDescription>
-              Esta acao remove a receita selecionada definitivamente.
+              Esta ação remove a receita selecionada definitivamente.
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-lg border border-border bg-muted/35 p-4 text-sm">

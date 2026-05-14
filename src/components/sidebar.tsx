@@ -17,17 +17,32 @@ const menuItems = [
   { title: "Dashboard", href: "/app", icon: Home, end: true },
   { title: "Receitas", href: "/app/receitas", icon: WalletCards },
   { title: "Despesas", href: "/app/despesas", icon: ReceiptText },
-  { title: "Cartoes", href: "/app/cartoes", icon: CreditCard },
-  { title: "Relatorios", href: "/app/relatorios", icon: BarChart3 },
+  { title: "Cartões", href: "/app/cartoes", icon: CreditCard },
+  { title: "Relatórios", href: "/app/relatorios", icon: BarChart3 },
   { title: "Premium", href: "/app/premium", icon: CreditCard },
-  { title: "Configuracoes", href: "/app/configuracoes", icon: Settings },
+  { title: "Configurações", href: "/app/configuracoes", icon: Settings },
 ];
 
-export function Sidebar() {
+type SidebarProps = {
+  className?: string;
+  onNavigate?: () => void;
+};
+
+export function Sidebar({ className, onNavigate }: SidebarProps) {
   const { logout, session } = useAuth();
 
+  function handleLogout() {
+    onNavigate?.();
+    logout();
+  }
+
   return (
-    <aside className="hidden h-screen min-h-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex lg:flex-col">
+    <aside
+      className={cn(
+        "h-screen min-h-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
+        className,
+      )}
+    >
       <div className="border-b border-sidebar-border p-5">
         <div className="space-y-3">
           <BrandLogo />
@@ -43,6 +58,7 @@ export function Sidebar() {
             key={item.href}
             to={item.href}
             end={item.end}
+            onClick={onNavigate}
             className={({ isActive }) =>
               cn(
                 "flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium text-sidebar-foreground/75 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
@@ -58,7 +74,7 @@ export function Sidebar() {
       </nav>
 
       <div className="border-t border-sidebar-border p-3">
-        <Button className="w-full justify-start" variant="ghost" onClick={logout}>
+        <Button className="w-full justify-start" variant="ghost" onClick={handleLogout}>
           <LogOut className="h-4 w-4" />
           Sair
         </Button>

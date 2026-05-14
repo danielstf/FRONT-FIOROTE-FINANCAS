@@ -1,4 +1,4 @@
-export type AppAd = {
+﻿export type AppAd = {
   title: string;
   description: string;
   cta: string;

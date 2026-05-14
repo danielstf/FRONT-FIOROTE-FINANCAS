@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+﻿import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Mail, Send } from "lucide-react";
 import { authApi } from "../../../api/auth/auth-api";
@@ -61,7 +61,7 @@ export function EsqueciSenhaPage() {
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="voce@email.com"
+                placeholder="usuario@email.com"
                 className="pl-9"
                 required
               />

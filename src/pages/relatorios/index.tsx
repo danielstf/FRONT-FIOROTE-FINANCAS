@@ -188,11 +188,11 @@ export function RelatoriosPage() {
                 <BarChart3 className="h-5 w-5" />
               </span>
               <h1 className="text-3xl font-semibold tracking-normal text-card-foreground">
-                Relatorios
+                Relatórios
               </h1>
             </div>
             <p className="text-sm text-muted-foreground">
-              Analise receitas, despesas, saldo e categorias por mes ou ano.
+              Analise receitas, despesas, saldo e categorias por mês ou ano.
             </p>
           </div>
 
@@ -246,7 +246,7 @@ export function RelatoriosPage() {
               </div>
             ) : (
               <div className="space-y-2">
-                <Label className="justify-center lg:justify-end">Mes</Label>
+                <Label className="justify-center lg:justify-end">Mês</Label>
                 <MonthPicker
                   value={mes}
                   onChange={(nextMonth) => {
@@ -271,7 +271,7 @@ export function RelatoriosPage() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardDescription>
-                Receitas {reportMode === "anual" ? "no ano" : "no mes"}
+                Receitas {reportMode === "anual" ? "no ano" : "no mês"}
               </CardDescription>
               <CardTitle className="text-blue-600 dark:text-blue-400">
                 {formatCurrency(totalReceitas)}
@@ -284,7 +284,7 @@ export function RelatoriosPage() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardDescription>
-                Despesas {reportMode === "anual" ? "no ano" : "no mes"}
+                Despesas {reportMode === "anual" ? "no ano" : "no mês"}
               </CardDescription>
               <CardTitle className="text-red-600 dark:text-red-400">
                 {formatCurrency(totalDespesas)}
@@ -319,7 +319,7 @@ export function RelatoriosPage() {
           <div>
             <CardTitle>Receitas x despesas</CardTitle>
             <CardDescription>
-              Area interativa com receitas e despesas do periodo selecionado.
+              Área interativa com receitas e despesas do período selecionado.
             </CardDescription>
           </div>
           <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-border bg-background text-sm">
@@ -347,7 +347,7 @@ export function RelatoriosPage() {
           {loading ? (
             <div className="flex h-80 items-center justify-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Carregando grafico...
+              Carregando gráfico...
             </div>
           ) : (
             <ChartContainer className="h-80 w-full" config={financialChartConfig}>
@@ -407,7 +407,7 @@ export function RelatoriosPage() {
               Evolucao {reportMode === "anual" ? "anual" : "mensal"}
             </CardTitle>
             <CardDescription>
-              Barras comparando receitas e despesas do periodo.
+              Barras comparando receitas e despesas do período.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -469,7 +469,7 @@ export function RelatoriosPage() {
               </span>
               <div>
                 <CardTitle>Despesas por categoria</CardTitle>
-                <CardDescription>Distribuicao do mes base do relatorio.</CardDescription>
+                <CardDescription>Distribuição do mês base do relatório.</CardDescription>
               </div>
             </div>
           </CardHeader>

@@ -66,7 +66,7 @@ export function MonthPicker({ value, onChange, className }: MonthPickerProps) {
     <div className={cn("relative w-full min-w-[220px]", className)}>
       <div className="grid h-11 grid-cols-[44px_1fr_44px] items-center overflow-hidden rounded-lg border border-border bg-card shadow-sm">
         <Button
-          aria-label="Mes anterior"
+          aria-label="Mês anterior"
           className="h-11 rounded-none border-0 px-0 text-muted-foreground hover:text-foreground"
           type="button"
           variant="ghost"
@@ -87,7 +87,7 @@ export function MonthPicker({ value, onChange, className }: MonthPickerProps) {
         </button>
 
         <Button
-          aria-label="Proximo mes"
+          aria-label="Próximo mês"
           className="h-11 rounded-none border-0 px-0 text-muted-foreground hover:text-foreground"
           type="button"
           variant="ghost"
