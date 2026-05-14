@@ -16,7 +16,8 @@ import { Label } from "../../components/ui/label";
 import { useAuth } from "../../providers/auth-provider";
 
 export function ConfiguracoesPage() {
-  const { session, atualizarPerfil } = useAuth();
+  const { session, atualizarPerfil, atualizarUsuarioSessao } = useAuth();
+  const usuarioTemSenha = session?.usuario.temSenha ?? true;
   const [nome, setNome] = useState(session?.usuario.nome ?? "");
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
@@ -62,10 +63,20 @@ export function ConfiguracoesPage() {
     setSavingPassword(true);
 
     try {
-      await authApi.trocarSenha({
-        senhaAtual: senhaAtual.trim() || undefined,
+      const response = await authApi.trocarSenha({
+        senhaAtual: usuarioTemSenha ? senhaAtual.trim() || undefined : undefined,
         novaSenha,
       });
+
+      if (response.usuario) {
+        atualizarUsuarioSessao(response.usuario);
+      } else if (session) {
+        atualizarUsuarioSessao({
+          ...session.usuario,
+          temSenha: true,
+        });
+      }
+
       setSenhaAtual("");
       setNovaSenha("");
       setConfirmarSenha("");
@@ -157,26 +168,32 @@ export function ConfiguracoesPage() {
                 <KeyRound className="h-5 w-5" />
               </span>
               <div>
-                <CardTitle>Trocar senha</CardTitle>
+                <CardTitle>
+                  {usuarioTemSenha ? "Trocar senha" : "Cadastrar senha"}
+                </CardTitle>
                 <CardDescription>
-                  Informe a senha atual e a nova senha. Se sua conta foi criada pelo
-                  Google e ainda não tem senha, deixe a senha atual em branco.
+                  {usuarioTemSenha
+                    ? "Informe a senha atual e escolha uma nova senha."
+                    : "Sua conta ainda não tem senha cadastrada. Crie uma senha para entrar também com email e senha."}
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <form className="grid gap-4" onSubmit={salvarSenha}>
-              <div className="space-y-2">
-                <Label htmlFor="senhaAtual">Senha atual</Label>
-                <Input
-                  id="senhaAtual"
-                  type="password"
-                  value={senhaAtual}
-                  onChange={(event) => setSenhaAtual(event.target.value)}
-                  autoComplete="current-password"
-                />
-              </div>
+              {usuarioTemSenha && (
+                <div className="space-y-2">
+                  <Label htmlFor="senhaAtual">Senha atual</Label>
+                  <Input
+                    id="senhaAtual"
+                    type="password"
+                    value={senhaAtual}
+                    onChange={(event) => setSenhaAtual(event.target.value)}
+                    autoComplete="current-password"
+                    required
+                  />
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="novaSenha">Nova senha</Label>
                 <Input
@@ -219,7 +236,7 @@ export function ConfiguracoesPage() {
                 ) : (
                   <Save className="h-4 w-4" />
                 )}
-                Alterar senha
+                {usuarioTemSenha ? "Alterar senha" : "Cadastrar senha"}
               </Button>
             </form>
           </CardContent>

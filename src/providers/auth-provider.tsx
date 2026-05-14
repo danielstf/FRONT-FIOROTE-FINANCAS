@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -22,6 +23,7 @@ type AuthContextValue = {
   loginGoogle: (payload: LoginGooglePayload) => Promise<void>;
   cadastrar: (payload: CadastroUsuarioPayload) => Promise<void>;
   atualizarPerfil: (payload: AtualizarPerfilPayload) => Promise<void>;
+  atualizarUsuarioSessao: (usuario: LoginResponse["usuario"]) => void;
   logout: () => void;
 };
 
@@ -42,6 +44,38 @@ function getStoredSession() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<LoginResponse | null>(getStoredSession);
+
+  useEffect(() => {
+    if (!session) return;
+
+    let ignore = false;
+
+    authApi
+      .buscarPerfil()
+      .then((data) => {
+        if (ignore) return;
+
+        setSession((currentSession) => {
+          if (!currentSession) return currentSession;
+
+          const nextSession = {
+            ...currentSession,
+            usuario: data.usuario,
+          };
+
+          localStorage.setItem(storageKey, JSON.stringify(nextSession));
+
+          return nextSession;
+        });
+      })
+      .catch(() => {
+        // Mantem a sessao atual se o refresh do perfil falhar momentaneamente.
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [session?.token]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -68,6 +102,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const nextSession = {
             ...currentSession,
             usuario: data.usuario,
+          };
+
+          localStorage.setItem(storageKey, JSON.stringify(nextSession));
+
+          return nextSession;
+        });
+      },
+      atualizarUsuarioSessao(usuario) {
+        setSession((currentSession) => {
+          if (!currentSession) return currentSession;
+
+          const nextSession = {
+            ...currentSession,
+            usuario,
           };
 
           localStorage.setItem(storageKey, JSON.stringify(nextSession));

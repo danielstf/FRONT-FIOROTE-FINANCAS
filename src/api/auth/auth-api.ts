@@ -3,6 +3,7 @@ import type {
   ApiMessageResponse,
   AtualizarPerfilPayload,
   AtualizarPerfilResponse,
+  BuscarPerfilResponse,
   CadastroUsuarioPayload,
   LoginGooglePayload,
   LoginPayload,
@@ -10,6 +11,7 @@ import type {
   RedefinirSenhaPayload,
   SolicitarRedefinicaoSenhaPayload,
   TrocarSenhaPayload,
+  TrocarSenhaResponse,
 } from "./types";
 
 export const authApi = {
@@ -52,8 +54,13 @@ export const authApi = {
     return data;
   },
 
+  async buscarPerfil() {
+    const { data } = await api.get<BuscarPerfilResponse>("/usuarios/perfil");
+    return data;
+  },
+
   async trocarSenha(payload: TrocarSenhaPayload) {
-    const { data } = await api.patch<ApiMessageResponse>(
+    const { data } = await api.patch<TrocarSenhaResponse>(
       "/usuarios/senha",
       payload,
     );

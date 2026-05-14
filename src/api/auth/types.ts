@@ -4,6 +4,8 @@ export type Usuario = {
   email: string;
   role: "ADMIN" | "USER";
   plano: "FREE" | "PREMIUM";
+  premiumExpiraEm?: string | null;
+  temSenha?: boolean;
 };
 
 export type LoginPayload = {
@@ -38,6 +40,10 @@ export type AtualizarPerfilResponse = {
   usuario: Usuario;
 };
 
+export type BuscarPerfilResponse = {
+  usuario: Usuario;
+};
+
 export type TrocarSenhaPayload = {
   senhaAtual?: string;
   novaSenha: string;
@@ -50,4 +56,8 @@ export type LoginResponse = {
 
 export type ApiMessageResponse = {
   message: string;
+};
+
+export type TrocarSenhaResponse = ApiMessageResponse & {
+  usuario?: Usuario;
 };
