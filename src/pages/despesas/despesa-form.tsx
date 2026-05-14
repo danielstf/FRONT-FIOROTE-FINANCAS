@@ -201,7 +201,7 @@ export function DespesaForm({
 
   return (
     <form
-      className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]"
+      className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_400px]"
       onSubmit={handleSubmit}
     >
       <Card className="overflow-hidden shadow-sm">
@@ -220,7 +220,7 @@ export function DespesaForm({
         </CardHeader>
         <CardContent>
           <div className="grid gap-5">
-            <div className="grid gap-4 sm:grid-cols-[1.2fr_0.8fr]">
+            <div className="grid gap-4 md:grid-cols-[minmax(0,1.35fr)_minmax(180px,0.65fr)]">
               <div className="space-y-2">
                 <Label htmlFor="nome">Nome</Label>
                 <Input
@@ -244,7 +244,7 @@ export function DespesaForm({
               </div>
             </div>
 
-            <div className="grid gap-4 rounded-lg border border-border bg-muted/35 p-4 sm:grid-cols-3">
+            <div className="grid gap-4 rounded-lg border border-border bg-muted/35 p-4 md:grid-cols-2 xl:grid-cols-3">
               <div className="space-y-2">
                 <Label>Mes de referencia</Label>
                 <MonthPicker value={mes} onChange={setMes} />
@@ -270,21 +270,21 @@ export function DespesaForm({
                   }}
                 >
                   <option value="DINHEIRO">Dinheiro</option>
-                  <option value="CARTAO_CREDITO">Cartao de credito</option>
+                  <option value="CARTAO_CREDITO">Cartão de crédito</option>
                 </Select>
               </div>
             </div>
 
             {formaPagamento === "CARTAO_CREDITO" && (
               <div className="animate-in fade-in-0 slide-in-from-top-1 space-y-2 rounded-lg border border-border bg-card p-4 shadow-sm">
-                <Label htmlFor="cartaoCreditoId">Cartao de credito</Label>
+                <Label htmlFor="cartaoCreditoId">Cartão de crédito</Label>
                 <Select
                   id="cartaoCreditoId"
                   value={cartaoCreditoId}
                   onChange={(event) => setCartaoCreditoId(event.target.value)}
                   required
                 >
-                  <option value="">Selecione um cartao</option>
+                  <option value="">Selecione um cartão</option>
                   {cartoes.map((cartao) => (
                     <option key={cartao.id} value={cartao.id}>
                       {cartao.nome}
@@ -293,13 +293,13 @@ export function DespesaForm({
                 </Select>
                 {cartoes.length === 0 && (
                   <p className="text-xs text-muted-foreground">
-                    Cadastre um cartao em Cartoes para usar despesas no credito.
+                    Cadastre um cartão em Cartões para usar despesas no crédito.
                   </p>
                 )}
               </div>
             )}
 
-            <div className="grid gap-4 rounded-lg border border-border bg-muted/35 p-4 sm:grid-cols-2">
+            <div className="grid gap-4 rounded-lg border border-border bg-muted/35 p-4 md:grid-cols-2">
               <label className="flex cursor-pointer items-start gap-3">
                 <input
                   type="checkbox"
@@ -373,8 +373,8 @@ export function DespesaForm({
         </CardContent>
       </Card>
 
-      <Card className="sticky top-4 self-start overflow-hidden shadow-sm">
-        <CardHeader>
+      <Card className="self-start overflow-hidden shadow-sm lg:sticky lg:top-4">
+        <CardHeader className="p-5">
           <div className="flex items-center gap-3">
             <div>
               <CardTitle>Categoria</CardTitle>
@@ -384,8 +384,8 @@ export function DespesaForm({
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid max-h-[520px] gap-2 overflow-y-auto rounded-lg border border-border bg-muted/25 p-2 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+        <CardContent className="space-y-3 p-5 pt-0">
+          <div className="grid max-h-[min(52vh,520px)] gap-2 overflow-y-auto rounded-lg border border-border bg-muted/25 p-2 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
             {categorias.map((opcao) => {
               const Icon = getCategoryIcon(opcao);
               const selected = categoria === opcao;
@@ -395,7 +395,7 @@ export function DespesaForm({
                   key={opcao}
                   type="button"
                   className={cn(
-                    "group flex min-h-14 items-center gap-3 rounded-md border border-border bg-background p-3 text-left text-sm shadow-sm transition-all hover:-translate-y-0.5 hover:border-destructive/35 hover:bg-destructive/5 hover:shadow-md",
+                    "group flex min-h-12 items-center gap-3 rounded-md border border-border bg-background p-2.5 text-left text-sm shadow-sm transition-all hover:-translate-y-0.5 hover:border-destructive/35 hover:bg-destructive/5 hover:shadow-md",
                     selected &&
                       "border-destructive/50 bg-destructive/10 text-destructive ring-2 ring-destructive/10",
                   )}
@@ -409,7 +409,7 @@ export function DespesaForm({
                   >
                     <Icon className="h-4 w-4" />
                   </span>
-                  <span className="font-medium">{opcao}</span>
+                  <span className="min-w-0 truncate font-medium">{opcao}</span>
                 </button>
               );
             })}

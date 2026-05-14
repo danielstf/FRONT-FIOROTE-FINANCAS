@@ -26,13 +26,13 @@ import {
 } from "lucide-react";
 
 export const defaultExpenseCategories = [
-  "Alimentacao",
+  "Alimentação",
   "Mercado",
   "Moradia",
   "Transporte",
-  "Combustivel",
-  "Saude",
-  "Educacao",
+  "Combustível",
+  "Saúde",
+  "Educação",
   "Lazer",
   "Assinaturas",
   "Internet",
@@ -45,39 +45,49 @@ export const defaultExpenseCategories = [
   "Impostos",
   "Seguro",
   "Trabalho",
+  "Livros",
+  "Beleza",
+  "Contas",
   "Outras",
 ];
 
-export const categoryIconMap: Record<string, LucideIcon> = {
-  Alimentacao: Utensils,
-  "Alimentação": Utensils,
-  Mercado: ShoppingBasket,
-  Moradia: Home,
-  Transporte: Bus,
-  Combustivel: Car,
-  Combustível: Car,
-  Saude: HeartPulse,
-  Saúde: HeartPulse,
-  Educacao: GraduationCap,
-  Educação: GraduationCap,
-  Lazer: Popcorn,
-  Assinaturas: Tv,
-  Internet: Wifi,
-  Telefone: Smartphone,
-  Roupas: Shirt,
-  Viagem: Plane,
-  Pets: PawPrint,
-  Filhos: Baby,
-  Academia: Dumbbell,
-  Impostos: Banknote,
-  Seguro: ShieldCheck,
-  Trabalho: BriefcaseBusiness,
-  Livros: BookOpen,
-  Beleza: Sparkles,
-  Contas: ReceiptText,
-  Outras: MoreHorizontal,
+const categoryIconMap: Record<string, LucideIcon> = {
+  alimentacao: Utensils,
+  mercado: ShoppingBasket,
+  moradia: Home,
+  transporte: Bus,
+  combustivel: Car,
+  saude: HeartPulse,
+  educacao: GraduationCap,
+  lazer: Popcorn,
+  assinaturas: Tv,
+  internet: Wifi,
+  telefone: Smartphone,
+  roupas: Shirt,
+  viagem: Plane,
+  pets: PawPrint,
+  filhos: Baby,
+  academia: Dumbbell,
+  impostos: Banknote,
+  seguro: ShieldCheck,
+  trabalho: BriefcaseBusiness,
+  livros: BookOpen,
+  beleza: Sparkles,
+  contas: ReceiptText,
+  outras: MoreHorizontal,
+  outros: MoreHorizontal,
 };
 
+function normalizeCategoryKey(category: string) {
+  return category
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .trim();
+}
+
 export function getCategoryIcon(category?: string | null) {
-  return category ? categoryIconMap[category] ?? MoreHorizontal : MoreHorizontal;
+  if (!category) return MoreHorizontal;
+
+  return categoryIconMap[normalizeCategoryKey(category)] ?? MoreHorizontal;
 }
