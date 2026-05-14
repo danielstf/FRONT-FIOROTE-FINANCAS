@@ -97,9 +97,7 @@ export function ReceitasPage() {
       setTotal(data.total);
       setSearchParams({ mes: mesSelecionado });
     } catch (requestError) {
-      const errorMessage = getApiErrorMessage(requestError);
-      setError(errorMessage);
-      toast.error(errorMessage);
+      setError(getApiErrorMessage(requestError));
     } finally {
       setLoading(false);
     }
@@ -116,9 +114,7 @@ export function ReceitasPage() {
       setReceitaExcluindo(null);
       await carregarReceitas(mes);
     } catch (requestError) {
-      const errorMessage = getApiErrorMessage(requestError);
-      setError(errorMessage);
-      toast.error(errorMessage);
+      toast.error(getApiErrorMessage(requestError));
     } finally {
       setDeletingId(null);
     }

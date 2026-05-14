@@ -117,9 +117,7 @@ export function DespesasPage() {
       );
       await carregarDespesas();
     } catch (requestError) {
-      const errorMessage = getApiErrorMessage(requestError);
-      setError(errorMessage);
-      toast.error(errorMessage);
+      toast.error(getApiErrorMessage(requestError));
     } finally {
       setBusyId(null);
     }
@@ -142,9 +140,7 @@ export function DespesasPage() {
       setDespesaExcluindo(null);
       await carregarDespesas();
     } catch (requestError) {
-      const errorMessage = getApiErrorMessage(requestError);
-      setError(errorMessage);
-      toast.error(errorMessage);
+      toast.error(getApiErrorMessage(requestError));
     } finally {
       setBusyId(null);
     }

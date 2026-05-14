@@ -46,8 +46,6 @@ export function ReceitaForm({
   const [mes, setMes] = useState(receita?.mes ?? defaultMonth ?? getCurrentMonth);
   const [opcoes, setOpcoes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     async function carregarOpcoes() {
@@ -64,20 +62,16 @@ export function ReceitaForm({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
-    setMessage("");
 
     const valorNumerico = parseMoney(valor);
     const nomeNormalizado = normalizeRequiredText(nome);
 
     if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
-      setError("Informe um valor maior que zero.");
       toast.error("Informe um valor maior que zero.");
       return;
     }
 
     if (!nomeNormalizado) {
-      setError("Informe o nome da receita.");
       toast.error("Informe o nome da receita.");
       return;
     }
@@ -99,11 +93,6 @@ export function ReceitaForm({
         });
       }
 
-      setMessage(
-        mode === "edit"
-          ? "Receita atualizada com sucesso."
-          : "Receita cadastrada com sucesso.",
-      );
       toast.success(
         mode === "edit"
           ? "Receita atualizada com sucesso."
@@ -117,9 +106,7 @@ export function ReceitaForm({
 
       window.setTimeout(() => navigate(`/app/receitas?mes=${mes}`), 700);
     } catch (requestError) {
-      const errorMessage = getApiErrorMessage(requestError);
-      setError(errorMessage);
-      toast.error(errorMessage);
+      toast.error(getApiErrorMessage(requestError));
     } finally {
       setLoading(false);
     }
@@ -177,17 +164,6 @@ export function ReceitaForm({
                 <MonthPicker value={mes} onChange={setMes} />
               </div>
             </div>
-
-            {error && (
-              <p className="rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {error}
-              </p>
-            )}
-            {message && (
-              <p className="rounded-md border border-primary/25 bg-primary/10 px-3 py-2 text-sm text-primary">
-                {message}
-              </p>
-            )}
 
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button type="submit" disabled={loading}>

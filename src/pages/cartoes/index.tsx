@@ -24,7 +24,6 @@ export function CartoesPage() {
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
 
   async function carregarCartoes() {
     setError("");
@@ -48,25 +47,21 @@ export function CartoesPage() {
   async function salvarCartao(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setMessage("");
     setSaving(true);
 
     try {
       const nomeNormalizado = normalizeRequiredText(nome);
 
       if (!nomeNormalizado) {
-        setError("Informe o nome do cartão.");
         toast.error("Informe o nome do cartão.");
         return;
       }
 
       if (editando) {
         await cartoesApi.editar(editando.id, { nome: nomeNormalizado });
-        setMessage("Cartão atualizado com sucesso.");
         toast.success("Cartão atualizado com sucesso.");
       } else {
         await cartoesApi.criar({ nome: nomeNormalizado });
-        setMessage("Cartão cadastrado com sucesso.");
         toast.success("Cartão cadastrado com sucesso.");
       }
 
@@ -74,9 +69,7 @@ export function CartoesPage() {
       setEditando(null);
       await carregarCartoes();
     } catch (requestError) {
-      const errorMessage = getApiErrorMessage(requestError);
-      setError(errorMessage);
-      toast.error(errorMessage);
+      toast.error(getApiErrorMessage(requestError));
     } finally {
       setSaving(false);
     }
@@ -88,18 +81,14 @@ export function CartoesPage() {
     if (!confirmed) return;
 
     setError("");
-    setMessage("");
     setBusyId(cartao.id);
 
     try {
       await cartoesApi.excluir(cartao.id);
-      setMessage("Cartão excluído com sucesso.");
       toast.success("Cartão excluído com sucesso.");
       await carregarCartoes();
     } catch (requestError) {
-      const errorMessage = getApiErrorMessage(requestError);
-      setError(errorMessage);
-      toast.error(errorMessage);
+      toast.error(getApiErrorMessage(requestError));
     } finally {
       setBusyId(null);
     }
@@ -108,7 +97,6 @@ export function CartoesPage() {
   function iniciarEdicao(cartao: CartaoCredito) {
     setEditando(cartao);
     setNome(toUppercaseText(cartao.nome));
-    setMessage("");
     setError("");
   }
 
@@ -172,12 +160,6 @@ export function CartoesPage() {
                   {error}
                 </p>
               )}
-              {message && (
-                <p className="rounded-md border border-primary/25 bg-primary/10 px-3 py-2 text-sm text-primary">
-                  {message}
-                </p>
-              )}
-
               <div className="flex flex-col gap-2 sm:flex-row">
                 <Button type="submit" disabled={saving}>
                   {saving ? (

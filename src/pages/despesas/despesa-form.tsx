@@ -82,8 +82,6 @@ export function DespesaForm({
   const [categorias, setCategorias] = useState<string[]>(fallbackCategorias);
   const [cartoes, setCartoes] = useState<CartaoCredito[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     async function carregarOpcoes() {
@@ -120,8 +118,6 @@ export function DespesaForm({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
-    setMessage("");
 
     const valorNumerico = parseMoney(valor);
     const parcelas = numeroParcelas ? Number(numeroParcelas) : undefined;
@@ -129,25 +125,21 @@ export function DespesaForm({
     const categoriaNormalizada = normalizeOptionalText(categoria);
 
     if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
-      setError("Informe um valor maior que zero.");
       toast.error("Informe um valor maior que zero.");
       return;
     }
 
     if (!nomeNormalizado) {
-      setError("Informe o nome da despesa.");
       toast.error("Informe o nome da despesa.");
       return;
     }
 
     if (parcelas !== undefined && (!Number.isInteger(parcelas) || parcelas <= 1)) {
-      setError("Para parcelar, informe 2 parcelas ou mais.");
       toast.error("Para parcelar, informe 2 parcelas ou mais.");
       return;
     }
 
     if (formaPagamento === "CARTAO_CREDITO" && !cartaoCreditoId) {
-      setError("Selecione o cartão de crédito desta despesa.");
       toast.error("Selecione o cartão de crédito desta despesa.");
       return;
     }
@@ -170,13 +162,9 @@ export function DespesaForm({
 
       if (mode === "edit" && despesa) {
         await despesasApi.editar(despesa.id, payload);
-        setMessage("Despesa atualizada com sucesso.");
         toast.success("Despesa atualizada com sucesso.");
       } else {
         await despesasApi.criar(payload);
-        setMessage(
-          parcelas ? "Despesas parceladas cadastradas com sucesso." : "Despesa cadastrada com sucesso.",
-        );
         toast.success(
           parcelas
             ? "Despesas parceladas cadastradas com sucesso."
@@ -191,9 +179,7 @@ export function DespesaForm({
 
       window.setTimeout(() => navigate("/app/despesas"), 700);
     } catch (requestError) {
-      const errorMessage = getApiErrorMessage(requestError);
-      setError(errorMessage);
-      toast.error(errorMessage);
+      toast.error(getApiErrorMessage(requestError));
     } finally {
       setLoading(false);
     }
@@ -335,17 +321,6 @@ export function DespesaForm({
                 />
               </div>
             </div>
-
-            {error && (
-              <p className="rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {error}
-              </p>
-            )}
-            {message && (
-              <p className="rounded-md border border-primary/25 bg-primary/10 px-3 py-2 text-sm text-primary">
-                {message}
-              </p>
-            )}
 
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button type="submit" disabled={loading}>

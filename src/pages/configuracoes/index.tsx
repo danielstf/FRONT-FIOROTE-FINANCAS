@@ -24,25 +24,16 @@ export function ConfiguracoesPage() {
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
-  const [profileError, setProfileError] = useState("");
-  const [profileMessage, setProfileMessage] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordMessage, setPasswordMessage] = useState("");
 
   async function salvarPerfil(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setProfileError("");
-    setProfileMessage("");
     setSavingProfile(true);
 
     try {
       await atualizarPerfil({ nome });
-      setProfileMessage("Nome atualizado com sucesso.");
       toast.success("Nome atualizado com sucesso.");
     } catch (requestError) {
-      const errorMessage = getApiErrorMessage(requestError);
-      setProfileError(errorMessage);
-      toast.error(errorMessage);
+      toast.error(getApiErrorMessage(requestError));
     } finally {
       setSavingProfile(false);
     }
@@ -50,13 +41,9 @@ export function ConfiguracoesPage() {
 
   async function salvarSenha(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPasswordError("");
-    setPasswordMessage("");
 
     if (novaSenha !== confirmarSenha) {
-      const errorMessage = "A confirmação da senha não confere.";
-      setPasswordError(errorMessage);
-      toast.error(errorMessage);
+      toast.error("A confirmação da senha não confere.");
       return;
     }
 
@@ -80,12 +67,9 @@ export function ConfiguracoesPage() {
       setSenhaAtual("");
       setNovaSenha("");
       setConfirmarSenha("");
-      setPasswordMessage("Senha alterada com sucesso.");
       toast.success("Senha alterada com sucesso.");
     } catch (requestError) {
-      const errorMessage = getApiErrorMessage(requestError);
-      setPasswordError(errorMessage);
-      toast.error(errorMessage);
+      toast.error(getApiErrorMessage(requestError));
     } finally {
       setSavingPassword(false);
     }
@@ -137,17 +121,6 @@ export function ConfiguracoesPage() {
                 <Label>Email</Label>
                 <Input value={session?.usuario.email ?? ""} disabled />
               </div>
-
-              {profileError && (
-                <p className="rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  {profileError}
-                </p>
-              )}
-              {profileMessage && (
-                <p className="rounded-md border border-primary/25 bg-primary/10 px-3 py-2 text-sm text-primary">
-                  {profileMessage}
-                </p>
-              )}
 
               <Button className="w-full sm:w-fit" type="submit" disabled={savingProfile}>
                 {savingProfile ? (
@@ -218,17 +191,6 @@ export function ConfiguracoesPage() {
                   required
                 />
               </div>
-
-              {passwordError && (
-                <p className="rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  {passwordError}
-                </p>
-              )}
-              {passwordMessage && (
-                <p className="rounded-md border border-primary/25 bg-primary/10 px-3 py-2 text-sm text-primary">
-                  {passwordMessage}
-                </p>
-              )}
 
               <Button className="w-full sm:w-fit" type="submit" disabled={savingPassword}>
                 {savingPassword ? (
