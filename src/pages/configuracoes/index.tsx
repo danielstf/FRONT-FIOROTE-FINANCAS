@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { KeyRound, Loader2, Save, Settings, UserRound } from "lucide-react";
+import { toast } from "sonner";
 import { authApi } from "../../api/auth/auth-api";
 import { getApiErrorMessage } from "../../api/errors";
 import { Button } from "../../components/ui/button";
@@ -36,8 +37,11 @@ export function ConfiguracoesPage() {
     try {
       await atualizarPerfil({ nome });
       setProfileMessage("Nome atualizado com sucesso.");
+      toast.success("Nome atualizado com sucesso.");
     } catch (requestError) {
-      setProfileError(getApiErrorMessage(requestError));
+      const errorMessage = getApiErrorMessage(requestError);
+      setProfileError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setSavingProfile(false);
     }
@@ -49,20 +53,28 @@ export function ConfiguracoesPage() {
     setPasswordMessage("");
 
     if (novaSenha !== confirmarSenha) {
-      setPasswordError("A confirmação da senha não confere.");
+      const errorMessage = "A confirmação da senha não confere.";
+      setPasswordError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
     setSavingPassword(true);
 
     try {
-      await authApi.trocarSenha({ senhaAtual, novaSenha });
+      await authApi.trocarSenha({
+        senhaAtual: senhaAtual.trim() || undefined,
+        novaSenha,
+      });
       setSenhaAtual("");
       setNovaSenha("");
       setConfirmarSenha("");
       setPasswordMessage("Senha alterada com sucesso.");
+      toast.success("Senha alterada com sucesso.");
     } catch (requestError) {
-      setPasswordError(getApiErrorMessage(requestError));
+      const errorMessage = getApiErrorMessage(requestError);
+      setPasswordError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setSavingPassword(false);
     }
@@ -146,7 +158,10 @@ export function ConfiguracoesPage() {
               </span>
               <div>
                 <CardTitle>Trocar senha</CardTitle>
-                <CardDescription>Informe a senha atual e a nova senha.</CardDescription>
+                <CardDescription>
+                  Informe a senha atual e a nova senha. Se sua conta foi criada pelo
+                  Google e ainda não tem senha, deixe a senha atual em branco.
+                </CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -159,7 +174,7 @@ export function ConfiguracoesPage() {
                   type="password"
                   value={senhaAtual}
                   onChange={(event) => setSenhaAtual(event.target.value)}
-                  required
+                  autoComplete="current-password"
                 />
               </div>
               <div className="space-y-2">
@@ -170,6 +185,7 @@ export function ConfiguracoesPage() {
                   type="password"
                   value={novaSenha}
                   onChange={(event) => setNovaSenha(event.target.value)}
+                  autoComplete="new-password"
                   required
                 />
               </div>
@@ -181,6 +197,7 @@ export function ConfiguracoesPage() {
                   type="password"
                   value={confirmarSenha}
                   onChange={(event) => setConfirmarSenha(event.target.value)}
+                  autoComplete="new-password"
                   required
                 />
               </div>

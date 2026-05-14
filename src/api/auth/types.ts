@@ -39,7 +39,7 @@ export type AtualizarPerfilResponse = {
 };
 
 export type TrocarSenhaPayload = {
-  senhaAtual: string;
+  senhaAtual?: string;
   novaSenha: string;
 };
 
