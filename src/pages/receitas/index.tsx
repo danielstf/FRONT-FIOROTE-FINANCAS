@@ -6,6 +6,7 @@ import {
   Loader2,
   Pencil,
   Plus,
+  Sparkles,
   Trash2,
   TrendingUp,
 } from "lucide-react";
@@ -131,12 +132,16 @@ export function ReceitasPage() {
         <div className="grid gap-6 p-5 lg:grid-cols-[1fr_360px] lg:p-6">
           <div className="space-y-5">
             <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 rounded-md border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400">
+                <Sparkles className="h-4 w-4" />
+                Entradas do mês
+              </div>
               <div className="flex items-center gap-3">
                 <span className="flex h-12 w-12 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
                   <TrendingUp className="h-6 w-6" />
                 </span>
-                <h1 className="text-3xl font-semibold tracking-normal text-card-foreground">
-                  Receitas
+                <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
+                  Receitas organizadas para fechar o mês.
                 </h1>
               </div>
               <p className="max-w-2xl text-sm text-muted-foreground">

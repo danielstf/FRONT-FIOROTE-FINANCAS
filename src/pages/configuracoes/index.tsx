@@ -1,5 +1,14 @@
 import { useState, type FormEvent } from "react";
-import { KeyRound, Loader2, Save, Settings, UserRound } from "lucide-react";
+import {
+  BadgeCheck,
+  KeyRound,
+  Loader2,
+  Mail,
+  Save,
+  ShieldCheck,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
 import { toast } from "sonner";
 import { authApi } from "../../api/auth/auth-api";
 import { getApiErrorMessage } from "../../api/errors";
@@ -76,20 +85,53 @@ export function ConfiguracoesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-lg border border-border bg-card p-5 shadow-sm lg:p-6">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Settings className="h-5 w-5" />
-          </span>
-          <div>
-            <h1 className="text-3xl font-semibold tracking-normal text-card-foreground">
-              Configurações
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Atualize seus dados de acesso e preferências da conta.
-            </p>
+    <div className="space-y-5">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-7">
+          <div className="space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
+              <Sparkles className="h-4 w-4" />
+              Conta e segurança
+            </div>
+
+            <div className="space-y-3">
+              <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
+                Configurações da conta
+              </h1>
+              <p className="max-w-2xl text-sm text-muted-foreground">
+                Mantenha seus dados atualizados e defina uma senha para acessar o
+                sistema com mais flexibilidade.
+              </p>
+            </div>
           </div>
+
+          <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
+            <CardContent className="space-y-4 p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Perfil atual</p>
+                <p className="mt-1 truncate text-xl font-semibold">
+                  {session?.usuario.nome}
+                </p>
+              </div>
+              <div className="grid gap-2 text-sm">
+                <div className="flex items-center gap-2 rounded-md border border-border p-3">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span className="min-w-0 truncate">{session?.usuario.email}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-md border border-border p-3">
+                  <span className="text-muted-foreground">Senha</span>
+                  <strong
+                    className={usuarioTemSenha ? "text-emerald-600" : "text-amber-600"}
+                  >
+                    {usuarioTemSenha ? "Cadastrada" : "Pendente"}
+                  </strong>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
@@ -138,7 +180,11 @@ export function ConfiguracoesPage() {
           <CardHeader>
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <KeyRound className="h-5 w-5" />
+                {usuarioTemSenha ? (
+                  <KeyRound className="h-5 w-5" />
+                ) : (
+                  <BadgeCheck className="h-5 w-5" />
+                )}
               </span>
               <div>
                 <CardTitle>

@@ -1,22 +1,21 @@
+import { useEffect, useMemo, useState } from "react";
 import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
   Loader2,
   PieChart,
+  Sparkles,
   TrendingDown,
   TrendingUp,
   WalletCards,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { dashboardApi } from "../../api/dashboard/dashboard-api";
-import type { CategoriaDespesaResumo, MovimentoMensal } from "../../api/dashboard/types";
+import type {
+  CategoriaDespesaResumo,
+  MovimentoMensal,
+} from "../../api/dashboard/types";
 import { getApiErrorMessage } from "../../api/errors";
 import { MonthPicker } from "../../components/month-picker";
 import { Button } from "../../components/ui/button";
@@ -180,83 +179,126 @@ export function RelatoriosPage() {
 
   return (
     <div className="space-y-5">
-      <section className="rounded-lg border border-border bg-card p-5 shadow-sm lg:p-6">
-        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <BarChart3 className="h-5 w-5" />
-              </span>
-              <h1 className="text-3xl font-semibold tracking-normal text-card-foreground">
-                Relatórios
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:p-7">
+          <div className="space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
+              <Sparkles className="h-4 w-4" />
+              Análise financeira
+            </div>
+
+            <div className="space-y-3">
+              <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
+                Relatórios para entender seu dinheiro.
               </h1>
+              <p className="max-w-2xl text-sm text-muted-foreground">
+                Analise receitas, despesas, saldo e categorias por mês ou ano,
+                com comparativos claros para tomar decisões melhores.
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Analise receitas, despesas, saldo e categorias por mês ou ano.
-            </p>
-          </div>
 
-          <div className="flex flex-col gap-3 lg:items-end">
-            <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-border bg-background text-sm">
-              {[
-                { value: "anual", label: "Anual" },
-                { value: "mensal", label: "Mensal" },
-              ].map((item) => (
-                <button
-                  key={item.value}
+            <div className="grid max-w-2xl gap-3 sm:grid-cols-3">
+              <div className="rounded-lg border border-border bg-background p-4">
+                <p className="text-sm text-muted-foreground">Receitas</p>
+                <p className="mt-2 text-xl font-semibold text-blue-600 dark:text-blue-400">
+                  {formatCurrency(totalReceitas)}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border bg-background p-4">
+                <p className="text-sm text-muted-foreground">Despesas</p>
+                <p className="mt-2 text-xl font-semibold text-red-600 dark:text-red-400">
+                  {formatCurrency(totalDespesas)}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border bg-background p-4">
+                <p className="text-sm text-muted-foreground">Saldo</p>
+                <p
                   className={cn(
-                    "px-4 py-2 font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
-                    reportMode === item.value &&
-                      "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                    "mt-2 text-xl font-semibold",
+                    saldoPeriodo >= 0
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-red-600 dark:text-red-400",
                   )}
-                  type="button"
-                  onClick={() => changeMode(item.value as ReportMode)}
                 >
-                  {item.label}
-                </button>
-              ))}
+                  {formatCurrency(saldoPeriodo)}
+                </p>
+              </div>
             </div>
-
-            {reportMode === "anual" ? (
-              <div className="space-y-2">
-                <Label className="justify-center lg:justify-end">Ano</Label>
-                <div className="grid h-11 w-56 grid-cols-[44px_1fr_44px] items-center overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-                  <Button
-                    aria-label="Ano anterior"
-                    className="h-11 rounded-none border-0 px-0"
-                    type="button"
-                    variant="ghost"
-                    onClick={() => changeYear(-1)}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <div className="border-x border-border text-center text-sm font-semibold">
-                    {ano}
-                  </div>
-                  <Button
-                    aria-label="Proximo ano"
-                    className="h-11 rounded-none border-0 px-0"
-                    type="button"
-                    variant="ghost"
-                    onClick={() => changeYear(1)}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Label className="justify-center lg:justify-end">Mês</Label>
-                <MonthPicker
-                  value={mes}
-                  onChange={(nextMonth) => {
-                    setMes(nextMonth);
-                    void carregarRelatorio({ modo: reportMode, ano, mes: nextMonth });
-                  }}
-                />
-              </div>
-            )}
           </div>
+
+          <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
+            <CardContent className="space-y-4 p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <BarChart3 className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Visualização</p>
+                <p className="mt-1 text-xl font-semibold">
+                  {reportMode === "anual" ? `Ano ${ano}` : "Mês selecionado"}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-border bg-background text-sm">
+                {[
+                  { value: "anual", label: "Anual" },
+                  { value: "mensal", label: "Mensal" },
+                ].map((item) => (
+                  <button
+                    key={item.value}
+                    className={cn(
+                      "px-4 py-2 font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+                      reportMode === item.value &&
+                        "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                    )}
+                    type="button"
+                    onClick={() => changeMode(item.value as ReportMode)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {reportMode === "anual" ? (
+                <div className="space-y-2">
+                  <Label>Ano</Label>
+                  <div className="grid h-11 grid-cols-[44px_1fr_44px] items-center overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+                    <Button
+                      aria-label="Ano anterior"
+                      className="h-11 rounded-none border-0 px-0"
+                      type="button"
+                      variant="ghost"
+                      onClick={() => changeYear(-1)}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <div className="border-x border-border text-center text-sm font-semibold">
+                      {ano}
+                    </div>
+                    <Button
+                      aria-label="Próximo ano"
+                      className="h-11 rounded-none border-0 px-0"
+                      type="button"
+                      variant="ghost"
+                      onClick={() => changeYear(1)}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label>Mês</Label>
+                  <MonthPicker
+                    value={mes}
+                    onChange={(nextMonth) => {
+                      setMes(nextMonth);
+                      void carregarRelatorio({ modo: reportMode, ano, mes: nextMonth });
+                    }}
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </section>
 
@@ -404,7 +446,7 @@ export function RelatoriosPage() {
         <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>
-              Evolucao {reportMode === "anual" ? "anual" : "mensal"}
+              Evolução {reportMode === "anual" ? "anual" : "mensal"}
             </CardTitle>
             <CardDescription>
               Barras comparando receitas e despesas do período.
@@ -414,7 +456,7 @@ export function RelatoriosPage() {
             {loading ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Carregando relatorio...
+                Carregando relatório...
               </div>
             ) : (
               <div className="grid gap-3">

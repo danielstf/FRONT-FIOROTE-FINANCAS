@@ -8,6 +8,7 @@ import {
   Plus,
   ReceiptText,
   Repeat2,
+  Sparkles,
   ThumbsUp,
   Trash2,
 } from "lucide-react";
@@ -165,12 +166,16 @@ export function DespesasPage() {
           <div className="space-y-5">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
               <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 rounded-md border border-destructive/20 bg-destructive/10 px-3 py-1.5 text-sm font-medium text-destructive">
+                  <Sparkles className="h-4 w-4" />
+                  Contas do mês
+                </div>
                 <div className="flex items-center gap-3">
                   <span className="flex h-11 w-11 items-center justify-center rounded-md bg-destructive/10 text-destructive">
                     <ReceiptText className="h-5 w-5" />
                   </span>
-                  <h1 className="text-3xl font-semibold tracking-normal text-card-foreground">
-                    Despesas
+                  <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
+                    Despesas sob controle.
                   </h1>
                 </div>
                 <p className="max-w-2xl text-sm text-muted-foreground">

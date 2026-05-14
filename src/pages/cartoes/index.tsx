@@ -1,5 +1,16 @@
-﻿import { useEffect, useState, type FormEvent } from "react";
-import { CreditCard, Loader2, Pencil, Plus, Save, Trash2, X } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
+import {
+  BadgeCheck,
+  CreditCard,
+  Loader2,
+  Pencil,
+  Plus,
+  Save,
+  Sparkles,
+  Trash2,
+  WalletCards,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { cartoesApi } from "../../api/cartoes/cartoes-api";
 import type { CartaoCredito } from "../../api/cartoes/types";
@@ -110,20 +121,45 @@ export function CartoesPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-lg border border-border bg-card p-5 shadow-sm lg:p-6">
-        <div className="flex items-center gap-3">
-          <span className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <CreditCard className="h-6 w-6" />
-          </span>
-          <div>
-            <h1 className="text-3xl font-semibold tracking-normal text-card-foreground">
-              Cartões
-            </h1>
-            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Cadastre os cartões da conta para usar em despesas no crédito.
-            </p>
+    <div className="space-y-5">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-7">
+          <div className="space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
+              <Sparkles className="h-4 w-4" />
+              Cartões de crédito
+            </div>
+
+            <div className="space-y-3">
+              <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
+                Organize os cartões usados nas despesas.
+              </h1>
+              <p className="max-w-2xl text-sm text-muted-foreground">
+                Cadastre os cartões da conta para vincular compras no crédito,
+                parcelas e lançamentos futuros com mais clareza.
+              </p>
+            </div>
           </div>
+
+          <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
+            <CardContent className="space-y-4 p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <WalletCards className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Cartões cadastrados</p>
+                <p className="mt-1 text-3xl font-semibold tracking-normal">
+                  {cartoes.length}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 rounded-md border border-border p-3 text-sm">
+                <BadgeCheck className="h-4 w-4 text-emerald-600" />
+                <span className="text-muted-foreground">
+                  Disponíveis no cadastro de despesas
+                </span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
@@ -137,7 +173,7 @@ export function CartoesPage() {
               <div>
                 <CardTitle>{editando ? "Editar cartão" : "Novo cartão"}</CardTitle>
                 <CardDescription>
-                  O nome aparece no cadastro de despesas com cartão de crédito.
+                  Use nomes simples para reconhecer o cartão rapidamente.
                 </CardDescription>
               </div>
             </div>
@@ -150,7 +186,7 @@ export function CartoesPage() {
                   id="nome-cartao"
                   value={nome}
                   onChange={(event) => setNome(toUppercaseText(event.target.value))}
-                  placeholder="Ex: Nubank, Inter, Itau"
+                  placeholder="Ex: Nubank, Inter, Itaú"
                   required
                 />
               </div>
@@ -184,7 +220,7 @@ export function CartoesPage() {
           <CardHeader>
             <CardTitle>Cartões cadastrados</CardTitle>
             <CardDescription>
-              Estes cartões ficam salvos na sua conta e aparecem no seletor de despesas.
+              Estes cartões aparecem no seletor de despesas com cartão de crédito.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -209,10 +245,10 @@ export function CartoesPage() {
                 {cartoes.map((cartao) => (
                   <div
                     key={cartao.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background p-4 shadow-sm"
+                    className="grid gap-3 rounded-lg border border-border bg-background p-4 shadow-sm transition-colors hover:border-primary/30 hover:bg-card sm:grid-cols-[1fr_auto]"
                   >
                     <div className="flex min-w-0 items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                         <CreditCard className="h-5 w-5" />
                       </span>
                       <div className="min-w-0">
@@ -224,7 +260,7 @@ export function CartoesPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex justify-end gap-2">
                       <Button
                         className="h-9 w-9 px-0"
                         title="Editar cartão"
