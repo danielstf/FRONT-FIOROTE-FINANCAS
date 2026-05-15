@@ -52,7 +52,7 @@ export function ConfiguracoesPage() {
     event.preventDefault();
 
     if (novaSenha !== confirmarSenha) {
-      toast.error("A confirmaÃ§Ã£o da senha nÃ£o confere.");
+      toast.error("A confirmação da senha não confere.");
       return;
     }
 
@@ -91,12 +91,12 @@ export function ConfiguracoesPage() {
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
               <Sparkles className="h-4 w-4" />
-              Conta e seguranÃ§a
+              Conta e segurança
             </div>
 
             <div className="space-y-3">
               <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
-                ConfiguraÃ§Ãµes da conta
+                Configurações da conta
               </h1>
               <p className="max-w-2xl text-sm text-muted-foreground">
                 Mantenha seus dados atualizados e defina uma senha para acessar o
@@ -145,7 +145,7 @@ export function ConfiguracoesPage() {
                 <UserRound className="h-5 w-5" />
               </span>
               <div>
-                <CardTitle>Dados do usuÃ¡rio</CardTitle>
+                <CardTitle>Dados do usuário</CardTitle>
                 <CardDescription>Altere o nome exibido no sistema.</CardDescription>
               </div>
             </div>
@@ -195,7 +195,7 @@ export function ConfiguracoesPage() {
                 <CardDescription>
                   {usuarioTemSenha
                     ? "Informe a senha atual e escolha uma nova senha."
-                    : "Sua conta ainda nÃ£o tem senha cadastrada. Crie uma senha para entrar tambÃ©m com email e senha."}
+                    : "Sua conta ainda não tem senha cadastrada. Crie uma senha para entrar também com email e senha."}
                 </CardDescription>
               </div>
             </div>

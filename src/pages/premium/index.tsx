@@ -54,7 +54,7 @@ export function PremiumPage() {
       const paymentUrl = data.checkoutUrl ?? data.sandboxCheckoutUrl;
 
       if (!paymentUrl) {
-        throw new Error("NÃ£o foi possÃ­vel iniciar o pagamento.");
+        throw new Error("Não foi possível iniciar o pagamento.");
       }
 
       window.location.href = paymentUrl;
@@ -82,12 +82,12 @@ export function PremiumPage() {
             <div className="space-y-3">
               <h1 className="max-w-2xl text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
                 {isPremium
-                  ? "Sua experiÃªncia Premium estÃ¡ liberada."
-                  : "Use o sistema sem anÃºncios e com mais tranquilidade."}
+                  ? "Sua experiência Premium está liberada."
+                  : "Use o sistema sem anúncios e com mais tranquilidade."}
               </h1>
               <p className="max-w-xl text-sm text-muted-foreground">
-                O Premium remove anÃºncios e mantÃ©m sua Ã¡rea financeira mais limpa
-                para acompanhar receitas, despesas e relatÃ³rios.
+                O Premium remove anúncios e mantém sua área financeira mais limpa
+                para acompanhar receitas, despesas e relatórios.
               </p>
             </div>
 
@@ -174,7 +174,7 @@ export function PremiumPage() {
         <div className="flex gap-3 rounded-lg border border-border bg-card p-4 shadow-sm">
           <Ban className="mt-0.5 h-5 w-5 text-primary" />
           <div>
-            <p className="font-semibold">Sem anÃºncios</p>
+            <p className="font-semibold">Sem anúncios</p>
             <p className="mt-1 text-sm text-muted-foreground">
               Tela mais limpa para usar no dia a dia.
             </p>
@@ -185,7 +185,7 @@ export function PremiumPage() {
           <div>
             <p className="font-semibold">Validade mensal</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Acesso liberado por 30 dias apÃ³s o pagamento.
+              Acesso liberado por 30 dias após o pagamento.
             </p>
           </div>
         </div>
@@ -194,7 +194,7 @@ export function PremiumPage() {
           <div>
             <p className="font-semibold">Acesso imediato</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Assim que o pagamento for confirmado, o plano Ã© ativado.
+              Assim que o pagamento for confirmado, o plano é ativado.
             </p>
           </div>
         </div>

@@ -184,16 +184,16 @@ export function RelatoriosPage() {
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
               <Sparkles className="h-4 w-4" />
-              AnÃ¡lise financeira
+              Análise financeira
             </div>
 
             <div className="space-y-3">
               <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
-                RelatÃ³rios para entender seu dinheiro.
+                Relatórios para entender seu dinheiro.
               </h1>
               <p className="max-w-2xl text-sm text-muted-foreground">
-                Analise receitas, despesas, saldo e categorias por mÃªs ou ano,
-                com comparativos claros para tomar decisÃµes melhores.
+                Analise receitas, despesas, saldo e categorias por mês ou ano,
+                com comparativos claros para tomar decisões melhores.
               </p>
             </div>
 
@@ -277,7 +277,7 @@ export function RelatoriosPage() {
                       {ano}
                     </div>
                     <Button
-                      aria-label="PrÃ³ximo ano"
+                      aria-label="Próximo ano"
                       className="h-11 rounded-none border-0 px-0"
                       type="button"
                       variant="ghost"
@@ -289,7 +289,7 @@ export function RelatoriosPage() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Label>MÃªs</Label>
+                  <Label>Mês</Label>
                   <MonthPicker
                     value={mes}
                     onChange={(nextMonth) => {
@@ -315,7 +315,7 @@ export function RelatoriosPage() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardDescription>
-                Receitas {reportMode === "anual" ? "no ano" : "no mÃªs"}
+                Receitas {reportMode === "anual" ? "no ano" : "no mês"}
               </CardDescription>
               <CardTitle className="text-blue-600 dark:text-blue-400">
                 {formatCurrency(totalReceitas)}
@@ -328,7 +328,7 @@ export function RelatoriosPage() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardDescription>
-                Despesas {reportMode === "anual" ? "no ano" : "no mÃªs"}
+                Despesas {reportMode === "anual" ? "no ano" : "no mês"}
               </CardDescription>
               <CardTitle className="text-red-600 dark:text-red-400">
                 {formatCurrency(totalDespesas)}
@@ -363,7 +363,7 @@ export function RelatoriosPage() {
           <div>
             <CardTitle>Receitas x despesas</CardTitle>
             <CardDescription>
-              Ãrea interativa com receitas e despesas do perÃ­odo selecionado.
+              Área interativa com receitas e despesas do período selecionado.
             </CardDescription>
           </div>
           <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-border bg-background text-sm">
@@ -391,7 +391,7 @@ export function RelatoriosPage() {
           {loading ? (
             <div className="flex h-80 items-center justify-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Carregando grÃ¡fico...
+              Carregando gráfico...
             </div>
           ) : (
             <ChartContainer className="h-80 w-full" config={financialChartConfig}>
@@ -448,17 +448,17 @@ export function RelatoriosPage() {
         <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>
-              EvoluÃ§Ã£o {reportMode === "anual" ? "anual" : "mensal"}
+              Evolução {reportMode === "anual" ? "anual" : "mensal"}
             </CardTitle>
             <CardDescription>
-              Barras comparando receitas e despesas do perÃ­odo.
+              Barras comparando receitas e despesas do período.
             </CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Carregando relatÃ³rio...
+                Carregando relatório...
               </div>
             ) : (
               <div className="grid gap-3">
@@ -513,7 +513,7 @@ export function RelatoriosPage() {
               </span>
               <div>
                 <CardTitle>Despesas por categoria</CardTitle>
-                <CardDescription>DistribuiÃ§Ã£o do mÃªs base do relatÃ³rio.</CardDescription>
+                <CardDescription>Distribuição do mês base do relatório.</CardDescription>
               </div>
             </div>
           </CardHeader>

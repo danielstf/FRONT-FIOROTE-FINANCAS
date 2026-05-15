@@ -146,14 +146,14 @@ export function DashboardPage() {
 
             <div className="space-y-3">
               <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
-                OlÃ¡, {session?.usuario.nome}. Seu mÃªs estÃ¡{" "}
+                Olá, {session?.usuario.nome}. Seu mês está{" "}
                 <span className={saldoPositivo ? "text-emerald-600" : "text-red-600"}>
                   {saldoPositivo ? "positivo" : "negativo"}
                 </span>
                 .
               </h1>
               <p className="max-w-2xl text-sm text-muted-foreground">
-                Acompanhe o saldo, veja entradas recentes e resolva suas pendÃªncias
+                Acompanhe o saldo, veja entradas recentes e resolva suas pendências
                 sem sair do dashboard.
               </p>
             </div>
@@ -203,7 +203,7 @@ export function DashboardPage() {
                   </strong>
                 </div>
                 <div className="space-y-2">
-                  <Label>MÃªs de referÃªncia</Label>
+                  <Label>Mês de referência</Label>
                   <MonthPicker
                     value={mes}
                     onChange={(selectedMonth) => {
@@ -227,7 +227,7 @@ export function DashboardPage() {
       <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Receitas do mÃªs</CardTitle>
+            <CardTitle>Receitas do mês</CardTitle>
             <CardDescription>
               Entradas cadastradas em{" "}
               <span className="capitalize">{formatMonthName(mes)}</span>.
@@ -243,7 +243,7 @@ export function DashboardPage() {
 
             {!loading && receitas.length === 0 && (
               <div className="rounded-lg border border-dashed border-border bg-muted/35 p-6 text-center">
-                <p className="font-medium text-foreground">Nenhuma receita neste mÃªs.</p>
+                <p className="font-medium text-foreground">Nenhuma receita neste mês.</p>
               </div>
             )}
 
@@ -281,7 +281,7 @@ export function DashboardPage() {
           <CardHeader>
             <CardTitle>Despesas pendentes</CardTitle>
             <CardDescription>
-              Todas as contas nÃ£o pagas de{" "}
+              Todas as contas não pagas de{" "}
               <span className="capitalize">{formatMonthName(mes)}</span>.
             </CardDescription>
           </CardHeader>
@@ -297,7 +297,7 @@ export function DashboardPage() {
               <div className="rounded-lg border border-dashed border-border bg-muted/35 p-6 text-center">
                 <CheckCircle2 className="mx-auto h-6 w-6 text-emerald-600" />
                 <p className="mt-2 font-medium text-foreground">
-                  Nenhuma despesa pendente neste mÃªs.
+                  Nenhuma despesa pendente neste mês.
                 </p>
               </div>
             )}
