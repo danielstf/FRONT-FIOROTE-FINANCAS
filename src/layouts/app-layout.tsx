@@ -29,7 +29,7 @@ export function AppLayout() {
   }, [session?.usuario.plano]);
 
   return (
-    <div className="h-dvh overflow-hidden bg-muted/35 text-foreground lg:grid lg:grid-cols-[280px_1fr]">
+    <div className="min-h-dvh overflow-x-hidden bg-muted/35 text-foreground lg:grid lg:h-dvh lg:grid-cols-[280px_1fr] lg:overflow-hidden">
       <Sidebar className="hidden lg:flex lg:flex-col" />
 
       <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -41,7 +41,7 @@ export function AppLayout() {
         </DialogContent>
       </Dialog>
 
-      <div className="flex min-h-0 min-w-0 flex-col">
+      <div className="flex min-h-dvh min-w-0 flex-col lg:min-h-0">
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-2 border-b border-border bg-card/95 px-3 backdrop-blur sm:px-4 lg:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <Button
@@ -81,7 +81,7 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
+        <main className="flex-1 lg:min-h-0 lg:overflow-y-auto">
           <div className="mx-auto w-full max-w-7xl space-y-5 p-3 sm:p-4 lg:p-6">
             {showAds && <AdBanner />}
             <Outlet />
