@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Link, Outlet } from "react-router-dom";
+import { Menu, MessageSquareText } from "lucide-react";
 import { pagamentosApi } from "../api/pagamentos/pagamentos-api";
 import { AdBanner } from "../components/ad-banner";
 import { BrandLogo } from "../components/brand-logo";
@@ -62,7 +62,23 @@ export function AppLayout() {
               </p>
             </div>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <span className="hidden rounded-md border border-primary/20 bg-primary/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-normal text-primary sm:inline-flex">
+              {session?.usuario.plano ?? "FREE"}
+            </span>
+            <Button
+              asChild
+              aria-label="Enviar sugestão, reclamação ou elogio"
+              className="h-9 w-9 px-0"
+              title="Atendimento"
+              variant="outline"
+            >
+              <Link to="/app/sugestoes">
+                <MessageSquareText className="h-4 w-4" />
+              </Link>
+            </Button>
+            <ThemeToggle />
+          </div>
         </header>
 
         <main className="min-h-0 flex-1 overflow-y-auto">

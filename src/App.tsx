@@ -11,6 +11,7 @@ import { DashboardPage } from "./pages/dashboard";
 import { CadastroDespesaPage } from "./pages/despesas/cadastro";
 import { DespesasPage } from "./pages/despesas";
 import { EditarDespesaPage } from "./pages/despesas/editar";
+import { GestaoPage } from "./pages/gestao";
 import { LandingPage } from "./pages/landing";
 import { PremiumPage } from "./pages/premium";
 import { PremiumRetornoPage } from "./pages/premium/retorno";
@@ -18,6 +19,7 @@ import { CadastroReceitaPage } from "./pages/receitas/cadastro";
 import { EditarReceitaPage } from "./pages/receitas/editar";
 import { ReceitasPage } from "./pages/receitas";
 import { RelatoriosPage } from "./pages/relatorios";
+import { SugestoesPage } from "./pages/sugestoes";
 import { RequireAuth } from "./routes/require-auth";
 
 export function App() {
@@ -52,6 +54,8 @@ export function App() {
         <Route path="cartoes" element={<CartoesPage />} />
         <Route path="relatorios" element={<RelatoriosPage />} />
         <Route path="premium" element={<PremiumPage />} />
+        <Route path="sugestoes" element={<SugestoesPage />} />
+        <Route path="gestao" element={<GestaoPage />} />
         <Route path="configuracoes" element={<ConfiguracoesPage />} />
       </Route>
 

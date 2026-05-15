@@ -3,8 +3,10 @@ import {
   CreditCard,
   Home,
   LogOut,
+  MessageSquareText,
   ReceiptText,
   Settings,
+  ShieldAlert,
   WalletCards,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
@@ -20,6 +22,7 @@ const menuItems = [
   { title: "Cartões", href: "/app/cartoes", icon: CreditCard },
   { title: "Relatórios", href: "/app/relatorios", icon: BarChart3 },
   { title: "Premium", href: "/app/premium", icon: CreditCard },
+  { title: "Atendimento", href: "/app/sugestoes", icon: MessageSquareText },
   { title: "Configurações", href: "/app/configuracoes", icon: Settings },
 ];
 
@@ -30,6 +33,13 @@ type SidebarProps = {
 
 export function Sidebar({ className, onNavigate }: SidebarProps) {
   const { logout, session } = useAuth();
+  const items =
+    session?.usuario.role === "ADMIN"
+      ? [
+          ...menuItems,
+          { title: "Gestão", href: "/app/gestao", icon: ShieldAlert },
+        ]
+      : menuItems;
 
   function handleLogout() {
     onNavigate?.();
@@ -44,16 +54,11 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       )}
     >
       <div className="border-b border-sidebar-border p-5">
-        <div className="space-y-3">
-          <BrandLogo />
-          <p className="rounded-md bg-sidebar-accent px-3 py-2 text-xs font-medium text-sidebar-accent-foreground">
-            Plano {session?.usuario.plano ?? "FREE"}
-          </p>
-        </div>
+        <BrandLogo />
       </div>
 
       <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-3">
-        {menuItems.map((item) => (
+        {items.map((item) => (
           <NavLink
             key={item.href}
             to={item.href}

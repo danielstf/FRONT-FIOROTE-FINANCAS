@@ -2,8 +2,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
+  Tags,
   CreditCard,
   Loader2,
+  Plus,
   Repeat2,
   Save,
 } from "lucide-react";
@@ -25,6 +27,13 @@ import {
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Select } from "../../components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog";
 import {
   normalizeOptionalText,
   normalizeRequiredText,
@@ -54,6 +63,29 @@ type DespesaFormProps = {
 };
 
 const fallbackCategorias = defaultExpenseCategories.map(toUppercaseText);
+
+function getCategoriaKey(categoria: string) {
+  return categoria
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .trim();
+}
+
+function mergeCategorias(categoriasApi: string[]) {
+  const categoriasUnicas = new Map<string, string>();
+
+  [...categoriasApi, ...fallbackCategorias].forEach((categoria) => {
+    const categoriaNormalizada = toUppercaseText(categoria);
+    const key = getCategoriaKey(categoriaNormalizada);
+
+    if (key && !categoriasUnicas.has(key)) {
+      categoriasUnicas.set(key, categoriaNormalizada);
+    }
+  });
+
+  return Array.from(categoriasUnicas.values());
+}
 
 export function DespesaForm({
   mode,
@@ -87,14 +119,15 @@ export function DespesaForm({
   const [categorias, setCategorias] = useState<string[]>(fallbackCategorias);
   const [cartoes, setCartoes] = useState<CartaoCredito[]>([]);
   const [loading, setLoading] = useState(false);
+  const [cartaoModalAberto, setCartaoModalAberto] = useState(false);
+  const [novoCartaoNome, setNovoCartaoNome] = useState("");
+  const [salvandoCartao, setSalvandoCartao] = useState(false);
 
   useEffect(() => {
     async function carregarOpcoes() {
       try {
         const data = await despesasApi.listarOpcoes();
-        setCategorias(
-          Array.from(new Set([...data.categorias, ...fallbackCategorias].map(toUppercaseText))),
-        );
+        setCategorias(mergeCategorias(data.categorias));
       } catch {
         setCategorias(fallbackCategorias);
       }
@@ -104,22 +137,53 @@ export function DespesaForm({
   }, []);
 
   useEffect(() => {
-    async function carregarCartoes() {
-      try {
-        const data = await cartoesApi.listar();
-        setCartoes(
-          data.cartoes.map((cartao) => ({
-            ...cartao,
-            nome: toUppercaseText(cartao.nome),
-          })),
-        );
-      } catch {
-        setCartoes([]);
-      }
-    }
-
     void carregarCartoes();
   }, []);
+
+  async function carregarCartoes() {
+    try {
+      const data = await cartoesApi.listar();
+      setCartoes(
+        data.cartoes.map((cartao) => ({
+          ...cartao,
+          nome: toUppercaseText(cartao.nome),
+        })),
+      );
+    } catch {
+      setCartoes([]);
+    }
+  }
+
+  async function cadastrarCartao(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const nomeNormalizado = normalizeRequiredText(novoCartaoNome);
+
+    if (!nomeNormalizado) {
+      toast.error("Informe o nome do cartão.");
+      return;
+    }
+
+    setSalvandoCartao(true);
+
+    try {
+      const cartao = await cartoesApi.criar({ nome: nomeNormalizado });
+      const cartaoNormalizado = {
+        ...cartao,
+        nome: toUppercaseText(cartao.nome),
+      };
+
+      setCartoes((current) => [cartaoNormalizado, ...current]);
+      setCartaoCreditoId(cartao.id);
+      setNovoCartaoNome("");
+      setCartaoModalAberto(false);
+      toast.success("Cartão cadastrado com sucesso.");
+    } catch (requestError) {
+      toast.error(getApiErrorMessage(requestError));
+    } finally {
+      setSalvandoCartao(false);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -191,10 +255,8 @@ export function DespesaForm({
   }
 
   return (
-    <form
-      className="grid gap-3"
-      onSubmit={handleSubmit}
-    >
+    <>
+      <form className="grid gap-3" onSubmit={handleSubmit}>
       <Card className="order-2 overflow-hidden shadow-sm">
         <CardHeader className="p-3">
           <div className="flex items-center gap-3">
@@ -202,7 +264,9 @@ export function DespesaForm({
               <CreditCard className="h-4 w-4" />
             </span>
             <div>
-              <CardTitle className="text-lg">Dados da despesa</CardTitle>
+              <CardTitle className="text-base uppercase tracking-normal">
+                Dados da despesa
+              </CardTitle>
               <CardDescription className="text-xs">
                 Cadastre vencimento, mês de referência, recorrência e parcelamento.
               </CardDescription>
@@ -271,23 +335,46 @@ export function DespesaForm({
 
             {formaPagamento === "CARTAO_CREDITO" && (
               <div className="animate-in fade-in-0 slide-in-from-top-1 space-y-1.5 rounded-lg border border-border bg-card p-2.5 shadow-sm">
-                <Label htmlFor="cartaoCreditoId">Cartão de crédito</Label>
-                <Select
-                  id="cartaoCreditoId"
-                  value={cartaoCreditoId}
-                  onChange={(event) => setCartaoCreditoId(event.target.value)}
-                  required
-                >
-                  <option value="">Selecione um cartão</option>
-                  {cartoes.map((cartao) => (
-                    <option key={cartao.id} value={cartao.id}>
-                      {cartao.nome}
-                    </option>
-                  ))}
-                </Select>
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="cartaoCreditoId">Cartão de crédito</Label>
+                  <Button
+                    className="h-8 px-2 text-xs"
+                    type="button"
+                    variant="outline"
+                    onClick={() => setCartaoModalAberto(true)}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Novo cartão
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Select
+                    id="cartaoCreditoId"
+                    value={cartaoCreditoId}
+                    onChange={(event) => setCartaoCreditoId(event.target.value)}
+                    required
+                  >
+                    <option value="">Selecione um cartão</option>
+                    {cartoes.map((cartao) => (
+                      <option key={cartao.id} value={cartao.id}>
+                        {cartao.nome}
+                      </option>
+                    ))}
+                  </Select>
+                  {cartoes.length === 0 && (
+                    <Button
+                      aria-label="Cadastrar cartão"
+                      className="h-10 w-10 shrink-0 px-0"
+                      type="button"
+                      onClick={() => setCartaoModalAberto(true)}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
                 {cartoes.length === 0 && (
                   <p className="text-xs text-muted-foreground">
-                    Cadastre um cartão em Cartões para usar despesas no crédito.
+                    Nenhum cartão cadastrado. Use o botão de + para cadastrar sem sair daqui.
                   </p>
                 )}
               </div>
@@ -355,8 +442,16 @@ export function DespesaForm({
       <Card className="order-1 self-start overflow-hidden shadow-sm">
         <CardHeader className="p-3 pb-2">
           <div className="flex items-center gap-3">
-            <div>
-              <CardTitle className="text-lg">Categoria</CardTitle>
+            <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Tags className="h-4 w-4" />
+            </span>
+            <div className="min-w-0">
+              <CardTitle className="text-base uppercase tracking-normal">
+                Categoria
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Escolha uma categoria para organizar seus relatórios.
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -386,7 +481,7 @@ export function DespesaForm({
                   >
                     <Icon className="h-2.5 w-2.5" />
                   </span>
-                  <span className="min-w-0 truncate text-[10px] font-medium leading-none">
+                  <span className="min-w-0 truncate text-[9px] font-medium uppercase leading-none">
                     {opcao}
                   </span>
                 </button>
@@ -400,6 +495,50 @@ export function DespesaForm({
           />
         </CardContent>
       </Card>
-    </form>
+
+      </form>
+
+      <Dialog open={cartaoModalAberto} onOpenChange={setCartaoModalAberto}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Novo cartão</DialogTitle>
+            <DialogDescription>
+              Cadastre um cartão para usar nesta despesa no crédito.
+            </DialogDescription>
+          </DialogHeader>
+          <form className="space-y-4" onSubmit={cadastrarCartao}>
+            <div className="space-y-2">
+              <Label htmlFor="novo-cartao-nome">Nome do cartão</Label>
+              <Input
+                id="novo-cartao-nome"
+                value={novoCartaoNome}
+                onChange={(event) =>
+                  setNovoCartaoNome(toUppercaseText(event.target.value))
+                }
+                placeholder="Ex: Nubank, Itaú, Caixa"
+                autoFocus
+              />
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setCartaoModalAberto(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={salvandoCartao}>
+                {salvandoCartao ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                Cadastrar cartão
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

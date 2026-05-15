@@ -4,11 +4,12 @@ import {
   CalendarDays,
   CreditCard,
   Loader2,
-  Pencil,
+  PencilLine,
   Plus,
   ReceiptText,
   Repeat2,
   Sparkles,
+  ThumbsDown,
   ThumbsUp,
   Trash2,
 } from "lucide-react";
@@ -313,10 +314,10 @@ export function DespesasPage() {
             <span className="flex h-10 w-10 items-center justify-center rounded-md bg-destructive/10 text-destructive">
               <ReceiptText className="h-5 w-5" />
             </span>
-            <div>
+            <div className="min-w-0">
               <CardTitle>Contas cadastradas</CardTitle>
               <CardDescription>
-                Categorias com icones, recorrencia, parcelas e controle de pagamento.
+                Categorias com ícones, recorrência, parcelas e controle de pagamento.
               </CardDescription>
             </div>
           </div>
@@ -373,7 +374,7 @@ export function DespesasPage() {
                       </div>
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate font-semibold text-red-600 dark:text-red-400">
+                          <p className="truncate font-semibold text-foreground">
                             {despesa.nome}
                           </p>
                           {despesa.paga && (
@@ -396,13 +397,13 @@ export function DespesasPage() {
                             {despesa.categoria ?? "Sem categoria"}
                           </span>
                           <span className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1">
-                            <CreditCard className="h-3.5 w-3.5" />
+                            <CreditCard className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                             {despesa.cartaoCredito
                               ? despesa.cartaoCredito.nome
                               : formaPagamentoLabel[despesa.formaPagamento]}
                           </span>
                           <span className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1">
-                            <CalendarDays className="h-3.5 w-3.5" />
+                            <CalendarDays className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                             {formatDate(despesa.dataVencimento)}
                           </span>
                           {despesa.fixa && (
@@ -445,9 +446,13 @@ export function DespesasPage() {
                             "h-9 w-9 px-0",
                             despesa.paga
                               ? "border-emerald-500/35 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/15 hover:text-emerald-800 dark:text-emerald-400"
-                              : "text-muted-foreground hover:text-emerald-700",
+                              : "border-rose-500/25 bg-rose-500/10 text-rose-700 hover:bg-rose-500/15 hover:text-rose-800 dark:text-rose-400",
                           )}
-                          title={despesa.paga ? "Despesa paga" : "Marcar como paga"}
+                          title={
+                            despesa.paga
+                              ? "Despesa paga"
+                              : "Despesa pendente. Clique para marcar como paga"
+                          }
                           variant="outline"
                           onClick={() => alternarPagamento(despesa)}
                           disabled={busyId === despesa.id}
@@ -457,21 +462,21 @@ export function DespesasPage() {
                           ) : despesa.paga ? (
                             <ThumbsUp className="h-4 w-4 fill-current" />
                           ) : (
-                            <ThumbsUp className="h-4 w-4" />
+                            <ThumbsDown className="h-4 w-4 fill-current" />
                           )}
                         </Button>
                         <Button
                           aria-label="Editar despesa"
-                          className="h-9 w-9 px-0"
+                          className="h-9 w-9 border-blue-500/25 px-0 text-blue-700 hover:bg-blue-500/10 hover:text-blue-800 dark:text-blue-400"
                           title="Editar"
                           variant="outline"
                           onClick={() => setDespesaEditando(despesa)}
                         >
-                          <Pencil className="h-4 w-4" />
+                          <PencilLine className="h-4 w-4" />
                         </Button>
                         <Button
                           aria-label="Excluir despesa"
-                          className="h-9 w-9 px-0 text-destructive hover:text-destructive"
+                          className="h-9 w-9 border-destructive/25 bg-destructive/5 px-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                           title="Excluir"
                           variant="outline"
                           onClick={() => {

@@ -125,14 +125,14 @@ export function CartoesPage() {
       <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
         <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-7">
           <div className="space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
+            <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium uppercase text-primary">
               <Sparkles className="h-4 w-4" />
               Cartões de crédito
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
-                Organize os cartões usados nas despesas.
+              <h1 className="text-2xl font-semibold uppercase tracking-normal text-card-foreground lg:text-3xl">
+                Organize os cartões usados nas despesas
               </h1>
               <p className="max-w-2xl text-sm text-muted-foreground">
                 Cadastre os cartões da conta para vincular compras no crédito,
@@ -143,14 +143,16 @@ export function CartoesPage() {
 
           <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
             <CardContent className="space-y-4 p-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <WalletCards className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Cartões cadastrados</p>
-                <p className="mt-1 text-3xl font-semibold tracking-normal">
-                  {cartoes.length}
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                  <WalletCards className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Cartões cadastrados</p>
+                  <p className="mt-1 text-3xl font-semibold tracking-normal">
+                    {cartoes.length}
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-2 rounded-md border border-border p-3 text-sm">
                 <BadgeCheck className="h-4 w-4 text-emerald-600" />
@@ -170,8 +172,10 @@ export function CartoesPage() {
               <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
                 {editando ? <Pencil className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
               </span>
-              <div>
-                <CardTitle>{editando ? "Editar cartão" : "Novo cartão"}</CardTitle>
+              <div className="min-w-0">
+                <CardTitle className="text-base uppercase tracking-normal">
+                  {editando ? "Editar cartão" : "Novo cartão"}
+                </CardTitle>
                 <CardDescription>
                   Use nomes simples para reconhecer o cartão rapidamente.
                 </CardDescription>
@@ -218,7 +222,9 @@ export function CartoesPage() {
 
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Cartões cadastrados</CardTitle>
+            <CardTitle className="text-base uppercase tracking-normal">
+              Cartões cadastrados
+            </CardTitle>
             <CardDescription>
               Estes cartões aparecem no seletor de despesas com cartão de crédito.
             </CardDescription>
