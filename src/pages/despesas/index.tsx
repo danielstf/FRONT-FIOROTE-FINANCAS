@@ -175,7 +175,7 @@ export function DespesasPage() {
                   <span className="flex h-11 w-11 items-center justify-center rounded-md bg-destructive/10 text-destructive">
                     <ReceiptText className="h-5 w-5" />
                   </span>
-                  <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
+                  <h1 className="text-2xl font-semibold tracking-normal text-card-foreground sm:text-3xl lg:text-4xl">
                     Despesas sob controle.
                   </h1>
                 </div>
@@ -245,7 +245,7 @@ export function DespesasPage() {
               <CalendarDays className="h-4 w-4" />
               <span className="capitalize">Total de {formatMonthName(mes)}</span>
             </div>
-            <p className="mt-3 text-4xl font-semibold tracking-normal text-red-600 dark:text-red-400">
+            <p className="mt-3 text-3xl font-semibold tracking-normal text-red-600 dark:text-red-400 sm:text-4xl">
               {formatCurrency(total)}
             </p>
             <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
@@ -352,7 +352,7 @@ export function DespesasPage() {
                   <div
                     key={despesa.id}
                     className={cn(
-                      "grid gap-4 rounded-lg border border-border bg-background p-4 shadow-sm transition-colors hover:border-destructive/35 hover:bg-card sm:grid-cols-[1fr_auto]",
+                      "grid gap-4 rounded-lg border border-border bg-background p-3 shadow-sm transition-colors hover:border-destructive/35 hover:bg-card sm:grid-cols-[1fr_auto] sm:p-4",
                       despesa.paga && "border-emerald-500/25",
                       despesa.vencida && !despesa.paga && "border-destructive/35 bg-destructive/5",
                     )}

@@ -152,7 +152,7 @@ export function DashboardPage() {
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
+              <h1 className="text-2xl font-semibold tracking-normal text-card-foreground sm:text-3xl lg:text-4xl">
                 Olá, {session?.usuario.nome}. Seu mês está{" "}
                 <span className={saldoPositivo ? "text-emerald-600" : "text-red-600"}>
                   {saldoPositivo ? "positivo" : "negativo"}
@@ -259,7 +259,7 @@ export function DashboardPage() {
                 {receitas.slice(0, 5).map((receita) => (
                   <div
                     key={receita.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background p-4 shadow-sm"
+                    className="flex flex-col gap-3 rounded-lg border border-border bg-background p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
@@ -274,7 +274,7 @@ export function DashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <strong className="shrink-0 text-blue-600 dark:text-blue-400">
+                    <strong className="shrink-0 self-end text-blue-600 dark:text-blue-400 sm:self-auto">
                       {formatCurrency(receita.valor)}
                     </strong>
                   </div>

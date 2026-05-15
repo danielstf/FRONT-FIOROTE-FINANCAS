@@ -95,7 +95,7 @@ export function ConfiguracoesPage() {
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
+              <h1 className="text-2xl font-semibold tracking-normal text-card-foreground sm:text-3xl lg:text-4xl">
                 Configurações da conta
               </h1>
               <p className="max-w-2xl text-sm text-muted-foreground">

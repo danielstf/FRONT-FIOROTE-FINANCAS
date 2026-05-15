@@ -140,7 +140,7 @@ export function ReceitasPage() {
                 <span className="flex h-12 w-12 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
                   <TrendingUp className="h-6 w-6" />
                 </span>
-                <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
+                <h1 className="text-2xl font-semibold tracking-normal text-card-foreground sm:text-3xl lg:text-4xl">
                   Receitas organizadas para fechar o mês.
                 </h1>
               </div>
@@ -171,7 +171,7 @@ export function ReceitasPage() {
             <p className="text-sm capitalize text-muted-foreground">
               Total de {formatMonthName(mes)}
             </p>
-            <p className="mt-2 text-4xl font-semibold tracking-normal text-blue-600 dark:text-blue-400">
+            <p className="mt-2 text-3xl font-semibold tracking-normal text-blue-600 dark:text-blue-400 sm:text-4xl">
               {formatCurrency(total)}
             </p>
             <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
@@ -242,7 +242,7 @@ export function ReceitasPage() {
               {receitas.map((receita) => (
                 <div
                   key={receita.id}
-                  className="group grid gap-4 rounded-lg border border-border bg-background p-4 shadow-sm transition-colors hover:border-blue-500/35 hover:bg-card sm:grid-cols-[1fr_auto]"
+                  className="group grid gap-4 rounded-lg border border-border bg-background p-3 shadow-sm transition-colors hover:border-blue-500/35 hover:bg-card sm:grid-cols-[1fr_auto] sm:p-4"
                 >
                   <div className="flex gap-3">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">

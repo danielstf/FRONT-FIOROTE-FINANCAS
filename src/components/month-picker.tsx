@@ -63,7 +63,7 @@ export function MonthPicker({ value, onChange, className }: MonthPickerProps) {
   }
 
   return (
-    <div className={cn("relative w-full min-w-[220px]", className)}>
+    <div className={cn("relative w-full min-w-0", className)}>
       <div className="grid h-11 grid-cols-[44px_1fr_44px] items-center overflow-hidden rounded-lg border border-border bg-card shadow-sm">
         <Button
           aria-label="Mês anterior"

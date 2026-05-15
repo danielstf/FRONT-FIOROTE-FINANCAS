@@ -188,7 +188,7 @@ export function RelatoriosPage() {
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
+              <h1 className="text-2xl font-semibold tracking-normal text-card-foreground sm:text-3xl lg:text-4xl">
                 Relatórios para entender seu dinheiro.
               </h1>
               <p className="max-w-2xl text-sm text-muted-foreground">
@@ -359,14 +359,14 @@ export function RelatoriosPage() {
       </div>
 
       <Card className="shadow-sm">
-        <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <CardTitle>Receitas x despesas</CardTitle>
             <CardDescription>
               Área interativa com receitas e despesas do período selecionado.
             </CardDescription>
           </div>
-          <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-border bg-background text-sm">
+          <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-border bg-background text-xs sm:text-sm">
             {[
               { value: "todos", label: "Todos" },
               { value: "receitas", label: "Receitas" },

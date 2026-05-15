@@ -53,8 +53,8 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
         className,
       )}
     >
-      <div className="border-b border-sidebar-border p-5">
-        <BrandLogo />
+      <div className="border-b border-sidebar-border px-4 py-5">
+        <BrandLogo className="justify-center" size="sidebar" />
       </div>
 
       <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-3">

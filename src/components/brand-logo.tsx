@@ -3,7 +3,7 @@ import { cn } from "../lib/utils";
 type BrandLogoProps = {
   compact?: boolean;
   className?: string;
-  size?: "default" | "large";
+  size?: "default" | "large" | "sidebar";
 };
 
 export function BrandLogo({
@@ -12,7 +12,11 @@ export function BrandLogo({
   size = "default",
 }: BrandLogoProps) {
   const logoSize =
-    size === "large" ? "h-10 sm:h-14 lg:h-16" : "h-11 sm:h-12";
+    size === "large"
+      ? "h-10 sm:h-14 lg:h-16"
+      : size === "sidebar"
+        ? "h-16 xl:h-20"
+        : "h-11 sm:h-12";
 
   return (
     <div className={cn("flex items-center gap-3", className)}>

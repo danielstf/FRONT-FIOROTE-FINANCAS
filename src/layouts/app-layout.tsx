@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { Menu, MessageSquareText } from "lucide-react";
 import { pagamentosApi } from "../api/pagamentos/pagamentos-api";
@@ -29,11 +29,11 @@ export function AppLayout() {
   }, [session?.usuario.plano]);
 
   return (
-    <div className="h-screen overflow-hidden bg-muted/35 text-foreground lg:grid lg:grid-cols-[280px_1fr]">
+    <div className="h-dvh overflow-hidden bg-muted/35 text-foreground lg:grid lg:grid-cols-[280px_1fr]">
       <Sidebar className="hidden lg:flex lg:flex-col" />
 
       <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <DialogContent className="left-0 top-0 h-screen max-h-screen w-80 max-w-[calc(100%-2rem)] translate-x-0 translate-y-0 gap-0 overflow-hidden rounded-none border-y-0 border-l-0 p-0 data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left">
+        <DialogContent className="left-0 top-0 h-dvh max-h-dvh w-80 max-w-[calc(100%-1rem)] translate-x-0 translate-y-0 gap-0 overflow-hidden rounded-none border-y-0 border-l-0 p-0 data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left">
           <Sidebar
             className="flex h-full flex-col border-r-0"
             onNavigate={() => setMobileMenuOpen(false)}
@@ -42,7 +42,7 @@ export function AppLayout() {
       </Dialog>
 
       <div className="flex min-h-0 min-w-0 flex-col">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-card/95 px-4 backdrop-blur lg:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-2 border-b border-border bg-card/95 px-3 backdrop-blur sm:px-4 lg:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <Button
               aria-label="Abrir menu"
@@ -82,7 +82,7 @@ export function AppLayout() {
         </header>
 
         <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-7xl space-y-5 p-4 lg:p-6">
+          <div className="mx-auto w-full max-w-7xl space-y-5 p-3 sm:p-4 lg:p-6">
             {showAds && <AdBanner />}
             <Outlet />
           </div>
@@ -91,3 +91,4 @@ export function AppLayout() {
     </div>
   );
 }
+

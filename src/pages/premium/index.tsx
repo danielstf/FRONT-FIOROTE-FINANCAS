@@ -80,7 +80,7 @@ export function PremiumPage() {
             </div>
 
             <div className="space-y-3">
-              <h1 className="max-w-2xl text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
+              <h1 className="max-w-2xl text-2xl font-semibold tracking-normal text-card-foreground sm:text-3xl lg:text-4xl">
                 {isPremium
                   ? "Sua experiência Premium está liberada."
                   : "Use o sistema sem anúncios e com mais tranquilidade."}
