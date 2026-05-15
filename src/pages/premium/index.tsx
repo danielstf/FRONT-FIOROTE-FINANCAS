@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import {
   Ban,
   CalendarDays,
@@ -54,7 +54,7 @@ export function PremiumPage() {
       const paymentUrl = data.checkoutUrl ?? data.sandboxCheckoutUrl;
 
       if (!paymentUrl) {
-        throw new Error("Não foi possível iniciar o pagamento.");
+        throw new Error("NÃ£o foi possÃ­vel iniciar o pagamento.");
       }
 
       window.location.href = paymentUrl;
@@ -82,12 +82,12 @@ export function PremiumPage() {
             <div className="space-y-3">
               <h1 className="max-w-2xl text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
                 {isPremium
-                  ? "Sua experiência Premium está liberada."
-                  : "Use o sistema sem anúncios e com mais tranquilidade."}
+                  ? "Sua experiÃªncia Premium estÃ¡ liberada."
+                  : "Use o sistema sem anÃºncios e com mais tranquilidade."}
               </h1>
               <p className="max-w-xl text-sm text-muted-foreground">
-                O Premium remove anúncios e mantém sua área financeira mais limpa
-                para acompanhar receitas, despesas e relatórios.
+                O Premium remove anÃºncios e mantÃ©m sua Ã¡rea financeira mais limpa
+                para acompanhar receitas, despesas e relatÃ³rios.
               </p>
             </div>
 
@@ -125,8 +125,16 @@ export function PremiumPage() {
 
           <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
             <CardContent className="space-y-4 p-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <ShieldCheck className="h-6 w-6" />
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Status</p>
+                  <p className="mt-1 text-xl font-semibold">
+                    {isPremium ? "Premium" : "Free"}
+                  </p>
+                </div>
               </div>
 
               {loadingStatus ? (
@@ -135,15 +143,7 @@ export function PremiumPage() {
                   Verificando plano...
                 </div>
               ) : (
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <p className="text-xl font-semibold">
-                      {isPremium ? "Premium" : "Free"}
-                    </p>
-                  </div>
-
-                  <div className="grid gap-3 text-sm">
+                <div className="grid gap-3 text-sm">
                     <div className="rounded-md border border-border p-3">
                       <p className="text-muted-foreground">Anúncios</p>
                       <p className="mt-1 font-semibold">
@@ -164,7 +164,6 @@ export function PremiumPage() {
                       )}
                     </div>
                   </div>
-                </div>
               )}
             </CardContent>
           </Card>
@@ -175,7 +174,7 @@ export function PremiumPage() {
         <div className="flex gap-3 rounded-lg border border-border bg-card p-4 shadow-sm">
           <Ban className="mt-0.5 h-5 w-5 text-primary" />
           <div>
-            <p className="font-semibold">Sem anúncios</p>
+            <p className="font-semibold">Sem anÃºncios</p>
             <p className="mt-1 text-sm text-muted-foreground">
               Tela mais limpa para usar no dia a dia.
             </p>
@@ -186,7 +185,7 @@ export function PremiumPage() {
           <div>
             <p className="font-semibold">Validade mensal</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Acesso liberado por 30 dias após o pagamento.
+              Acesso liberado por 30 dias apÃ³s o pagamento.
             </p>
           </div>
         </div>
@@ -195,7 +194,7 @@ export function PremiumPage() {
           <div>
             <p className="font-semibold">Acesso imediato</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Assim que o pagamento for confirmado, o plano é ativado.
+              Assim que o pagamento for confirmado, o plano Ã© ativado.
             </p>
           </div>
         </div>
@@ -203,3 +202,5 @@ export function PremiumPage() {
     </div>
   );
 }
+
+

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+﻿import { useState, type FormEvent } from "react";
 import {
   BadgeCheck,
   KeyRound,
@@ -52,7 +52,7 @@ export function ConfiguracoesPage() {
     event.preventDefault();
 
     if (novaSenha !== confirmarSenha) {
-      toast.error("A confirmação da senha não confere.");
+      toast.error("A confirmaÃ§Ã£o da senha nÃ£o confere.");
       return;
     }
 
@@ -91,12 +91,12 @@ export function ConfiguracoesPage() {
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
               <Sparkles className="h-4 w-4" />
-              Conta e segurança
+              Conta e seguranÃ§a
             </div>
 
             <div className="space-y-3">
               <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
-                Configurações da conta
+                ConfiguraÃ§Ãµes da conta
               </h1>
               <p className="max-w-2xl text-sm text-muted-foreground">
                 Mantenha seus dados atualizados e defina uma senha para acessar o
@@ -107,14 +107,16 @@ export function ConfiguracoesPage() {
 
           <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
             <CardContent className="space-y-4 p-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <ShieldCheck className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Perfil atual</p>
-                <p className="mt-1 truncate text-xl font-semibold">
-                  {session?.usuario.nome}
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm text-muted-foreground">Perfil atual</p>
+                  <p className="mt-1 truncate text-xl font-semibold">
+                    {session?.usuario.nome}
+                  </p>
+                </div>
               </div>
               <div className="grid gap-2 text-sm">
                 <div className="flex items-center gap-2 rounded-md border border-border p-3">
@@ -143,7 +145,7 @@ export function ConfiguracoesPage() {
                 <UserRound className="h-5 w-5" />
               </span>
               <div>
-                <CardTitle>Dados do usuário</CardTitle>
+                <CardTitle>Dados do usuÃ¡rio</CardTitle>
                 <CardDescription>Altere o nome exibido no sistema.</CardDescription>
               </div>
             </div>
@@ -193,7 +195,7 @@ export function ConfiguracoesPage() {
                 <CardDescription>
                   {usuarioTemSenha
                     ? "Informe a senha atual e escolha uma nova senha."
-                    : "Sua conta ainda não tem senha cadastrada. Crie uma senha para entrar também com email e senha."}
+                    : "Sua conta ainda nÃ£o tem senha cadastrada. Crie uma senha para entrar tambÃ©m com email e senha."}
                 </CardDescription>
               </div>
             </div>
@@ -253,3 +255,5 @@ export function ConfiguracoesPage() {
     </div>
   );
 }
+
+

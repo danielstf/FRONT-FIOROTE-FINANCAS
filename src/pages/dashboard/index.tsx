@@ -1,4 +1,4 @@
-import {
+﻿import {
   AlertTriangle,
   ArrowUpRight,
   BadgeCheck,
@@ -146,14 +146,14 @@ export function DashboardPage() {
 
             <div className="space-y-3">
               <h1 className="text-3xl font-semibold tracking-normal text-card-foreground lg:text-4xl">
-                Olá, {session?.usuario.nome}. Seu mês está{" "}
+                OlÃ¡, {session?.usuario.nome}. Seu mÃªs estÃ¡{" "}
                 <span className={saldoPositivo ? "text-emerald-600" : "text-red-600"}>
                   {saldoPositivo ? "positivo" : "negativo"}
                 </span>
                 .
               </h1>
               <p className="max-w-2xl text-sm text-muted-foreground">
-                Acompanhe o saldo, veja entradas recentes e resolva suas pendências
+                Acompanhe o saldo, veja entradas recentes e resolva suas pendÃªncias
                 sem sair do dashboard.
               </p>
             </div>
@@ -177,21 +177,23 @@ export function DashboardPage() {
 
           <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
             <CardContent className="space-y-4 p-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <BadgeCheck className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Saldo final</p>
-                <p
-                  className={cn(
-                    "mt-1 text-3xl font-semibold tracking-normal",
-                    saldoPositivo
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-red-600 dark:text-red-400",
-                  )}
-                >
-                  {formatCurrency(saldo)}
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                  <BadgeCheck className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Saldo final</p>
+                  <p
+                    className={cn(
+                      "mt-1 text-3xl font-semibold tracking-normal",
+                      saldoPositivo
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-red-600 dark:text-red-400",
+                    )}
+                  >
+                    {formatCurrency(saldo)}
+                  </p>
+                </div>
               </div>
               <div className="grid gap-2 text-sm">
                 <div className="flex items-center justify-between rounded-md border border-border p-3">
@@ -201,7 +203,7 @@ export function DashboardPage() {
                   </strong>
                 </div>
                 <div className="space-y-2">
-                  <Label>Mês de referência</Label>
+                  <Label>MÃªs de referÃªncia</Label>
                   <MonthPicker
                     value={mes}
                     onChange={(selectedMonth) => {
@@ -225,7 +227,7 @@ export function DashboardPage() {
       <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Receitas do mês</CardTitle>
+            <CardTitle>Receitas do mÃªs</CardTitle>
             <CardDescription>
               Entradas cadastradas em{" "}
               <span className="capitalize">{formatMonthName(mes)}</span>.
@@ -241,7 +243,7 @@ export function DashboardPage() {
 
             {!loading && receitas.length === 0 && (
               <div className="rounded-lg border border-dashed border-border bg-muted/35 p-6 text-center">
-                <p className="font-medium text-foreground">Nenhuma receita neste mês.</p>
+                <p className="font-medium text-foreground">Nenhuma receita neste mÃªs.</p>
               </div>
             )}
 
@@ -279,7 +281,7 @@ export function DashboardPage() {
           <CardHeader>
             <CardTitle>Despesas pendentes</CardTitle>
             <CardDescription>
-              Todas as contas não pagas de{" "}
+              Todas as contas nÃ£o pagas de{" "}
               <span className="capitalize">{formatMonthName(mes)}</span>.
             </CardDescription>
           </CardHeader>
@@ -295,7 +297,7 @@ export function DashboardPage() {
               <div className="rounded-lg border border-dashed border-border bg-muted/35 p-6 text-center">
                 <CheckCircle2 className="mx-auto h-6 w-6 text-emerald-600" />
                 <p className="mt-2 font-medium text-foreground">
-                  Nenhuma despesa pendente neste mês.
+                  Nenhuma despesa pendente neste mÃªs.
                 </p>
               </div>
             )}
@@ -361,3 +363,5 @@ export function DashboardPage() {
     </div>
   );
 }
+
+
