@@ -4,7 +4,14 @@ export { formatCurrency, moneyToInput, parseMoney } from "../../lib/money";
 export function formatDate(value: string | null) {
   if (!value) return "Sem vencimento";
 
-  return new Intl.DateTimeFormat("pt-BR").format(new Date(value));
+  const [datePart] = value.split("T");
+  const [year, month, day] = datePart.split("-").map(Number);
+
+  if (!year || !month || !day) return "Data inválida";
+
+  return new Intl.DateTimeFormat("pt-BR").format(
+    new Date(year, month - 1, day),
+  );
 }
 
 export function getCurrentMonth() {
