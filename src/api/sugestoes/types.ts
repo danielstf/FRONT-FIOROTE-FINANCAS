@@ -11,6 +11,7 @@ export type Sugestao = {
   tipo: SugestaoTipo;
   titulo: string;
   mensagem: string;
+  status: "ABERTO" | "FINALIZADO";
   criadoEm: string;
   usuario: {
     id: string;

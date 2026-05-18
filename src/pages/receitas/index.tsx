@@ -31,6 +31,7 @@ import {
   DialogTitle,
 } from "../../components/ui/dialog";
 import { Label } from "../../components/ui/label";
+import { useAuth } from "../../providers/auth-provider";
 import { ReceitaForm } from "./receita-form";
 
 function getCurrentMonth() {
@@ -69,6 +70,7 @@ function getMonthOnlyName(value: string) {
 }
 
 export function ReceitasPage() {
+  const { perfilFinanceiroId } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialMonth = searchParams.get("mes") ?? getCurrentMonth();
   const [mes, setMes] = useState(initialMonth);
@@ -79,6 +81,7 @@ export function ReceitasPage() {
   const [cadastroAberto, setCadastroAberto] = useState(false);
   const [receitaEditando, setReceitaEditando] = useState<Receita | null>(null);
   const [receitaExcluindo, setReceitaExcluindo] = useState<Receita | null>(null);
+  const [escopoExclusao, setEscopoExclusao] = useState<"mes" | "todas">("mes");
   const [error, setError] = useState("");
 
   const maiorReceita = useMemo(() => {
@@ -110,8 +113,17 @@ export function ReceitasPage() {
     setDeletingId(receitaExcluindo.id);
 
     try {
-      await receitasApi.excluir(receitaExcluindo.id);
-      toast.success("Receita excluída com sucesso.");
+      await receitasApi.excluir(receitaExcluindo.id, {
+        escopo: receitaExcluindo.fixa ? escopoExclusao : undefined,
+        mes,
+      });
+      toast.success(
+        receitaExcluindo.fixa && escopoExclusao === "mes"
+          ? "Receita removida deste mês."
+          : receitaExcluindo.fixa
+            ? "Receita removida deste mês em diante."
+            : "Receita excluída com sucesso.",
+      );
       setReceitaExcluindo(null);
       await carregarReceitas(mes);
     } catch (requestError) {
@@ -124,7 +136,7 @@ export function ReceitasPage() {
   useEffect(() => {
     void carregarReceitas(initialMonth);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [perfilFinanceiroId]);
 
   return (
     <div className="space-y-6">
@@ -160,8 +172,13 @@ export function ReceitasPage() {
                   }}
                 />
               </div>
-              <Button onClick={() => setCadastroAberto(true)}>
-                <Plus className="h-4 w-4" />
+              <Button
+                className="h-11 border border-blue-400/30 bg-blue-600 px-5 text-white shadow-sm shadow-blue-600/20 hover:bg-blue-700"
+                onClick={() => setCadastroAberto(true)}
+              >
+                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-white/15">
+                  <Plus className="h-4 w-4" />
+                </span>
                 Nova receita
               </Button>
             </div>
@@ -230,7 +247,10 @@ export function ReceitasPage() {
               <p className="mt-1 text-sm text-muted-foreground">
                 Comece adicionando uma entrada para compor o total mensal.
               </p>
-              <Button className="mt-4" onClick={() => setCadastroAberto(true)}>
+              <Button
+                className="mt-4 border border-blue-400/30 bg-blue-600 text-white shadow-sm shadow-blue-600/20 hover:bg-blue-700"
+                onClick={() => setCadastroAberto(true)}
+              >
                 <Plus className="h-4 w-4" />
                 Cadastrar receita
               </Button>
@@ -274,7 +294,11 @@ export function ReceitasPage() {
                         className="h-9 w-9 px-0"
                         title="Editar receita"
                         variant="outline"
-                        onClick={() => setReceitaEditando(receita)}
+                        onClick={() =>
+                          setReceitaEditando(
+                            receita.fixa ? { ...receita, mes } : receita,
+                          )
+                        }
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -282,7 +306,10 @@ export function ReceitasPage() {
                         className="h-9 w-9 px-0 text-destructive hover:text-destructive"
                         title="Excluir receita"
                         variant="outline"
-                        onClick={() => setReceitaExcluindo(receita)}
+                        onClick={() => {
+                          setEscopoExclusao("mes");
+                          setReceitaExcluindo(receita);
+                        }}
                         disabled={deletingId === receita.id}
                       >
                         {deletingId === receita.id ? (
@@ -359,7 +386,8 @@ export function ReceitasPage() {
           <DialogHeader>
             <DialogTitle>Excluir receita</DialogTitle>
             <DialogDescription>
-              Esta ação remove a receita selecionada definitivamente.
+              Escolha se deseja remover apenas este mês ou encerrar a receita fixa
+              deste mês em diante.
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-lg border border-border bg-muted/35 p-4 text-sm">
@@ -368,6 +396,41 @@ export function ReceitasPage() {
               {formatCurrency(receitaExcluindo?.valor ?? 0)}
             </p>
           </div>
+          {receitaExcluindo?.fixa && (
+            <div className="grid gap-2 rounded-lg border border-border bg-background p-3 text-sm">
+              <p className="font-medium text-foreground">Como deseja excluir?</p>
+              <label className="flex cursor-pointer items-start gap-2 rounded-md border border-border bg-background p-3">
+                <input
+                  className="mt-1 h-4 w-4 accent-primary"
+                  checked={escopoExclusao === "mes"}
+                  name="escopo-receita"
+                  type="radio"
+                  onChange={() => setEscopoExclusao("mes")}
+                />
+                <span>
+                  <span className="block font-medium">Somente a selecionada</span>
+                  <span className="text-xs text-muted-foreground">
+                    Remove apenas {formatMonth(mes)}.
+                  </span>
+                </span>
+              </label>
+              <label className="flex cursor-pointer items-start gap-2 rounded-md border border-border bg-background p-3">
+                <input
+                  className="mt-1 h-4 w-4 accent-primary"
+                  checked={escopoExclusao === "todas"}
+                  name="escopo-receita"
+                  type="radio"
+                  onChange={() => setEscopoExclusao("todas")}
+                />
+                <span>
+                  <span className="block font-medium">Esta e as próximas</span>
+                  <span className="text-xs text-muted-foreground">
+                    Mantém os meses anteriores e encerra a recorrência daqui para frente.
+                  </span>
+                </span>
+              </label>
+            </div>
+          )}
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <Button
               type="button"
@@ -385,7 +448,11 @@ export function ReceitasPage() {
               {deletingId === receitaExcluindo?.id && (
                 <Loader2 className="h-4 w-4 animate-spin" />
               )}
-              Excluir
+              {receitaExcluindo?.fixa && escopoExclusao === "mes"
+                ? "Excluir selecionada"
+                : receitaExcluindo?.fixa
+                  ? "Excluir esta e próximas"
+                  : "Excluir"}
             </Button>
           </div>
         </DialogContent>

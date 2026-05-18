@@ -10,6 +10,7 @@ import {
   TrendingUp,
   WalletCards,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { dashboardApi } from "../../api/dashboard/dashboard-api";
 import type {
@@ -34,6 +35,7 @@ import {
 } from "../../components/ui/chart";
 import { Label } from "../../components/ui/label";
 import { cn } from "../../lib/utils";
+import { useAuth } from "../../providers/auth-provider";
 
 const chartColors = [
   "#ef4444",
@@ -108,6 +110,8 @@ function buildPieGradient(items: CategoriaDespesaResumo[]) {
 }
 
 export function RelatoriosPage() {
+  const { session, perfilFinanceiroId } = useAuth();
+  const isPremium = session?.usuario.plano === "PREMIUM";
   const [ano, setAno] = useState(getCurrentYear);
   const [mes, setMes] = useState(getCurrentMonth);
   const [reportMode, setReportMode] = useState<ReportMode>("anual");
@@ -162,9 +166,11 @@ export function RelatoriosPage() {
   }
 
   useEffect(() => {
+    if (!isPremium) return;
+
     void carregarRelatorio();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isPremium, perfilFinanceiroId]);
 
   function changeYear(offset: number) {
     const nextYear = String(Number(ano) + offset);
@@ -175,6 +181,35 @@ export function RelatoriosPage() {
   function changeMode(mode: ReportMode) {
     setReportMode(mode);
     void carregarRelatorio({ modo: mode, ano, mes });
+  }
+
+  if (!isPremium) {
+    return (
+      <div className="space-y-5">
+        <Card className="border-primary/20 shadow-sm">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <Sparkles className="h-5 w-5" />
+              </span>
+              <div>
+                <CardTitle className="uppercase tracking-normal">
+                  Relatórios Premium
+                </CardTitle>
+                <CardDescription>
+                  Os relatórios detalhados ficam disponíveis para usuários Premium.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link to="/app/premium">Ver Premium</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

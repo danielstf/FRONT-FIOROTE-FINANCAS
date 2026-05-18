@@ -4,16 +4,20 @@ import { cn } from "../../lib/utils";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   asChild?: boolean;
-  variant?: "default" | "outline" | "ghost";
+  variant?: "default" | "outline" | "ghost" | "secondary" | "destructive";
 };
 
 const variants = {
   default:
-    "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 focus-visible:ring-ring",
+    "border border-primary/20 bg-primary text-primary-foreground shadow-sm shadow-primary/20 hover:bg-primary/90 hover:shadow-md focus-visible:ring-ring",
   outline:
-    "border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring",
+    "border border-input bg-background text-foreground shadow-sm hover:border-primary/35 hover:bg-accent hover:text-accent-foreground hover:shadow-md focus-visible:ring-ring",
   ghost:
     "text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring",
+  secondary:
+    "border border-border bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 hover:shadow-md focus-visible:ring-ring",
+  destructive:
+    "border border-destructive/20 bg-destructive text-white shadow-sm shadow-destructive/20 hover:bg-destructive/90 hover:shadow-md focus-visible:ring-destructive",
 };
 
 export function Button({
@@ -29,7 +33,7 @@ export function Button({
     <Comp
       type={type}
       className={cn(
-        "inline-flex h-10 items-center justify-center gap-2 rounded-md px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-60",
+        "inline-flex h-10 items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold transition-all duration-200 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-60",
         variants[variant],
         className,
       )}

@@ -1,7 +1,6 @@
 ﻿import {
   AlertTriangle,
   ArrowUpRight,
-  BadgeCheck,
   CalendarDays,
   CheckCircle2,
   CreditCard,
@@ -20,6 +19,7 @@ import type { Despesa } from "../../api/despesas/types";
 import { getApiErrorMessage } from "../../api/errors";
 import { receitasApi } from "../../api/receitas/receitas-api";
 import type { Receita } from "../../api/receitas/types";
+import { BrandLogo } from "../../components/brand-logo";
 import { MonthPicker } from "../../components/month-picker";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Label } from "../../components/ui/label";
@@ -61,7 +61,7 @@ function formatDate(value: string | null) {
 }
 
 export function DashboardPage() {
-  const { session } = useAuth();
+  const { session, perfilFinanceiroId } = useAuth();
   const [mes, setMes] = useState(getCurrentMonth);
   const [receitas, setReceitas] = useState<Receita[]>([]);
   const [despesasPendentes, setDespesasPendentes] = useState<Despesa[]>([]);
@@ -126,7 +126,7 @@ export function DashboardPage() {
     setPayingId(despesa.id);
 
     try {
-      await despesasApi.alterarPagamento(despesa.id, true);
+      await despesasApi.alterarPagamento(despesa.id, true, mes);
       toast.success("Despesa marcada como paga.");
       await carregarDashboard(mes);
     } catch (requestError) {
@@ -139,7 +139,17 @@ export function DashboardPage() {
   useEffect(() => {
     void carregarDashboard(mes);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [perfilFinanceiroId]);
+
+  useEffect(() => {
+    if (!resumoMes) return;
+
+    window.dispatchEvent(
+      new CustomEvent("fiorote-saldo-change", {
+        detail: resumoMes.saldoFinal,
+      }),
+    );
+  }, [resumoMes]);
 
   return (
     <div className="space-y-5">
@@ -184,15 +194,13 @@ export function DashboardPage() {
 
           <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
             <CardContent className="space-y-4 p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                  <BadgeCheck className="h-6 w-6" />
-                </div>
-                <div>
+              <div className="flex min-w-0 items-center gap-3">
+                <BrandLogo compact mood={saldoPositivo ? "positive" : "negative"} />
+                <div className="min-w-0">
                   <p className="text-sm text-muted-foreground">Saldo final</p>
                   <p
                     className={cn(
-                      "mt-1 text-3xl font-semibold tracking-normal",
+                      "mt-1 break-words text-2xl font-semibold tracking-normal sm:text-3xl",
                       saldoPositivo
                         ? "text-emerald-600 dark:text-emerald-400"
                         : "text-red-600 dark:text-red-400",

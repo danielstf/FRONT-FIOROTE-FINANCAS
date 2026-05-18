@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import {
+  CheckCircle2,
   HeartHandshake,
   Lightbulb,
   Loader2,
   MessageCircleWarning,
   MessageSquareText,
   ShieldAlert,
+  Trash2,
 } from "lucide-react";
 import { Navigate } from "react-router-dom";
+import { toast } from "sonner";
+import { getApiErrorMessage } from "../../api/errors";
 import { sugestoesApi } from "../../api/sugestoes/sugestoes-api";
 import type { Sugestao, SugestaoTipo } from "../../api/sugestoes/types";
-import { getApiErrorMessage } from "../../api/errors";
+import { Button } from "../../components/ui/button";
 import {
   Card,
   CardContent,
@@ -18,8 +22,15 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { useAuth } from "../../providers/auth-provider";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog";
 import { cn } from "../../lib/utils";
+import { useAuth } from "../../providers/auth-provider";
 
 const tipoConfig: Record<
   SugestaoTipo,
@@ -56,6 +67,8 @@ export function GestaoPage() {
   const [sugestoes, setSugestoes] = useState<Sugestao[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [sugestaoExcluindo, setSugestaoExcluindo] = useState<Sugestao | null>(null);
 
   useEffect(() => {
     if (session?.usuario.role !== "ADMIN") return;
@@ -79,6 +92,41 @@ export function GestaoPage() {
 
   if (session?.usuario.role !== "ADMIN") {
     return <Navigate to="/app" replace />;
+  }
+
+  async function finalizarSugestao(item: Sugestao) {
+    setBusyId(item.id);
+    try {
+      const atualizada = await sugestoesApi.finalizar(item.id);
+      setSugestoes((current) =>
+        current.map((sugestao) =>
+          sugestao.id === atualizada.id ? atualizada : sugestao,
+        ),
+      );
+      toast.success("Chamado finalizado.");
+    } catch (requestError) {
+      toast.error(getApiErrorMessage(requestError));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function excluirSugestao() {
+    if (!sugestaoExcluindo) return;
+
+    setBusyId(sugestaoExcluindo.id);
+    try {
+      await sugestoesApi.excluir(sugestaoExcluindo.id);
+      setSugestoes((current) =>
+        current.filter((sugestao) => sugestao.id !== sugestaoExcluindo.id),
+      );
+      setSugestaoExcluindo(null);
+      toast.success("Chamado excluído.");
+    } catch (requestError) {
+      toast.error(getApiErrorMessage(requestError));
+    } finally {
+      setBusyId(null);
+    }
   }
 
   return (
@@ -166,9 +214,43 @@ export function GestaoPage() {
                           </p>
                         </div>
                       </div>
-                      <time className="text-xs text-muted-foreground">
-                        {new Date(item.criadoEm).toLocaleString("pt-BR")}
-                      </time>
+                      <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+                        <span
+                          className={cn(
+                            "rounded-md border px-2 py-1 text-[10px] font-semibold uppercase",
+                            item.status === "FINALIZADO"
+                              ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                              : "border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+                          )}
+                        >
+                          {item.status === "FINALIZADO" ? "Finalizado" : "Aberto"}
+                        </span>
+                        <time className="text-xs text-muted-foreground">
+                          {new Date(item.criadoEm).toLocaleString("pt-BR")}
+                        </time>
+                        {item.status !== "FINALIZADO" && (
+                          <Button
+                            className="h-8 px-2 text-xs"
+                            disabled={busyId === item.id}
+                            type="button"
+                            variant="outline"
+                            onClick={() => finalizarSugestao(item)}
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            Finalizar
+                          </Button>
+                        )}
+                        <Button
+                          className="h-8 px-2 text-xs"
+                          disabled={busyId === item.id}
+                          type="button"
+                          variant="destructive"
+                          onClick={() => setSugestaoExcluindo(item)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Excluir
+                        </Button>
+                      </div>
                     </div>
                     <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
                       {item.mensagem}
@@ -180,6 +262,48 @@ export function GestaoPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog
+        open={Boolean(sugestaoExcluindo)}
+        onOpenChange={(open) => {
+          if (!open) setSugestaoExcluindo(null);
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Excluir chamado</DialogTitle>
+            <DialogDescription>
+              Confirme para remover definitivamente esta mensagem da gestão.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-lg border border-border bg-muted/35 p-4 text-sm">
+            <p className="font-semibold text-foreground">{sugestaoExcluindo?.titulo}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {sugestaoExcluindo?.usuario.nome} | {sugestaoExcluindo?.usuario.email}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setSugestaoExcluindo(null)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={excluirSugestao}
+              disabled={busyId === sugestaoExcluindo?.id}
+            >
+              {busyId === sugestaoExcluindo?.id && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
+              Excluir chamado
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

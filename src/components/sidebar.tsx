@@ -28,16 +28,18 @@ const menuItems = [
 
 type SidebarProps = {
   className?: string;
+  logoMood?: "positive" | "negative" | "neutral";
   onNavigate?: () => void;
 };
 
-export function Sidebar({ className, onNavigate }: SidebarProps) {
+export function Sidebar({ className, logoMood = "neutral", onNavigate }: SidebarProps) {
   const { logout, session } = useAuth();
   const items =
     session?.usuario.role === "ADMIN"
       ? [
           ...menuItems,
           { title: "Gestão", href: "/app/gestao", icon: ShieldAlert },
+          { title: "Relatório admin", href: "/app/admin", icon: BarChart3 },
         ]
       : menuItems;
 
@@ -54,7 +56,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       )}
     >
       <div className="border-b border-sidebar-border px-4 py-5">
-        <BrandLogo className="justify-center" size="sidebar" />
+        <BrandLogo className="justify-center" mood={logoMood} size="sidebar" />
       </div>
 
       <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-3">

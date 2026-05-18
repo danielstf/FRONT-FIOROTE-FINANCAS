@@ -16,6 +16,7 @@ import type {
 } from "../api/auth/types";
 
 const storageKey = "fiorote-financas-auth";
+const perfilStorageKey = "fiorote-financas-perfil-id";
 
 type AuthContextValue = {
   session: LoginResponse | null;
@@ -24,6 +25,8 @@ type AuthContextValue = {
   cadastrar: (payload: CadastroUsuarioPayload) => Promise<void>;
   atualizarPerfil: (payload: AtualizarPerfilPayload) => Promise<void>;
   atualizarUsuarioSessao: (usuario: LoginResponse["usuario"]) => void;
+  perfilFinanceiroId: string | null;
+  selecionarPerfilFinanceiro: (perfilId: string | null) => void;
   logout: () => void;
 };
 
@@ -44,6 +47,9 @@ function getStoredSession() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<LoginResponse | null>(getStoredSession);
+  const [perfilFinanceiroId, setPerfilFinanceiroId] = useState<string | null>(() => {
+    return localStorage.getItem(perfilStorageKey);
+  });
 
   useEffect(() => {
     if (!session) return;
@@ -123,12 +129,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return nextSession;
         });
       },
+      perfilFinanceiroId,
+      selecionarPerfilFinanceiro(perfilId) {
+        setPerfilFinanceiroId(perfilId);
+
+        if (perfilId) {
+          localStorage.setItem(perfilStorageKey, perfilId);
+        } else {
+          localStorage.removeItem(perfilStorageKey);
+        }
+      },
       logout() {
         localStorage.removeItem(storageKey);
+        localStorage.removeItem(perfilStorageKey);
+        setPerfilFinanceiroId(null);
         setSession(null);
       },
     }),
-    [session],
+    [perfilFinanceiroId, session],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

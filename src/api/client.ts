@@ -9,6 +9,13 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const savedSession = localStorage.getItem("fiorote-financas-auth");
+  const perfilFinanceiroId = localStorage.getItem("fiorote-financas-perfil-id");
+
+  if (perfilFinanceiroId) {
+    config.headers["X-Perfil-Financeiro-Id"] = perfilFinanceiroId;
+  } else {
+    delete config.headers["X-Perfil-Financeiro-Id"];
+  }
 
   if (!savedSession) return config;
 

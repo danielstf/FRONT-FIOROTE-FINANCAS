@@ -3,42 +3,60 @@ import { cn } from "../lib/utils";
 type BrandLogoProps = {
   compact?: boolean;
   className?: string;
+  mood?: "positive" | "negative" | "neutral";
   size?: "default" | "large" | "sidebar";
 };
 
 export function BrandLogo({
   compact = false,
   className,
+  mood = "neutral",
   size = "default",
 }: BrandLogoProps) {
-  const logoSize =
+  const isNegative = mood === "negative";
+  const logoSrc = isNegative ? "/logo-real-negative.png" : "/logo-real-positive.png";
+  const iconSize =
     size === "large"
-      ? "h-10 sm:h-14 lg:h-16"
+      ? "h-20 w-20"
       : size === "sidebar"
-        ? "h-16 xl:h-20"
-        : "h-11 sm:h-12";
+        ? "h-16 w-16"
+        : "h-14 w-14";
+  const titleSize =
+    size === "large"
+      ? "text-3xl sm:text-4xl"
+      : size === "sidebar"
+        ? "text-xl xl:text-2xl"
+        : "text-xl";
+  const subtitleSize = size === "sidebar" ? "text-xs xl:text-sm" : "text-xs";
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      {compact ? (
-        <img
-          alt="Fiorote Control"
-          className="h-10 w-10 shrink-0 object-contain"
-          src="/logo-fiorote-control-icon.png"
-        />
-      ) : (
-        <>
-          <img
-            alt="Fiorote Control"
-            className={cn("w-auto object-contain dark:hidden", logoSize)}
-            src="/logo-fiorote-control.png"
-          />
-          <img
-            alt="Fiorote Control"
-            className={cn("hidden w-auto object-contain dark:block", logoSize)}
-            src="/logo-fiorote-control-dark.png"
-          />
-        </>
+      <img
+        alt={isNegative ? "Fiorote Control saldo negativo" : "Fiorote Control"}
+        className={cn("shrink-0 object-contain drop-shadow-sm", iconSize)}
+        src={logoSrc}
+      />
+
+      {!compact && (
+        <span className="min-w-0 leading-none">
+          <span
+            className={cn(
+              "block font-black uppercase tracking-normal text-foreground drop-shadow-sm",
+              titleSize,
+            )}
+          >
+            Fiorote
+          </span>
+          <span
+            className={cn(
+              "block text-center font-extrabold uppercase tracking-[0.26em]",
+              isNegative ? "text-red-600" : "text-primary",
+              subtitleSize,
+            )}
+          >
+            Control
+          </span>
+        </span>
       )}
     </div>
   );

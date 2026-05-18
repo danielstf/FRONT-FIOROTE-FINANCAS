@@ -40,6 +40,7 @@ import {
   toUppercaseText,
 } from "../../lib/text";
 import { formatMoneyInput } from "../../lib/money";
+import { useAuth } from "../../providers/auth-provider";
 import { cn } from "../../lib/utils";
 import {
   defaultExpenseCategories,
@@ -95,6 +96,8 @@ export function DespesaForm({
   onCancel,
 }: DespesaFormProps) {
   const navigate = useNavigate();
+  const { session } = useAuth();
+  const isPremium = session?.usuario.plano === "PREMIUM";
   const [nome, setNome] = useState(despesa?.nome ? toUppercaseText(despesa.nome) : "");
   const [valor, setValor] = useState(despesa ? moneyToInput(despesa.valor) : "");
   const [categoria, setCategoria] = useState(
@@ -113,6 +116,9 @@ export function DespesaForm({
     despesa?.dataVencimento ? despesa.dataVencimento.slice(0, 10) : "",
   );
   const [fixa, setFixa] = useState(despesa?.fixa ?? false);
+  const [escopoEdicao, setEscopoEdicao] = useState<"selecionado" | "proximos">(
+    "selecionado",
+  );
   const [numeroParcelas, setNumeroParcelas] = useState(
     despesa?.numeroParcelas ? String(despesa.numeroParcelas) : "",
   );
@@ -213,6 +219,11 @@ export function DespesaForm({
       return;
     }
 
+    if (fixa && !isPremium) {
+      toast.error("Despesa fixa é um recurso Premium.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -230,8 +241,21 @@ export function DespesaForm({
       };
 
       if (mode === "edit" && despesa) {
-        await despesasApi.editar(despesa.id, payload);
-        toast.success("Despesa atualizada com sucesso.");
+        if (despesa.fixa && escopoEdicao === "proximos") {
+          await despesasApi.excluir(despesa.id, {
+            escopo: "todas",
+            mes,
+          });
+          await despesasApi.criar({
+            ...payload,
+            fixa: true,
+            numeroParcelas: undefined,
+          });
+          toast.success("Despesa atualizada deste mês em diante.");
+        } else {
+          await despesasApi.editar(despesa.id, payload);
+          toast.success("Despesa atualizada com sucesso.");
+        }
       } else {
         await despesasApi.criar(payload);
         toast.success(
@@ -385,8 +409,9 @@ export function DespesaForm({
                 <input
                   type="checkbox"
                   checked={fixa}
+                  disabled={!isPremium}
                   onChange={(event) => setFixa(event.target.checked)}
-                  className="mt-1 h-4 w-4 accent-emerald-600"
+                  className="mt-1 h-4 w-4 accent-emerald-600 disabled:cursor-not-allowed"
                 />
                 <span>
                   <span className="flex items-center gap-2 text-sm font-medium">
@@ -394,7 +419,9 @@ export function DespesaForm({
                     Despesa fixa
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    Use para contas recorrentes sem parcelamento.
+                    {isPremium
+                      ? "Use para contas recorrentes sem parcelamento."
+                      : "Disponível somente para usuários Premium."}
                   </span>
                 </span>
               </label>
@@ -412,6 +439,44 @@ export function DespesaForm({
                 />
               </div>
             </div>
+
+            {mode === "edit" && despesa?.fixa && (
+              <div className="grid gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
+                <p className="font-medium text-foreground">Como deseja editar?</p>
+                <label className="flex cursor-pointer items-start gap-2 rounded-md border border-border bg-background p-3">
+                  <input
+                    className="mt-1 h-4 w-4 accent-primary"
+                    type="radio"
+                    name="escopo-edicao-despesa"
+                    checked={escopoEdicao === "selecionado"}
+                    onChange={() => setEscopoEdicao("selecionado")}
+                  />
+                  <span>
+                    <span className="block font-medium">Somente a selecionada</span>
+                    <span className="text-xs text-muted-foreground">
+                      Cria uma alteração apenas para este mês.
+                    </span>
+                  </span>
+                </label>
+                <label className="flex cursor-pointer items-start gap-2 rounded-md border border-border bg-background p-3">
+                  <input
+                    className="mt-1 h-4 w-4 accent-primary"
+                    type="radio"
+                    name="escopo-edicao-despesa"
+                    checked={escopoEdicao === "proximos"}
+                    onChange={() => setEscopoEdicao("proximos")}
+                  />
+                  <span>
+                    <span className="block font-medium">
+                      Esta e as próximas
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Mantém meses anteriores e aplica o novo valor daqui para frente.
+                    </span>
+                  </span>
+                </label>
+              </div>
+            )}
 
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button type="submit" disabled={loading}>

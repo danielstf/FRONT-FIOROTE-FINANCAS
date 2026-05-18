@@ -1,17 +1,24 @@
-﻿import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   BadgeCheck,
+  Crown,
   KeyRound,
   Loader2,
-  Mail,
+  PencilLine,
+  Plus,
   Save,
   ShieldCheck,
   Sparkles,
+  SunMoon,
+  Trash2,
   UserRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { authApi } from "../../api/auth/auth-api";
 import { getApiErrorMessage } from "../../api/errors";
+import { perfisApi } from "../../api/perfis/perfis-api";
+import type { PerfilFinanceiro } from "../../api/perfis/types";
+import { Avatar, avatarOptions, getAvatarOption } from "../../components/ui/avatar";
 import { Button } from "../../components/ui/button";
 import {
   Card,
@@ -20,24 +27,67 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { ThemeToggle } from "../../components/theme-toggle";
 import { useAuth } from "../../providers/auth-provider";
 
 export function ConfiguracoesPage() {
-  const { session, atualizarPerfil, atualizarUsuarioSessao } = useAuth();
+  const {
+    session,
+    atualizarPerfil,
+    atualizarUsuarioSessao,
+    perfilFinanceiroId,
+    selecionarPerfilFinanceiro,
+  } = useAuth();
   const usuarioTemSenha = session?.usuario.temSenha ?? true;
+  const isPremium = session?.usuario.plano === "PREMIUM";
   const [nome, setNome] = useState(session?.usuario.nome ?? "");
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [perfis, setPerfis] = useState<PerfilFinanceiro[]>([]);
+  const [perfilEditando, setPerfilEditando] = useState<PerfilFinanceiro | null>(null);
+  const [perfilNome, setPerfilNome] = useState("");
+  const [perfilAvatar, setPerfilAvatar] = useState("user");
+  const [senhaModalAberto, setSenhaModalAberto] = useState(false);
+  const [perfilModalAberto, setPerfilModalAberto] = useState(false);
+  const [perfilExcluindo, setPerfilExcluindo] = useState<PerfilFinanceiro | null>(null);
+  const [loadingPerfis, setLoadingPerfis] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  const [savingPerfil, setSavingPerfil] = useState(false);
+  const [deletingPerfil, setDeletingPerfil] = useState(false);
 
-  async function salvarPerfil(event: FormEvent<HTMLFormElement>) {
+  async function carregarPerfis() {
+    if (!isPremium) return;
+
+    setLoadingPerfis(true);
+    try {
+      const data = await perfisApi.listar();
+      setPerfis(data.perfis);
+    } catch (requestError) {
+      toast.error(getApiErrorMessage(requestError));
+    } finally {
+      setLoadingPerfis(false);
+    }
+  }
+
+  useEffect(() => {
+    void carregarPerfis();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPremium]);
+
+  async function salvarDados(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSavingProfile(true);
-
     try {
       await atualizarPerfil({ nome });
       toast.success("Nome atualizado com sucesso.");
@@ -57,25 +107,17 @@ export function ConfiguracoesPage() {
     }
 
     setSavingPassword(true);
-
     try {
       const response = await authApi.trocarSenha({
         senhaAtual: usuarioTemSenha ? senhaAtual.trim() || undefined : undefined,
         novaSenha,
       });
 
-      if (response.usuario) {
-        atualizarUsuarioSessao(response.usuario);
-      } else if (session) {
-        atualizarUsuarioSessao({
-          ...session.usuario,
-          temSenha: true,
-        });
-      }
-
+      if (response.usuario) atualizarUsuarioSessao(response.usuario);
       setSenhaAtual("");
       setNovaSenha("");
       setConfirmarSenha("");
+      setSenhaModalAberto(false);
       toast.success("Senha alterada com sucesso.");
     } catch (requestError) {
       toast.error(getApiErrorMessage(requestError));
@@ -84,53 +126,117 @@ export function ConfiguracoesPage() {
     }
   }
 
+  function limparPerfil() {
+    setPerfilEditando(null);
+    setPerfilNome("");
+    setPerfilAvatar("user");
+  }
+
+  function abrirNovoPerfil() {
+    limparPerfil();
+    setPerfilModalAberto(true);
+  }
+
+  function editarPerfil(perfil: PerfilFinanceiro) {
+    setPerfilEditando(perfil);
+    setPerfilNome(perfil.nome);
+    setPerfilAvatar(perfil.avatar);
+    setPerfilModalAberto(true);
+  }
+
+  async function salvarPerfilFinanceiro(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!isPremium) {
+      toast.error("Perfis financeiros são exclusivos para usuários Premium.");
+      return;
+    }
+
+    setSavingPerfil(true);
+    try {
+      if (perfilEditando) {
+        await perfisApi.editar(perfilEditando.id, {
+          nome: perfilNome,
+          avatar: perfilAvatar,
+        });
+        toast.success("Perfil atualizado com sucesso.");
+      } else {
+        await perfisApi.criar({ nome: perfilNome, avatar: perfilAvatar });
+        toast.success("Perfil criado com sucesso.");
+      }
+
+      limparPerfil();
+      setPerfilModalAberto(false);
+      await carregarPerfis();
+    } catch (requestError) {
+      toast.error(getApiErrorMessage(requestError));
+    } finally {
+      setSavingPerfil(false);
+    }
+  }
+
+  async function excluirPerfil() {
+    if (!perfilExcluindo) return;
+
+    setDeletingPerfil(true);
+    try {
+      await perfisApi.excluir(perfilExcluindo.id);
+      if (perfilFinanceiroId === perfilExcluindo.id) selecionarPerfilFinanceiro(null);
+      if (perfilEditando?.id === perfilExcluindo.id) limparPerfil();
+      setPerfilExcluindo(null);
+      toast.success("Perfil excluído com sucesso.");
+      await carregarPerfis();
+    } catch (requestError) {
+      toast.error(getApiErrorMessage(requestError));
+    } finally {
+      setDeletingPerfil(false);
+    }
+  }
+
   return (
     <div className="space-y-5">
       <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-        <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-7">
-          <div className="space-y-5">
+        <div className="grid gap-6 p-5 lg:grid-cols-[1fr_360px] lg:p-7">
+          <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
               <Sparkles className="h-4 w-4" />
-              Conta e segurança
+              Conta e perfis
             </div>
-
-            <div className="space-y-3">
-              <h1 className="text-2xl font-semibold tracking-normal text-card-foreground sm:text-3xl lg:text-4xl">
-                Configurações da conta
-              </h1>
-              <p className="max-w-2xl text-sm text-muted-foreground">
-                Mantenha seus dados atualizados e defina uma senha para acessar o
-                sistema com mais flexibilidade.
-              </p>
+            <h1 className="text-2xl font-semibold tracking-normal lg:text-3xl">
+              Configurações da conta
+            </h1>
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              Atualize seus dados, ajuste o tema e organize perfis financeiros.
+            </p>
+            <div className="grid gap-3 pt-2 sm:grid-cols-3">
+              <div className="rounded-lg border border-border bg-background p-3">
+                <p className="text-xs text-muted-foreground">Plano</p>
+                <p className="mt-1 font-semibold text-primary">
+                  {session?.usuario.plano ?? "FREE"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border bg-background p-3">
+                <p className="text-xs text-muted-foreground">Senha</p>
+                <p className="mt-1 font-semibold">
+                  {usuarioTemSenha ? "Ativa" : "Pendente"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border bg-background p-3">
+                <p className="text-xs text-muted-foreground">Perfis</p>
+                <p className="mt-1 font-semibold">{perfis.length + 1}</p>
+              </div>
             </div>
           </div>
-
           <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
-            <CardContent className="space-y-4 p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                  <ShieldCheck className="h-6 w-6" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm text-muted-foreground">Perfil atual</p>
-                  <p className="mt-1 truncate text-xl font-semibold">
-                    {session?.usuario.nome}
-                  </p>
-                </div>
-              </div>
-              <div className="grid gap-2 text-sm">
-                <div className="flex items-center gap-2 rounded-md border border-border p-3">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="min-w-0 truncate">{session?.usuario.email}</span>
-                </div>
-                <div className="flex items-center justify-between rounded-md border border-border p-3">
-                  <span className="text-muted-foreground">Senha</span>
-                  <strong
-                    className={usuarioTemSenha ? "text-emerald-600" : "text-amber-600"}
-                  >
-                    {usuarioTemSenha ? "Cadastrada" : "Pendente"}
-                  </strong>
-                </div>
+            <CardContent className="flex items-center gap-3 p-5">
+              <span className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <ShieldCheck className="h-6 w-6" />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate font-semibold">{session?.usuario.nome}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {session?.usuario.email}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -140,18 +246,14 @@ export function ConfiguracoesPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="shadow-sm">
           <CardHeader>
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <UserRound className="h-5 w-5" />
-              </span>
-              <div>
-                <CardTitle>Dados do usuário</CardTitle>
-                <CardDescription>Altere o nome exibido no sistema.</CardDescription>
-              </div>
-            </div>
+            <CardTitle className="flex items-center gap-2">
+              <UserRound className="h-5 w-5 text-primary" />
+              Dados do usuário
+            </CardTitle>
+            <CardDescription>Altere o nome exibido no sistema.</CardDescription>
           </CardHeader>
           <CardContent>
-            <form className="grid gap-4" onSubmit={salvarPerfil}>
+            <form className="grid gap-4" onSubmit={salvarDados}>
               <div className="space-y-2">
                 <Label htmlFor="nome">Nome</Label>
                 <Input
@@ -165,7 +267,6 @@ export function ConfiguracoesPage() {
                 <Label>Email</Label>
                 <Input value={session?.usuario.email ?? ""} disabled />
               </div>
-
               <Button className="w-full sm:w-fit" type="submit" disabled={savingProfile}>
                 {savingProfile ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -180,80 +281,310 @@ export function ConfiguracoesPage() {
 
         <Card className="shadow-sm">
           <CardHeader>
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
-                {usuarioTemSenha ? (
-                  <KeyRound className="h-5 w-5" />
-                ) : (
-                  <BadgeCheck className="h-5 w-5" />
-                )}
-              </span>
-              <div>
-                <CardTitle>
-                  {usuarioTemSenha ? "Trocar senha" : "Cadastrar senha"}
-                </CardTitle>
-                <CardDescription>
-                  {usuarioTemSenha
-                    ? "Informe a senha atual e escolha uma nova senha."
-                    : "Sua conta ainda não tem senha cadastrada. Crie uma senha para entrar também com email e senha."}
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <form className="grid gap-4" onSubmit={salvarSenha}>
-              {usuarioTemSenha && (
-                <div className="space-y-2">
-                  <Label htmlFor="senhaAtual">Senha atual</Label>
-                  <Input
-                    id="senhaAtual"
-                    type="password"
-                    value={senhaAtual}
-                    onChange={(event) => setSenhaAtual(event.target.value)}
-                    autoComplete="current-password"
-                    required
-                  />
-                </div>
+            <CardTitle className="flex items-center gap-2">
+              {usuarioTemSenha ? (
+                <KeyRound className="h-5 w-5 text-primary" />
+              ) : (
+                <BadgeCheck className="h-5 w-5 text-primary" />
               )}
-              <div className="space-y-2">
-                <Label htmlFor="novaSenha">Nova senha</Label>
-                <Input
-                  id="novaSenha"
-                  minLength={6}
-                  type="password"
-                  value={novaSenha}
-                  onChange={(event) => setNovaSenha(event.target.value)}
-                  autoComplete="new-password"
-                  required
-                />
+              Segurança e tema
+            </CardTitle>
+            <CardDescription>
+              A senha fica escondida até você abrir a alteração.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background p-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                  {usuarioTemSenha ? (
+                    <KeyRound className="h-5 w-5" />
+                  ) : (
+                    <BadgeCheck className="h-5 w-5" />
+                  )}
+                </span>
+                <div className="min-w-0">
+                  <p className="font-semibold">
+                    {usuarioTemSenha ? "Senha cadastrada" : "Senha pendente"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Atualize sua senha em uma janela segura.
+                  </p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmarSenha">Confirmar nova senha</Label>
-                <Input
-                  id="confirmarSenha"
-                  minLength={6}
-                  type="password"
-                  value={confirmarSenha}
-                  onChange={(event) => setConfirmarSenha(event.target.value)}
-                  autoComplete="new-password"
-                  required
-                />
+              <Button variant="outline" onClick={() => setSenhaModalAberto(true)}>
+                {usuarioTemSenha ? "Trocar" : "Cadastrar"}
+              </Button>
+            </div>
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background p-3">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                  <SunMoon className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="font-semibold">Tema do sistema</p>
+                  <p className="text-xs text-muted-foreground">
+                    Alterne entre claro e escuro.
+                  </p>
+                </div>
               </div>
+              <ThemeToggle />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-              <Button className="w-full sm:w-fit" type="submit" disabled={savingPassword}>
+      <Card className="shadow-sm">
+        <CardHeader>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Crown className="h-5 w-5 text-primary" />
+                Perfis financeiros
+              </CardTitle>
+              <CardDescription>
+                Usuários Premium podem criar até 5 perfis com dados separados.
+              </CardDescription>
+            </div>
+            <Button onClick={abrirNovoPerfil} disabled={!isPremium}>
+              <Plus className="h-4 w-4" />
+              Novo perfil
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {!isPremium && (
+            <p className="mb-4 rounded-md border border-primary/25 bg-primary/10 px-3 py-2 text-sm text-primary">
+              Assine o Premium para criar perfis financeiros.
+            </p>
+          )}
+
+          <div className="grid content-start gap-3">
+            {loadingPerfis && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Carregando perfis...
+              </div>
+            )}
+            {!loadingPerfis && perfis.length === 0 && (
+              <div className="rounded-lg border border-dashed border-border bg-muted/35 p-6 text-center text-sm text-muted-foreground">
+                Nenhum perfil financeiro cadastrado.
+              </div>
+            )}
+            {perfis.map((perfil) => (
+              <div
+                className="flex flex-col gap-3 rounded-lg border border-border bg-background p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                key={perfil.id}
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <Avatar value={perfil.avatar} label={perfil.nome} />
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold">{perfil.nome}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Avatar {getAvatarOption(perfil.avatar).label}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    aria-label="Editar perfil"
+                    className="h-9 w-9 px-0"
+                    title="Editar perfil"
+                    variant="outline"
+                    onClick={() => editarPerfil(perfil)}
+                  >
+                    <PencilLine className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    aria-label="Excluir perfil"
+                    className="h-9 w-9 px-0 text-destructive hover:text-destructive"
+                    title="Excluir perfil"
+                    variant="outline"
+                    onClick={() => setPerfilExcluindo(perfil)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Dialog open={senhaModalAberto} onOpenChange={setSenhaModalAberto}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {usuarioTemSenha ? "Trocar senha" : "Cadastrar senha"}
+            </DialogTitle>
+            <DialogDescription>
+              Confirme os dados para atualizar o acesso da conta.
+            </DialogDescription>
+          </DialogHeader>
+          <form className="grid gap-4" onSubmit={salvarSenha}>
+            {usuarioTemSenha && (
+              <div className="space-y-2">
+                <Label htmlFor="senhaAtual">Senha atual</Label>
+                <Input
+                  id="senhaAtual"
+                  type="password"
+                  value={senhaAtual}
+                  onChange={(event) => setSenhaAtual(event.target.value)}
+                  required
+                />
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="novaSenha">Nova senha</Label>
+              <Input
+                id="novaSenha"
+                minLength={6}
+                type="password"
+                value={novaSenha}
+                onChange={(event) => setNovaSenha(event.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmarSenha">Confirmar nova senha</Label>
+              <Input
+                id="confirmarSenha"
+                minLength={6}
+                type="password"
+                value={confirmarSenha}
+                onChange={(event) => setConfirmarSenha(event.target.value)}
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setSenhaModalAberto(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={savingPassword}>
                 {savingPassword ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="h-4 w-4" />
                 )}
-                {usuarioTemSenha ? "Alterar senha" : "Cadastrar senha"}
+                Confirmar
               </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={perfilModalAberto}
+        onOpenChange={(open) => {
+          setPerfilModalAberto(open);
+          if (!open) limparPerfil();
+        }}
+      >
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>
+              {perfilEditando ? "Editar perfil" : "Novo perfil"}
+            </DialogTitle>
+            <DialogDescription>
+              Defina o nome e o ícone usado para identificar o perfil financeiro.
+            </DialogDescription>
+          </DialogHeader>
+          <form className="grid gap-4" onSubmit={salvarPerfilFinanceiro}>
+            <div className="space-y-2">
+              <Label htmlFor="perfil-nome">Nome do perfil</Label>
+              <Input
+                id="perfil-nome"
+                value={perfilNome}
+                onChange={(event) => setPerfilNome(event.target.value)}
+                placeholder="Ex: Pessoal, Família, Empresa"
+                disabled={!isPremium}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Avatar</Label>
+              <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+                {avatarOptions.map((avatar) => {
+                  const Icon = avatar.icon;
+                  const selected = perfilAvatar === avatar.value;
+
+                  return (
+                    <button
+                      aria-label={avatar.label}
+                      className={`flex h-11 items-center justify-center rounded-full border transition-colors ${
+                        selected
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-muted-foreground hover:bg-accent"
+                      }`}
+                      disabled={!isPremium}
+                      key={avatar.value}
+                      title={avatar.label}
+                      type="button"
+                      onClick={() => setPerfilAvatar(avatar.value)}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <Button type="button" variant="outline" onClick={() => setPerfilModalAberto(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={!isPremium || savingPerfil}>
+                {savingPerfil ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                {perfilEditando ? "Salvar perfil" : "Criar perfil"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(perfilExcluindo)}
+        onOpenChange={(open) => {
+          if (!open) setPerfilExcluindo(null);
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Excluir perfil</DialogTitle>
+            <DialogDescription>
+              Confirme para remover este perfil financeiro e seus dados vinculados.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/35 p-4">
+            <Avatar value={perfilExcluindo?.avatar} label={perfilExcluindo?.nome ?? ""} />
+            <div className="min-w-0">
+              <p className="truncate font-semibold">{perfilExcluindo?.nome}</p>
+              <p className="text-xs text-muted-foreground">Esta ação não pode ser desfeita.</p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button type="button" variant="outline" onClick={() => setPerfilExcluindo(null)}>
+              Cancelar
+            </Button>
+            <Button
+              className="bg-destructive text-white hover:bg-destructive/90"
+              type="button"
+              onClick={excluirPerfil}
+              disabled={deletingPerfil}
+            >
+              {deletingPerfil && <Loader2 className="h-4 w-4 animate-spin" />}
+              Excluir perfil
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-
-

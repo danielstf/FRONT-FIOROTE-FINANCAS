@@ -36,6 +36,7 @@ import {
   DialogTitle,
 } from "../../components/ui/dialog";
 import { cn } from "../../lib/utils";
+import { useAuth } from "../../providers/auth-provider";
 import { DespesaForm } from "./despesa-form";
 import { getCategoryColor, getCategoryIcon } from "./category-icons";
 import {
@@ -49,7 +50,21 @@ import {
 
 type StatusFilter = "todas" | "pendentes" | "pagas" | "vencidas";
 
+function ajustarDataParaMes(dataIso: string | null, mesDestino: string) {
+  if (!dataIso) return dataIso;
+
+  const [, month] = mesDestino.split("-").map(Number);
+  const [datePart] = dataIso.split("T");
+  const [, , day] = datePart.split("-").map(Number);
+  const [yearText] = mesDestino.split("-");
+  const ultimoDia = new Date(Number(yearText), month, 0).getDate();
+  const diaSeguro = Math.min(day || 1, ultimoDia);
+
+  return `${mesDestino}-${String(diaSeguro).padStart(2, "0")}T00:00:00.000Z`;
+}
+
 export function DespesasPage() {
+  const { perfilFinanceiroId } = useAuth();
   const [mes, setMes] = useState(getCurrentMonth);
   const [despesas, setDespesas] = useState<Despesa[]>([]);
   const [total, setTotal] = useState(0);
@@ -115,7 +130,7 @@ export function DespesasPage() {
     setError("");
 
     try {
-      await despesasApi.alterarPagamento(despesa.id, !despesa.paga);
+      await despesasApi.alterarPagamento(despesa.id, !despesa.paga, mes);
       toast.success(
         despesa.paga ? "Despesa marcada como pendente." : "Despesa marcada como paga.",
       );
@@ -158,7 +173,7 @@ export function DespesasPage() {
   useEffect(() => {
     void carregarDespesas();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [perfilFinanceiroId]);
 
   return (
     <div className="space-y-6">
@@ -184,8 +199,13 @@ export function DespesasPage() {
                   <span className="capitalize">{formatMonthName(mes)}</span>.
                 </p>
               </div>
-              <Button className="sm:mt-1" onClick={() => setCadastroAberto(true)}>
-                <Plus className="h-4 w-4" />
+              <Button
+                className="h-11 border border-rose-400/30 bg-rose-600 px-5 text-white shadow-sm shadow-rose-600/20 hover:bg-rose-700 sm:mt-1"
+                onClick={() => setCadastroAberto(true)}
+              >
+                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-white/15">
+                  <Plus className="h-4 w-4" />
+                </span>
                 Nova despesa
               </Button>
             </div>
@@ -336,7 +356,10 @@ export function DespesasPage() {
               <p className="mt-1 text-sm text-muted-foreground">
                 Cadastre uma conta para iniciar o controle do mês.
               </p>
-              <Button className="mt-4" onClick={() => setCadastroAberto(true)}>
+              <Button
+                className="mt-4 border border-rose-400/30 bg-rose-600 text-white shadow-sm shadow-rose-600/20 hover:bg-rose-700"
+                onClick={() => setCadastroAberto(true)}
+              >
                 <Plus className="h-4 w-4" />
                 Cadastrar despesa
               </Button>
@@ -470,7 +493,20 @@ export function DespesasPage() {
                           className="h-9 w-9 border-blue-500/25 px-0 text-blue-700 hover:bg-blue-500/10 hover:text-blue-800 dark:text-blue-400"
                           title="Editar"
                           variant="outline"
-                          onClick={() => setDespesaEditando(despesa)}
+                          onClick={() =>
+                            setDespesaEditando(
+                              despesa.fixa
+                                ? {
+                                    ...despesa,
+                                    mesReferencia: `${mes}-01T00:00:00.000Z`,
+                                    dataVencimento: ajustarDataParaMes(
+                                      despesa.dataVencimento,
+                                      mes,
+                                    ),
+                                  }
+                                : despesa,
+                            )
+                          }
                         >
                           <PencilLine className="h-4 w-4" />
                         </Button>
@@ -556,9 +592,9 @@ export function DespesasPage() {
             <DialogTitle>Excluir despesa</DialogTitle>
             <DialogDescription>
               {despesaExcluindoParcelada
-                ? "Esta despesa faz parte de um parcelamento. Escolha se deseja remover apenas este mês/parcela ou excluir todas as parcelas."
+                ? "Esta despesa faz parte de um parcelamento. Escolha se deseja remover apenas esta parcela ou excluir o parcelamento."
                 : despesaExcluindoRecorrente
-                  ? "Esta despesa é fixa. Escolha se deseja remover apenas deste mês ou excluir todas as recorrências."
+                  ? "Esta despesa é fixa. Escolha se deseja remover apenas a selecionada ou esta e as próximas."
                 : "Esta ação remove a despesa selecionada definitivamente."}
             </DialogDescription>
           </DialogHeader>
@@ -597,7 +633,7 @@ export function DespesasPage() {
                     <span className="block font-medium">
                       {despesaExcluindoParcelada
                         ? "Remover somente esta parcela"
-                        : "Remover somente deste mês"}
+                        : "Remover somente a selecionada"}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {despesaExcluindoParcelada
@@ -618,13 +654,13 @@ export function DespesasPage() {
                   <span>
                     <span className="block font-medium">
                       {despesaExcluindoParcelada
-                        ? "Excluir todas as parcelas"
-                        : "Excluir todas"}
+                        ? "Excluir parcelamento"
+                        : "Excluir esta e as próximas"}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {despesaExcluindoParcelada
-                        ? "Remove o parcelamento completo."
-                        : "Remove a despesa fixa definitivamente."}
+                        ? "Remove todas as parcelas vinculadas."
+                        : "Mantém os meses anteriores e remove esta recorrência daqui para frente."}
                     </span>
                   </span>
                 </label>
@@ -653,7 +689,9 @@ export function DespesasPage() {
                 : despesaExcluindoParcelada && escopoExclusao === "mes"
                   ? "Remover esta parcela"
                 : despesaExcluindoRecorrente && escopoExclusao === "mes"
-                  ? "Remover deste mês"
+                  ? "Remover selecionada"
+                : despesaExcluindoRecorrente && escopoExclusao === "todas"
+                  ? "Excluir esta e próximas"
                 : "Excluir"}
             </Button>
           </div>

@@ -2,6 +2,7 @@ import { api } from "../client";
 import type {
   CriarReceitaPayload,
   EditarReceitaPayload,
+  ExcluirReceitaParams,
   ListarReceitasParams,
   ListarReceitasResponse,
   OpcoesReceitaResponse,
@@ -36,7 +37,7 @@ export const receitasApi = {
     return data;
   },
 
-  async excluir(receitaId: string) {
-    await api.delete(`/receitas/${receitaId}`);
+  async excluir(receitaId: string, params?: ExcluirReceitaParams) {
+    await api.delete(`/receitas/${receitaId}`, { params });
   },
 };

@@ -38,10 +38,10 @@ export const despesasApi = {
     return data;
   },
 
-  async alterarPagamento(despesaId: string, paga: boolean) {
+  async alterarPagamento(despesaId: string, paga: boolean, mes?: string) {
     const { data } = await api.patch<Despesa>(
       `/despesas/${despesaId}/pagamento`,
-      { paga },
+      { paga, mes },
     );
     return data;
   },

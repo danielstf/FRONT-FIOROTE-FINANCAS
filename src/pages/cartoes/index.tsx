@@ -26,8 +26,10 @@ import {
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { normalizeRequiredText, toUppercaseText } from "../../lib/text";
+import { useAuth } from "../../providers/auth-provider";
 
 export function CartoesPage() {
+  const { perfilFinanceiroId } = useAuth();
   const [cartoes, setCartoes] = useState<CartaoCredito[]>([]);
   const [nome, setNome] = useState("");
   const [editando, setEditando] = useState<CartaoCredito | null>(null);
@@ -118,7 +120,8 @@ export function CartoesPage() {
 
   useEffect(() => {
     void carregarCartoes();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [perfilFinanceiroId]);
 
   return (
     <div className="space-y-5">

@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./layouts/app-layout";
 import { AuthLayout } from "./layouts/auth-layout";
+import { AdminResumoPage } from "./pages/admin";
 import { CadastroPage } from "./pages/auth/cadastro";
 import { EsqueciSenhaPage } from "./pages/auth/esqueci-senha";
 import { LoginPage } from "./pages/auth/login";
@@ -20,6 +21,7 @@ import { EditarReceitaPage } from "./pages/receitas/editar";
 import { ReceitasPage } from "./pages/receitas";
 import { RelatoriosPage } from "./pages/relatorios";
 import { SugestoesPage } from "./pages/sugestoes";
+import { RequireAdmin } from "./routes/require-admin";
 import { RequireAuth } from "./routes/require-auth";
 
 export function App() {
@@ -55,7 +57,22 @@ export function App() {
         <Route path="relatorios" element={<RelatoriosPage />} />
         <Route path="premium" element={<PremiumPage />} />
         <Route path="sugestoes" element={<SugestoesPage />} />
-        <Route path="gestao" element={<GestaoPage />} />
+        <Route
+          path="gestao"
+          element={
+            <RequireAdmin>
+              <GestaoPage />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="admin"
+          element={
+            <RequireAdmin>
+              <AdminResumoPage />
+            </RequireAdmin>
+          }
+        />
         <Route path="configuracoes" element={<ConfiguracoesPage />} />
       </Route>
 
