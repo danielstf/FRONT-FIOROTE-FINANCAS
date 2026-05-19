@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { Check, ChevronDown, Menu, MessageSquareText, Settings } from "lucide-react";
+import { Check, Menu, Settings } from "lucide-react";
 import { pagamentosApi } from "../api/pagamentos/pagamentos-api";
 import { perfisApi } from "../api/perfis/perfis-api";
 import type { PerfilFinanceiro } from "../api/perfis/types";
 import { AdBanner } from "../components/ad-banner";
 import { BrandLogo } from "../components/brand-logo";
 import { Sidebar } from "../components/sidebar";
-import { ThemeToggle } from "../components/theme-toggle";
 import { Avatar } from "../components/ui/avatar";
 import { Button } from "../components/ui/button";
 import {
@@ -105,17 +104,28 @@ export function AppLayout() {
   function escolherPerfil(perfilId: string | null) {
     selecionarPerfilFinanceiro(perfilId);
     setProfileMenuOpen(false);
+    setMobileMenuOpen(false);
   }
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-background text-foreground lg:grid lg:h-dvh lg:grid-cols-[260px_1fr] lg:divide-x lg:divide-sidebar-border lg:overflow-hidden">
-      <Sidebar className="hidden lg:flex lg:flex-col" logoMood={logoMood} />
+      <Sidebar
+        className="hidden lg:flex lg:flex-col"
+        logoMood={logoMood}
+        perfilSelecionado={perfilSelecionado}
+        onProfileClick={() => setProfileMenuOpen(true)}
+      />
 
       <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <DialogContent className="left-0 top-0 h-dvh max-h-dvh w-72 max-w-[calc(100%-2rem)] translate-x-0 translate-y-0 gap-0 overflow-hidden rounded-none border-y-0 border-l-0 p-0 shadow-2xl data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left">
           <Sidebar
             className="flex h-full flex-col border-r-0"
             logoMood={logoMood}
+            perfilSelecionado={perfilSelecionado}
+            onProfileClick={() => {
+              setMobileMenuOpen(false);
+              setProfileMenuOpen(true);
+            }}
             onNavigate={() => setMobileMenuOpen(false)}
           />
         </DialogContent>
@@ -193,27 +203,6 @@ export function AppLayout() {
             </Button>
 
             <BrandLogo compact className="lg:hidden" mood={logoMood} />
-
-            <button
-              className="flex min-w-0 items-center gap-3 rounded-lg border border-transparent p-1.5 text-left transition-colors hover:border-border hover:bg-muted/50"
-              type="button"
-              onClick={() => setProfileMenuOpen(true)}
-            >
-              <Avatar
-                className="h-9 w-9"
-                value={perfilSelecionado?.avatar}
-                label={perfilSelecionado?.nome ?? session?.usuario.nome ?? "Perfil"}
-              />
-              <div className="hidden min-w-0 sm:block">
-                <p className="truncate text-sm font-semibold leading-tight text-foreground">
-                  {session?.usuario.nome}
-                </p>
-                <p className="truncate text-[11px] leading-tight text-muted-foreground">
-                  {perfilSelecionado ? perfilSelecionado.nome : "Perfil principal"}
-                </p>
-              </div>
-              <ChevronDown className="hidden h-4 w-4 shrink-0 text-muted-foreground sm:block" />
-            </button>
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
@@ -221,21 +210,6 @@ export function AppLayout() {
               {session?.usuario.plano ?? "FREE"}
             </span>
 
-            <div className="hidden h-5 w-px bg-border sm:block" />
-
-            <Button
-              asChild
-              aria-label="Enviar sugestão, reclamação ou elogio"
-              className="h-9 w-9 px-0 text-muted-foreground"
-              title="Atendimento"
-              variant="outline"
-            >
-              <Link to="/app/sugestoes">
-                <MessageSquareText className="h-4 w-4" />
-              </Link>
-            </Button>
-
-            <ThemeToggle />
           </div>
         </header>
 

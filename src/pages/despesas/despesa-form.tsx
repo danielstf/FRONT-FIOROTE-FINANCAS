@@ -411,7 +411,7 @@ export function DespesaForm({
                   checked={fixa}
                   disabled={!isPremium}
                   onChange={(event) => setFixa(event.target.checked)}
-                  className="mt-1 h-4 w-4 accent-emerald-600 disabled:cursor-not-allowed"
+                  className="mt-1 h-4 w-4 accent-blue-600 disabled:cursor-not-allowed"
                 />
                 <span>
                   <span className="flex items-center gap-2 text-sm font-medium">

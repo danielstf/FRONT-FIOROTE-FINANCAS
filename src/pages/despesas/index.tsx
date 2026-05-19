@@ -207,7 +207,8 @@ export function DespesasPage() {
               </div>
 
               <Button
-                className="h-10 shrink-0 border border-rose-400/30 bg-rose-600 px-4 text-sm text-white shadow-sm shadow-rose-600/20 hover:bg-rose-700 sm:mt-1"
+                className="h-10 shrink-0 px-4 text-sm sm:mt-1"
+                variant="destructive"
                 onClick={() => setCadastroAberto(true)}
               >
                 <span className="flex h-6 w-6 items-center justify-center rounded-md bg-white/15">
@@ -391,7 +392,8 @@ export function DespesasPage() {
                 Cadastre uma conta para iniciar o controle do mês.
               </p>
               <Button
-                className="mt-5 border border-rose-400/30 bg-rose-600 text-white shadow-sm shadow-rose-600/20 hover:bg-rose-700"
+                className="mt-5"
+                variant="destructive"
                 onClick={() => setCadastroAberto(true)}
               >
                 <Plus className="h-4 w-4" />
@@ -706,8 +708,8 @@ export function DespesasPage() {
               Cancelar
             </Button>
             <Button
-              className="bg-destructive text-white hover:bg-destructive/90"
               type="button"
+              variant="destructive"
               onClick={excluirDespesa}
               disabled={busyId === despesaExcluindo?.id}
             >

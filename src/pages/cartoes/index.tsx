@@ -125,13 +125,11 @@ export function CartoesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <section className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
-        <div className="relative grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:p-8">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_300px] lg:p-7">
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-              <Sparkles className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
+              <Sparkles className="h-4 w-4" />
               Cartões de crédito
             </div>
 
@@ -146,10 +144,10 @@ export function CartoesPage() {
             </div>
           </div>
 
-          <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
+          <Card className="self-start border-primary/20 bg-background shadow-sm">
             <CardContent className="p-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                   <WalletCards className="h-6 w-6" />
                 </div>
                 <div>
@@ -165,8 +163,8 @@ export function CartoesPage() {
                   </p>
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5 text-xs text-emerald-700 dark:text-emerald-400">
-                <BadgeCheck className="h-3.5 w-3.5 shrink-0" />
+              <div className="mt-4 flex items-center gap-2 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-700 dark:text-emerald-400">
+                <BadgeCheck className="h-4 w-4 shrink-0" />
                 Disponíveis no cadastro de despesas
               </div>
             </CardContent>
@@ -324,4 +322,3 @@ export function CartoesPage() {
     </div>
   );
 }
-

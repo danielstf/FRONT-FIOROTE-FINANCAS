@@ -118,20 +118,18 @@ export function AdminResumoPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <section className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
-        <div className="relative flex flex-col gap-4 p-6 sm:flex-row sm:items-start sm:justify-between lg:p-8">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-start sm:justify-between lg:p-7">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-              <ShieldAlert className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
+              <ShieldAlert className="h-4 w-4" />
               Administração
             </div>
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight lg:text-3xl">
+              <h1 className="text-2xl font-semibold tracking-normal lg:text-3xl">
                 Relatório administrativo
               </h1>
-              <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">
+              <p className="mt-2 max-w-xl text-sm text-muted-foreground">
                 Visão geral de usuários, planos, perfis e movimentações do
                 sistema.
               </p>

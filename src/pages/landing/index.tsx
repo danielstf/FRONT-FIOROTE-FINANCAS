@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BrandLogo } from "../../components/brand-logo";
-import { ThemeToggle } from "../../components/theme-toggle";
 import { Button } from "../../components/ui/button";
 import {
   Card,
@@ -65,13 +64,17 @@ const features = [
 
 export function LandingPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="dark min-h-screen bg-background text-foreground">
       {/* ── HEADER ── */}
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 lg:h-20 lg:px-8">
-          <BrandLogo mood="positive" size="large" />
+      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur-md">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4 lg:h-20 lg:px-8">
+          <BrandLogo
+            className="min-w-0 flex-1 sm:flex-none"
+            mood="positive"
+            size="nav"
+          />
 
-          <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground lg:flex">
+          <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground lg:flex xl:gap-8">
             <a
               className="transition-colors hover:text-foreground"
               href="#funcoes"
@@ -92,14 +95,14 @@ export function LandingPage() {
             </a>
           </nav>
 
-          <div className="flex shrink-0 items-center gap-2">
-            <ThemeToggle />
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <Button asChild className="hidden sm:inline-flex" variant="ghost">
               <Link to="/login">Entrar</Link>
             </Button>
-            <Button asChild>
+            <Button asChild className="px-3 sm:px-4">
               <Link to="/cadastro">
-                Começar grátis
+                <span className="sm:hidden">Começar</span>
+                <span className="hidden sm:inline">Começar grátis</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </Button>

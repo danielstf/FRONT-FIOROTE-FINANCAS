@@ -173,7 +173,7 @@ export function ReceitasPage() {
                 />
               </div>
               <Button
-                className="h-11 border border-blue-400/30 bg-blue-600 px-5 text-white shadow-sm shadow-blue-600/20 hover:bg-blue-700"
+                className="h-11 px-5"
                 onClick={() => setCadastroAberto(true)}
               >
                 <span className="flex h-7 w-7 items-center justify-center rounded-md bg-white/15">
@@ -248,7 +248,7 @@ export function ReceitasPage() {
                 Comece adicionando uma entrada para compor o total mensal.
               </p>
               <Button
-                className="mt-4 border border-blue-400/30 bg-blue-600 text-white shadow-sm shadow-blue-600/20 hover:bg-blue-700"
+                className="mt-4"
                 onClick={() => setCadastroAberto(true)}
               >
                 <Plus className="h-4 w-4" />
@@ -440,8 +440,8 @@ export function ReceitasPage() {
               Cancelar
             </Button>
             <Button
-              className="bg-destructive text-white hover:bg-destructive/90"
               type="button"
+              variant="destructive"
               onClick={excluirReceita}
               disabled={deletingId === receitaExcluindo?.id}
             >

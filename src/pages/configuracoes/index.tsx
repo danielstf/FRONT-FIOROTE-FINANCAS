@@ -1,9 +1,9 @@
-import { useEffect, useState, type FormEvent } from "react";
 import {
   BadgeCheck,
   Crown,
   KeyRound,
   Loader2,
+  LogOut,
   PencilLine,
   Plus,
   Save,
@@ -13,12 +13,18 @@ import {
   Trash2,
   UserRound,
 } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { authApi } from "../../api/auth/auth-api";
 import { getApiErrorMessage } from "../../api/errors";
 import { perfisApi } from "../../api/perfis/perfis-api";
 import type { PerfilFinanceiro } from "../../api/perfis/types";
-import { Avatar, avatarOptions, getAvatarOption } from "../../components/ui/avatar";
+import { ThemeToggle } from "../../components/theme-toggle";
+import {
+  Avatar,
+  avatarOptions,
+  getAvatarOption,
+} from "../../components/ui/avatar";
 import { Button } from "../../components/ui/button";
 import {
   Card,
@@ -36,7 +42,6 @@ import {
 } from "../../components/ui/dialog";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
-import { ThemeToggle } from "../../components/theme-toggle";
 import { useAuth } from "../../providers/auth-provider";
 
 export function ConfiguracoesPage() {
@@ -46,6 +51,7 @@ export function ConfiguracoesPage() {
     atualizarUsuarioSessao,
     perfilFinanceiroId,
     selecionarPerfilFinanceiro,
+    logout,
   } = useAuth();
   const usuarioTemSenha = session?.usuario.temSenha ?? true;
   const isPremium = session?.usuario.plano === "PREMIUM";
@@ -54,12 +60,15 @@ export function ConfiguracoesPage() {
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [perfis, setPerfis] = useState<PerfilFinanceiro[]>([]);
-  const [perfilEditando, setPerfilEditando] = useState<PerfilFinanceiro | null>(null);
+  const [perfilEditando, setPerfilEditando] = useState<PerfilFinanceiro | null>(
+    null,
+  );
   const [perfilNome, setPerfilNome] = useState("");
   const [perfilAvatar, setPerfilAvatar] = useState("user");
   const [senhaModalAberto, setSenhaModalAberto] = useState(false);
   const [perfilModalAberto, setPerfilModalAberto] = useState(false);
-  const [perfilExcluindo, setPerfilExcluindo] = useState<PerfilFinanceiro | null>(null);
+  const [perfilExcluindo, setPerfilExcluindo] =
+    useState<PerfilFinanceiro | null>(null);
   const [loadingPerfis, setLoadingPerfis] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
@@ -109,7 +118,9 @@ export function ConfiguracoesPage() {
     setSavingPassword(true);
     try {
       const response = await authApi.trocarSenha({
-        senhaAtual: usuarioTemSenha ? senhaAtual.trim() || undefined : undefined,
+        senhaAtual: usuarioTemSenha
+          ? senhaAtual.trim() || undefined
+          : undefined,
         novaSenha,
       });
 
@@ -181,7 +192,8 @@ export function ConfiguracoesPage() {
     setDeletingPerfil(true);
     try {
       await perfisApi.excluir(perfilExcluindo.id);
-      if (perfilFinanceiroId === perfilExcluindo.id) selecionarPerfilFinanceiro(null);
+      if (perfilFinanceiroId === perfilExcluindo.id)
+        selecionarPerfilFinanceiro(null);
       if (perfilEditando?.id === perfilExcluindo.id) limparPerfil();
       setPerfilExcluindo(null);
       toast.success("Perfil excluído com sucesso.");
@@ -233,7 +245,9 @@ export function ConfiguracoesPage() {
                 <ShieldCheck className="h-6 w-6" />
               </span>
               <div className="min-w-0">
-                <p className="truncate font-semibold">{session?.usuario.nome}</p>
+                <p className="truncate font-semibold">
+                  {session?.usuario.nome}
+                </p>
                 <p className="truncate text-xs text-muted-foreground">
                   {session?.usuario.email}
                 </p>
@@ -267,7 +281,11 @@ export function ConfiguracoesPage() {
                 <Label>Email</Label>
                 <Input value={session?.usuario.email ?? ""} disabled />
               </div>
-              <Button className="w-full sm:w-fit" type="submit" disabled={savingProfile}>
+              <Button
+                className="w-full sm:w-fit"
+                type="submit"
+                disabled={savingProfile}
+              >
                 {savingProfile ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
@@ -312,7 +330,10 @@ export function ConfiguracoesPage() {
                   </p>
                 </div>
               </div>
-              <Button variant="outline" onClick={() => setSenhaModalAberto(true)}>
+              <Button
+                variant="outline"
+                onClick={() => setSenhaModalAberto(true)}
+              >
                 {usuarioTemSenha ? "Trocar" : "Cadastrar"}
               </Button>
             </div>
@@ -329,6 +350,24 @@ export function ConfiguracoesPage() {
                 </div>
               </div>
               <ThemeToggle />
+            </div>
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-destructive/10 text-destructive">
+                  <LogOut className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-semibold text-destructive">
+                    Sair da conta
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Encerre sua sessão neste dispositivo.
+                  </p>
+                </div>
+              </div>
+              <Button variant="destructive" onClick={logout}>
+                Sair
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -490,7 +529,8 @@ export function ConfiguracoesPage() {
               {perfilEditando ? "Editar perfil" : "Novo perfil"}
             </DialogTitle>
             <DialogDescription>
-              Defina o nome e o ícone usado para identificar o perfil financeiro.
+              Defina o nome e o ícone usado para identificar o perfil
+              financeiro.
             </DialogDescription>
           </DialogHeader>
           <form className="grid gap-4" onSubmit={salvarPerfilFinanceiro}>
@@ -533,7 +573,11 @@ export function ConfiguracoesPage() {
               </div>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <Button type="button" variant="outline" onClick={() => setPerfilModalAberto(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setPerfilModalAberto(false)}
+              >
                 Cancelar
               </Button>
               <Button type="submit" disabled={!isPremium || savingPerfil}>
@@ -559,18 +603,28 @@ export function ConfiguracoesPage() {
           <DialogHeader>
             <DialogTitle>Excluir perfil</DialogTitle>
             <DialogDescription>
-              Confirme para remover este perfil financeiro e seus dados vinculados.
+              Confirme para remover este perfil financeiro e seus dados
+              vinculados.
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/35 p-4">
-            <Avatar value={perfilExcluindo?.avatar} label={perfilExcluindo?.nome ?? ""} />
+            <Avatar
+              value={perfilExcluindo?.avatar}
+              label={perfilExcluindo?.nome ?? ""}
+            />
             <div className="min-w-0">
               <p className="truncate font-semibold">{perfilExcluindo?.nome}</p>
-              <p className="text-xs text-muted-foreground">Esta ação não pode ser desfeita.</p>
+              <p className="text-xs text-muted-foreground">
+                Esta ação não pode ser desfeita.
+              </p>
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <Button type="button" variant="outline" onClick={() => setPerfilExcluindo(null)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setPerfilExcluindo(null)}
+            >
               Cancelar
             </Button>
             <Button

@@ -155,18 +155,16 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Hero Header */}
-      <section className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
-        <div className="relative grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_300px] lg:p-8">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_300px] lg:p-7">
           <div className="space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-              <Sparkles className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
+              <Sparkles className="h-4 w-4" />
               <span className="capitalize">{formatMonthName(mes)}</span>
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight text-card-foreground sm:text-3xl lg:text-4xl">
+              <h1 className="text-2xl font-semibold tracking-normal text-card-foreground sm:text-3xl lg:text-4xl">
                 Olá, {session?.usuario.nome}.{" "}
                 <span className="block sm:inline">
                   Seu mês está{" "}
@@ -176,7 +174,7 @@ export function DashboardPage() {
                   .
                 </span>
               </h1>
-              <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              <p className="max-w-2xl text-sm text-muted-foreground">
                 Acompanhe o saldo, veja entradas recentes e resolva suas pendências
                 sem sair do dashboard.
               </p>
@@ -187,7 +185,7 @@ export function DashboardPage() {
                 <div
                   key={stat.label}
                   className={cn(
-                    "rounded-xl border border-l-4 border-border bg-background p-4 transition-shadow hover:shadow-sm",
+                    "rounded-lg border border-l-4 border-border bg-background p-4 transition-shadow hover:shadow-sm",
                     stat.borderAccent,
                   )}
                 >
@@ -195,7 +193,7 @@ export function DashboardPage() {
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       {stat.label}
                     </p>
-                    <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg", stat.iconBg)}>
+                    <span className={cn("flex h-7 w-7 items-center justify-center rounded-md", stat.iconBg)}>
                       <stat.icon className="h-3.5 w-3.5" />
                     </span>
                   </div>
@@ -207,8 +205,7 @@ export function DashboardPage() {
             </div>
           </div>
 
-          {/* Saldo Card */}
-          <Card className="self-start border border-primary/20 bg-background/80 shadow-sm">
+          <Card className="self-start border border-primary/20 bg-background shadow-sm">
             <CardContent className="space-y-5 p-5">
               <div className="min-w-0">
                 <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
