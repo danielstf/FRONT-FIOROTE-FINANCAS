@@ -12,7 +12,8 @@ export type AdminResumoResponse = {
     despesas: number;
   };
   simultaneos: {
-    atual: number | null;
+    atual: number;
+    janelaMinutos: number;
     observacao: string;
   };
   ultimosUsuarios: Array<{

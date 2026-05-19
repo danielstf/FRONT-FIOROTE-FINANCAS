@@ -254,10 +254,10 @@ export function AdminResumoPage() {
               <Card className="shadow-sm">
                 <CardHeader>
                   <CardDescription>Usuários simultâneos</CardDescription>
-                  <CardTitle>{resumo.simultaneos.atual ?? "Não medido"}</CardTitle>
+                  <CardTitle>{resumo.simultaneos.atual}</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 text-sm text-muted-foreground">
-                  {resumo.simultaneos.observacao}
+                  Ativos nos últimos {resumo.simultaneos.janelaMinutos} minutos.
                 </CardContent>
               </Card>
             </div>

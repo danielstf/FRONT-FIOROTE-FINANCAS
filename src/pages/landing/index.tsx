@@ -5,6 +5,7 @@ import {
   BellRing,
   CheckCircle2,
   CreditCard,
+  FileSpreadsheet,
   Layers3,
   LockKeyhole,
   MonitorSmartphone,
@@ -28,14 +29,19 @@ import {
 
 const features = [
   {
-    title: "Controle básico",
-    description: "Cadastre receitas, despesas, cartões e vencimentos do mês.",
+    title: "Controle financeiro",
+    description: "Cadastre receitas, despesas, cartões, vencimentos e pagamentos.",
     icon: WalletCards,
   },
   {
     title: "Relatórios Premium",
-    description: "Veja gráficos mensais e anuais para entender melhor seu dinheiro.",
+    description: "Compare meses, anos, categorias e saldos com gráficos claros.",
     icon: PieChart,
+  },
+  {
+    title: "Exportação Excel",
+    description: "Baixe relatórios por mês, ano ou meses selecionados.",
+    icon: FileSpreadsheet,
   },
   {
     title: "Perfis financeiros",
@@ -44,8 +50,13 @@ const features = [
   },
   {
     title: "Recorrências",
-    description: "Receitas e despesas fixas ficam disponíveis para usuários Premium.",
+    description: "Controle receitas e despesas fixas com escopo mensal ou futuro.",
     icon: Repeat2,
+  },
+  {
+    title: "Web e Android",
+    description: "Use no navegador e no aplicativo Android do Fiorote Control.",
+    icon: Smartphone,
   },
 ];
 
@@ -62,8 +73,8 @@ export function LandingPage() {
             <a className="transition-colors hover:text-foreground" href="#precos">
               Planos
             </a>
-            <a className="transition-colors hover:text-foreground" href="#app">
-              Aplicativo
+            <a className="transition-colors hover:text-foreground" href="#tutorial">
+              Tutorial
             </a>
           </nav>
           <div className="flex shrink-0 items-center gap-2">
@@ -93,9 +104,9 @@ export function LandingPage() {
                 Fiorote Control para organizar seu dinheiro todos os meses
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-                Controle entradas, contas, cartões, perfis financeiros e relatórios
-                em uma experiência feita para o navegador e, em breve, também para
-                Android na Play Store.
+                Controle entradas, contas, cartões, perfis financeiros,
+                recorrências e relatórios com exportação em Excel. O sistema
+                funciona na web e também no app Android.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -120,7 +131,7 @@ export function LandingPage() {
               </span>
               <span className="inline-flex items-center gap-2">
                 <MonitorSmartphone className="h-4 w-4 text-primary" />
-                Web e app em breve
+                Web e Android
               </span>
             </div>
           </div>
@@ -169,8 +180,8 @@ export function LandingPage() {
                 <Repeat2 className="h-4 w-4 text-emerald-600" />
               </div>
               <div className="flex items-center justify-between">
-                <span>Relatório anual</span>
-                <PieChart className="h-4 w-4 text-primary" />
+                <span>Relatório Excel</span>
+                <FileSpreadsheet className="h-4 w-4 text-primary" />
               </div>
             </div>
           </div>
@@ -186,7 +197,7 @@ export function LandingPage() {
             O essencial fica no plano grátis. Recursos avançados ficam no Premium.
           </p>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {features.map((feature) => (
             <Card className="shadow-sm" key={feature.title}>
               <CardHeader>
@@ -209,7 +220,7 @@ export function LandingPage() {
               Comece grátis e ative o Premium quando precisar
             </h2>
             <p className="text-muted-foreground">
-              O Premium custa R$ 5,00 por mês e libera relatórios, perfis
+              O Premium libera relatórios completos, exportação Excel, perfis
               financeiros, recorrências e remoção de anúncios.
             </p>
           </div>
@@ -252,22 +263,18 @@ export function LandingPage() {
                   R$ 5,00 <span className="text-sm text-muted-foreground">/mês</span>
                 </p>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex gap-2">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" />
-                    Relatórios visuais
-                  </li>
-                  <li className="flex gap-2">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" />
-                    Até 5 perfis financeiros
-                  </li>
-                  <li className="flex gap-2">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" />
-                    Receitas e despesas fixas
-                  </li>
-                  <li className="flex gap-2">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" />
-                    Sem anúncios
-                  </li>
+                  {[
+                    "Relatórios visuais",
+                    "Exportação Excel",
+                    "Até 5 perfis financeiros",
+                    "Receitas e despesas fixas",
+                    "Sem anúncios",
+                  ].map((item) => (
+                    <li className="flex gap-2" key={item}>
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" />
+                      {item}
+                    </li>
+                  ))}
                 </ul>
                 <Button asChild className="w-full">
                   <Link to="/cadastro">Criar conta</Link>
@@ -278,34 +285,33 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="border-y border-border bg-card" id="app">
+      <section className="border-y border-border bg-card" id="tutorial">
         <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-6">
           <div className="space-y-3">
-            <p className="text-sm font-semibold uppercase text-primary">Em breve</p>
+            <p className="text-sm font-semibold uppercase text-primary">Tutorial</p>
             <h2 className="text-3xl font-semibold tracking-normal">
-              Fiorote Control também no celular
+              Aprenda o fluxo principal em poucos passos
             </h2>
             <p className="text-muted-foreground">
-              Além da versão web, o aplicativo Android será disponibilizado na Play
-              Store para consultar e atualizar lançamentos nas duas plataformas.
+              O tutorial em vídeo pode ser publicado aqui quando o arquivo estiver
+              pronto. Por enquanto, a página já mostra o roteiro de uso do sistema.
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border border-border bg-background p-5 shadow-sm">
-              <MonitorSmartphone className="mb-4 h-7 w-7 text-primary" />
-              <h3 className="text-xl font-semibold">Use no computador</h3>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Melhor para revisar relatórios, cadastrar dados e acompanhar o mês.
-              </p>
-            </div>
-            <div className="rounded-lg border border-primary/30 bg-primary/10 p-5 shadow-sm">
-              <Smartphone className="mb-4 h-7 w-7 text-primary" />
-              <h3 className="text-xl font-semibold">App Android</h3>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Em breve na Play Store para uso rápido no dia a dia.
-              </p>
-            </div>
+            {[
+              ["1", "Cadastre receitas e despesas"],
+              ["2", "Separe perfis financeiros"],
+              ["3", "Acompanhe o dashboard mensal"],
+              ["4", "Exporte relatórios em Excel"],
+            ].map(([step, title]) => (
+              <div className="rounded-lg border border-border bg-background p-5 shadow-sm" key={step}>
+                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 font-bold text-primary">
+                  {step}
+                </span>
+                <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+              </div>
+            ))}
           </div>
         </div>
       </section>

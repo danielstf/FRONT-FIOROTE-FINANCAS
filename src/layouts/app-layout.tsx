@@ -162,7 +162,7 @@ export function AppLayout() {
       </Dialog>
 
       <div className="flex min-h-dvh min-w-0 flex-col lg:min-h-0">
-        <header className="sticky top-0 z-20 flex h-[70px] items-center justify-between gap-3 border-b border-sidebar-border bg-card/95 px-3 shadow-sm backdrop-blur-md sm:px-5 lg:px-7">
+        <header className="sticky top-0 z-20 flex h-17.5 items-center justify-between gap-3 border-b border-sidebar-border bg-card/95 px-3 shadow-sm backdrop-blur-md sm:px-5 lg:px-7">
           <div className="flex min-w-0 items-center gap-3">
             <Button
               aria-label="Abrir menu"
@@ -170,7 +170,7 @@ export function AppLayout() {
               variant="outline"
               onClick={() => setMobileMenuOpen(true)}
             >
-              <Menu className="h-[18px] w-[18px]" />
+              <Menu className="h-4.5 w-4.5" />
             </Button>
 
             <BrandLogo compact className="lg:hidden" mood={logoMood} />

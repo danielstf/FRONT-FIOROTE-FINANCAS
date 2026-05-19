@@ -14,7 +14,9 @@ export function BrandLogo({
   size = "default",
 }: BrandLogoProps) {
   const isNegative = mood === "negative";
-  const logoSrc = isNegative ? "/logo-real-negative.png" : "/logo-real-positive.png";
+  const logoSrc = isNegative
+    ? "/logo-fiorote-control-negative.svg"
+    : "/logo-fiorote-control-positive.svg";
   const iconSize =
     size === "large"
       ? "h-20 w-20"
