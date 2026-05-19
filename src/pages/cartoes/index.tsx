@@ -1,4 +1,3 @@
-import { useEffect, useState, type FormEvent } from "react";
 import {
   BadgeCheck,
   CreditCard,
@@ -11,6 +10,7 @@ import {
   WalletCards,
   X,
 } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { cartoesApi } from "../../api/cartoes/cartoes-api";
 import type { CartaoCredito } from "../../api/cartoes/types";
@@ -124,20 +124,22 @@ export function CartoesPage() {
   }, [perfilFinanceiroId]);
 
   return (
-    <div className="space-y-5">
-      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-        <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-7">
-          <div className="space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium uppercase text-primary">
-              <Sparkles className="h-4 w-4" />
+    <div className="space-y-6">
+      {/* Header */}
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+        <div className="relative grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:p-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+              <Sparkles className="h-3.5 w-3.5" />
               Cartões de crédito
             </div>
 
-            <div className="space-y-3">
-              <h1 className="text-2xl font-semibold uppercase tracking-normal text-card-foreground lg:text-3xl">
-                Organize os cartões usados nas despesas
+            <div className="space-y-2">
+              <h1 className="text-2xl font-semibold tracking-tight text-card-foreground lg:text-3xl">
+                Organize seus cartões
               </h1>
-              <p className="max-w-2xl text-sm text-muted-foreground">
+              <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
                 Cadastre os cartões da conta para vincular compras no crédito,
                 parcelas e lançamentos futuros com mais clareza.
               </p>
@@ -145,66 +147,75 @@ export function CartoesPage() {
           </div>
 
           <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
-            <CardContent className="space-y-4 p-5">
+            <CardContent className="p-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <WalletCards className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Cartões cadastrados</p>
-                  <p className="mt-1 text-3xl font-semibold tracking-normal">
-                    {cartoes.length}
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Cartões cadastrados
+                  </p>
+                  <p className="mt-0.5 text-3xl font-bold tracking-tight">
+                    {loading ? (
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    ) : (
+                      cartoes.length
+                    )}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 rounded-md border border-border p-3 text-sm">
-                <BadgeCheck className="h-4 w-4 text-emerald-600" />
-                <span className="text-muted-foreground">
-                  Disponíveis no cadastro de despesas
-                </span>
+              <div className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5 text-xs text-emerald-700 dark:text-emerald-400">
+                <BadgeCheck className="h-3.5 w-3.5 shrink-0" />
+                Disponíveis no cadastro de despesas
               </div>
             </CardContent>
           </Card>
         </div>
       </section>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,520px)_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,480px)_1fr]">
+        {/* Formulário */}
         <Card className="shadow-sm">
-          <CardHeader>
+          <CardHeader className="border-b border-border pb-4">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
-                {editando ? <Pencil className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                {editando ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
               </span>
-              <div className="min-w-0">
-                <CardTitle className="text-base uppercase tracking-normal">
+              <div>
+                <CardTitle className="text-sm font-semibold uppercase tracking-wide">
                   {editando ? "Editar cartão" : "Novo cartão"}
                 </CardTitle>
-                <CardDescription>
-                  Use nomes simples para reconhecer o cartão rapidamente.
+                <CardDescription className="text-xs">
+                  Use nomes simples para reconhecer rapidamente.
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-5">
             <form className="grid gap-4" onSubmit={salvarCartao}>
               <div className="space-y-2">
-                <Label htmlFor="nome-cartao">Nome do cartão</Label>
+                <Label htmlFor="nome-cartao" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Nome do cartão
+                </Label>
                 <Input
                   id="nome-cartao"
                   value={nome}
                   onChange={(event) => setNome(toUppercaseText(event.target.value))}
-                  placeholder="Ex: Nubank, Inter, Itaú"
+                  placeholder="Ex: NUBANK, INTER, ITAÚ"
                   required
+                  className="h-10"
                 />
               </div>
 
               {error && (
-                <p className="rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <p className="rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-2.5 text-sm text-destructive">
                   {error}
                 </p>
               )}
+
               <div className="flex flex-col gap-2 sm:flex-row">
-                <Button type="submit" disabled={saving}>
+                <Button type="submit" disabled={saving} className="h-10 flex-1 gap-2">
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -213,7 +224,12 @@ export function CartoesPage() {
                   {editando ? "Salvar alterações" : "Cadastrar cartão"}
                 </Button>
                 {editando && (
-                  <Button type="button" variant="outline" onClick={cancelarEdicao}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={cancelarEdicao}
+                    className="h-10 gap-2"
+                  >
                     <X className="h-4 w-4" />
                     Cancelar
                   </Button>
@@ -223,45 +239,51 @@ export function CartoesPage() {
           </CardContent>
         </Card>
 
+        {/* Lista de cartões */}
         <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-base uppercase tracking-normal">
+          <CardHeader className="border-b border-border pb-4">
+            <CardTitle className="text-sm font-semibold uppercase tracking-wide">
               Cartões cadastrados
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs">
               Estes cartões aparecem no seletor de despesas com cartão de crédito.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {loading && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 p-5 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Carregando cartões...
               </div>
             )}
 
             {!loading && cartoes.length === 0 && (
-              <div className="rounded-lg border border-dashed border-border bg-muted/35 p-8 text-center">
-                <p className="font-medium text-foreground">Nenhum cartão cadastrado.</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Cadastre seu primeiro cartão para usar em despesas no crédito.
-                </p>
+              <div className="flex flex-col items-center justify-center gap-3 p-12 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                  <CreditCard className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Nenhum cartão cadastrado.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Cadastre seu primeiro cartão para usar em despesas.
+                  </p>
+                </div>
               </div>
             )}
 
             {!loading && cartoes.length > 0 && (
-              <div className="grid gap-3">
+              <div className="divide-y divide-border">
                 {cartoes.map((cartao) => (
                   <div
                     key={cartao.id}
-                    className="grid gap-3 rounded-lg border border-border bg-background p-4 shadow-sm transition-colors hover:border-primary/30 hover:bg-card sm:grid-cols-[1fr_auto]"
+                    className="flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex min-w-0 items-center gap-3">
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                        <CreditCard className="h-5 w-5" />
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <CreditCard className="h-4 w-4" />
                       </span>
                       <div className="min-w-0">
-                        <p className="truncate font-semibold text-foreground">
+                        <p className="truncate text-sm font-semibold text-foreground">
                           {cartao.nome}
                         </p>
                         <p className="text-xs text-muted-foreground">
@@ -269,26 +291,26 @@ export function CartoesPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex justify-end gap-2">
+                    <div className="flex shrink-0 justify-end gap-2">
                       <Button
-                        className="h-9 w-9 px-0"
+                        className="h-8 w-8 rounded-lg p-0"
                         title="Editar cartão"
                         variant="outline"
                         onClick={() => iniciarEdicao(cartao)}
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-3.5 w-3.5" />
                       </Button>
                       <Button
-                        className="h-9 w-9 px-0 text-destructive hover:text-destructive"
+                        className="h-8 w-8 rounded-lg p-0 text-destructive hover:text-destructive"
                         title="Excluir cartão"
                         variant="outline"
                         onClick={() => excluirCartao(cartao)}
                         disabled={busyId === cartao.id}
                       >
                         {busyId === cartao.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
                         ) : (
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         )}
                       </Button>
                     </div>
@@ -302,3 +324,4 @@ export function CartoesPage() {
     </div>
   );
 }
+

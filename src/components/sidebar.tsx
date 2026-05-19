@@ -55,7 +55,7 @@ export function Sidebar({ className, logoMood = "neutral", onNavigate }: Sidebar
         className,
       )}
     >
-      <div className="border-b border-sidebar-border px-4 py-5">
+      <div className="border-b border-sidebar-border px-4 py-6">
         <BrandLogo className="justify-center" mood={logoMood} size="sidebar" />
       </div>
 

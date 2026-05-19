@@ -8,58 +8,28 @@ type BrandLogoProps = {
 };
 
 export function BrandLogo({
-  compact = false,
   className,
   mood = "neutral",
   size = "default",
 }: BrandLogoProps) {
   const isNegative = mood === "negative";
   const logoSrc = isNegative
-    ? "/logo-fiorote-control-negative.svg"
-    : "/logo-fiorote-control-positive.svg";
-  const iconSize =
+    ? "/logo-fiorote-control-negative.png"
+    : "/logo-fiorote-control-positive.png";
+  const logoSize =
     size === "large"
-      ? "h-20 w-20"
+      ? "h-24 w-auto max-w-[340px] sm:max-w-[420px]"
       : size === "sidebar"
-        ? "h-16 w-16"
-        : "h-14 w-14";
-  const titleSize =
-    size === "large"
-      ? "text-3xl sm:text-4xl"
-      : size === "sidebar"
-        ? "text-xl xl:text-2xl"
-        : "text-xl";
-  const subtitleSize = size === "sidebar" ? "text-xs xl:text-sm" : "text-xs";
+        ? "h-20 w-auto max-w-[240px]"
+        : "h-14 w-auto max-w-[220px]";
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn("flex min-w-0 items-center", className)}>
       <img
         alt={isNegative ? "Fiorote Control saldo negativo" : "Fiorote Control"}
-        className={cn("shrink-0 object-contain drop-shadow-sm", iconSize)}
+        className={cn("shrink-0 object-contain drop-shadow-sm", logoSize)}
         src={logoSrc}
       />
-
-      {!compact && (
-        <span className="min-w-0 leading-none">
-          <span
-            className={cn(
-              "block font-black uppercase tracking-normal text-foreground drop-shadow-sm",
-              titleSize,
-            )}
-          >
-            Fiorote
-          </span>
-          <span
-            className={cn(
-              "block text-center font-extrabold uppercase tracking-[0.26em]",
-              isNegative ? "text-red-600" : "text-primary",
-              subtitleSize,
-            )}
-          >
-            Control
-          </span>
-        </span>
-      )}
     </div>
   );
 }

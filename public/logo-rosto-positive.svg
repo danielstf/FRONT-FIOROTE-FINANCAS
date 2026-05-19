@@ -1,0 +1,24 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="facePositive" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(210 168) rotate(52) scale(330)">
+      <stop offset="0" stop-color="#E9FF6A"/>
+      <stop offset="0.48" stop-color="#9BE21C"/>
+      <stop offset="1" stop-color="#138A35"/>
+    </radialGradient>
+    <linearGradient id="ringPositive" x1="72" y1="82" x2="432" y2="438" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#78E13F"/>
+      <stop offset="1" stop-color="#006F2A"/>
+    </linearGradient>
+    <filter id="softShadowPositive" x="36" y="38" width="440" height="440" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#003B18" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <g filter="url(#softShadowPositive)">
+    <circle cx="256" cy="256" r="190" fill="url(#facePositive)"/>
+    <circle cx="256" cy="256" r="202" stroke="url(#ringPositive)" stroke-width="24"/>
+    <ellipse cx="190" cy="215" rx="24" ry="42" fill="#00672E"/>
+    <ellipse cx="322" cy="215" rx="24" ry="42" fill="#00672E"/>
+    <path d="M154 300C174 365 335 365 358 300" stroke="#00672E" stroke-width="38" stroke-linecap="round"/>
+    <path d="M160 302C184 342 325 345 352 302" stroke="#D6FF58" stroke-width="10" stroke-linecap="round" opacity="0.55"/>
+  </g>
+</svg>

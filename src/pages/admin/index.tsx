@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
 import {
   BarChart3,
   Crown,
@@ -9,6 +8,7 @@ import {
   Users,
   WalletCards,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { adminApi } from "../../api/admin/admin-api";
 import type { AdminResumoResponse } from "../../api/admin/types";
 import { getApiErrorMessage } from "../../api/errors";
@@ -20,8 +20,8 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { useAuth } from "../../providers/auth-provider";
 import { cn } from "../../lib/utils";
+import { useAuth } from "../../providers/auth-provider";
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -80,27 +80,66 @@ export function AdminResumoPage() {
     );
   }
 
+  const metrics = [
+    {
+      label: "Usuários",
+      value: resumo?.usuarios.total ?? 0,
+      icon: Users,
+      color: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-500/10",
+      border: "border-blue-500/20",
+    },
+    {
+      label: "Premium",
+      value: resumo?.usuarios.premium ?? 0,
+      icon: Crown,
+      color: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/20",
+      helper: `${percentualPremium}% da base`,
+    },
+    {
+      label: "Perfis",
+      value: resumo?.perfis.total ?? 0,
+      icon: WalletCards,
+      color: "text-violet-600 dark:text-violet-400",
+      bg: "bg-violet-500/10",
+      border: "border-violet-500/20",
+    },
+    {
+      label: "Movimentos",
+      value: totalMovimentos,
+      icon: TrendingUp,
+      color: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-500/10",
+      border: "border-amber-500/20",
+    },
+  ];
+
   return (
-    <div className="space-y-5">
-      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-        <div className="grid gap-5 p-5 lg:grid-cols-[1fr_auto] lg:p-7">
+    <div className="space-y-6">
+      {/* Header */}
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+        <div className="relative flex flex-col gap-4 p-6 sm:flex-row sm:items-start sm:justify-between lg:p-8">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
-              <ShieldAlert className="h-4 w-4" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+              <ShieldAlert className="h-3.5 w-3.5" />
               Administração
             </div>
             <div>
-              <h1 className="text-2xl font-semibold tracking-normal lg:text-3xl">
+              <h1 className="text-2xl font-semibold tracking-tight lg:text-3xl">
                 Relatório administrativo
               </h1>
-              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                Visão geral de usuários, planos, perfis e movimentações do sistema.
+              <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">
+                Visão geral de usuários, planos, perfis e movimentações do
+                sistema.
               </p>
             </div>
           </div>
 
           <Button
-            className="h-11 self-start px-5"
+            className="h-10 shrink-0 gap-2 self-start px-4 text-sm"
             type="button"
             variant="outline"
             onClick={carregarResumo}
@@ -117,66 +156,45 @@ export function AdminResumoPage() {
       </section>
 
       {error && (
-        <p className="rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <p className="rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </p>
       )}
 
       {loading ? (
-        <div className="flex h-40 items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
+        <div className="flex h-48 flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
           Carregando relatório...
         </div>
       ) : resumo ? (
         <>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {[
-              {
-                label: "Usuários",
-                value: resumo.usuarios.total,
-                icon: Users,
-                color: "text-blue-600 dark:text-blue-400",
-                bg: "bg-blue-500/10",
-              },
-              {
-                label: "Premium",
-                value: resumo.usuarios.premium,
-                icon: Crown,
-                color: "text-emerald-600 dark:text-emerald-400",
-                bg: "bg-emerald-500/10",
-                helper: `${percentualPremium}% da base`,
-              },
-              {
-                label: "Perfis",
-                value: resumo.perfis.total,
-                icon: WalletCards,
-                color: "text-violet-600 dark:text-violet-400",
-                bg: "bg-violet-500/10",
-              },
-              {
-                label: "Movimentos",
-                value: totalMovimentos,
-                icon: TrendingUp,
-                color: "text-amber-600 dark:text-amber-400",
-                bg: "bg-amber-500/10",
-              },
-            ].map((item) => (
-              <Card className="shadow-sm" key={item.label}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                  <div>
-                    <CardDescription>{item.label}</CardDescription>
-                    <CardTitle className={cn("mt-2 text-3xl", item.color)}>
+          {/* Métricas */}
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {metrics.map((item) => (
+              <Card
+                className={cn(
+                  "relative overflow-hidden shadow-sm transition-shadow hover:shadow-md",
+                  `border-l-4 ${item.border}`,
+                )}
+                key={item.label}
+              >
+                <CardHeader className="flex flex-row items-start justify-between gap-3 pb-2">
+                  <div className="space-y-1 min-w-0">
+                    <CardDescription className="text-xs font-medium uppercase tracking-wide">
+                      {item.label}
+                    </CardDescription>
+                    <CardTitle className={cn("text-3xl font-bold", item.color)}>
                       {item.value}
                     </CardTitle>
                     {item.helper && (
-                      <p className="mt-1 text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {item.helper}
                       </p>
                     )}
                   </div>
                   <span
                     className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-md",
+                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
                       item.bg,
                       item.color,
                     )}
@@ -188,31 +206,42 @@ export function AdminResumoPage() {
             ))}
           </div>
 
+          {/* Conteúdo principal */}
           <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
+            {/* Últimos usuários */}
             <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle>Últimos usuários</CardTitle>
-                <CardDescription>Cadastros mais recentes no sistema.</CardDescription>
+              <CardHeader className="border-b border-border pb-4">
+                <CardTitle className="text-base">Últimos usuários</CardTitle>
+                <CardDescription>
+                  Cadastros mais recentes no sistema.
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="divide-y divide-border p-0">
                 {resumo.ultimosUsuarios.map((usuario) => (
                   <div
-                    className="flex flex-col gap-3 rounded-lg border border-border bg-background p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between"
                     key={usuario.id}
                   >
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold">{usuario.nome}</p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {usuario.email}
-                      </p>
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                        {usuario.nome.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold">
+                          {usuario.nome}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {usuario.email}
+                        </p>
+                      </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                       <span
                         className={cn(
-                          "rounded-md border px-2 py-1 text-[10px] font-bold uppercase",
+                          "rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide",
                           usuario.plano === "PREMIUM"
-                            ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                            : "border-border bg-muted text-muted-foreground",
+                            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+                            : "bg-muted text-muted-foreground",
                         )}
                       >
                         {usuario.plano}
@@ -226,25 +255,28 @@ export function AdminResumoPage() {
               </CardContent>
             </Card>
 
+            {/* Cards laterais */}
             <div className="space-y-4">
               <Card className="shadow-sm">
-                <CardHeader>
-                  <CardDescription>Movimentos cadastrados</CardDescription>
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className="pb-3">
+                  <CardDescription className="text-xs font-medium uppercase tracking-wide">
+                    Movimentos cadastrados
+                  </CardDescription>
+                  <CardTitle className="flex items-center gap-2 text-2xl">
                     <BarChart3 className="h-5 w-5 text-primary" />
                     {totalMovimentos}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-3 pt-0 text-sm">
-                  <div className="rounded-md border border-border bg-background p-3">
-                    <p className="text-muted-foreground">Receitas</p>
-                    <p className="mt-1 text-xl font-semibold text-blue-600 dark:text-blue-400">
+                <CardContent className="grid grid-cols-2 gap-3 pt-0">
+                  <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-3">
+                    <p className="text-xs text-muted-foreground">Receitas</p>
+                    <p className="mt-1.5 text-xl font-bold text-blue-600 dark:text-blue-400">
                       {resumo.movimentos.receitas}
                     </p>
                   </div>
-                  <div className="rounded-md border border-border bg-background p-3">
-                    <p className="text-muted-foreground">Despesas</p>
-                    <p className="mt-1 text-xl font-semibold text-red-600 dark:text-red-400">
+                  <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3">
+                    <p className="text-xs text-muted-foreground">Despesas</p>
+                    <p className="mt-1.5 text-xl font-bold text-red-600 dark:text-red-400">
                       {resumo.movimentos.despesas}
                     </p>
                   </div>
@@ -252,12 +284,21 @@ export function AdminResumoPage() {
               </Card>
 
               <Card className="shadow-sm">
-                <CardHeader>
-                  <CardDescription>Usuários simultâneos</CardDescription>
-                  <CardTitle>{resumo.simultaneos.atual}</CardTitle>
+                <CardHeader className="pb-3">
+                  <CardDescription className="text-xs font-medium uppercase tracking-wide">
+                    Usuários simultâneos
+                  </CardDescription>
+                  <CardTitle className="text-2xl">
+                    {resumo.simultaneos.atual}
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-0 text-sm text-muted-foreground">
-                  Ativos nos últimos {resumo.simultaneos.janelaMinutos} minutos.
+                <CardContent className="pt-0">
+                  <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+                    Ativos nos últimos{" "}
+                    <span className="font-semibold text-foreground">
+                      {resumo.simultaneos.janelaMinutos} min
+                    </span>
+                  </p>
                 </CardContent>
               </Card>
             </div>

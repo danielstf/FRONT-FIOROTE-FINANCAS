@@ -601,7 +601,7 @@ function Metric({
     <Card>
       <CardHeader>
         <CardDescription>{title}</CardDescription>
-        <CardTitle className={cn("flex items-center gap-2 break-words text-2xl", color)}>
+        <CardTitle className={cn("flex items-center gap-2 wrap-break-word text-2xl", color)}>
           <Icon className="h-5 w-5" />
           {value}
         </CardTitle>

@@ -58,6 +58,25 @@ export function AppLayout() {
   }, []);
 
   useEffect(() => {
+    const favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    const appleIcon = document.querySelector<HTMLLinkElement>(
+      'link[rel="apple-touch-icon"]',
+    );
+    const iconHref =
+      logoMood === "negative"
+        ? "/logo-rosto-negative.svg"
+        : "/logo-rosto-positive.svg";
+
+    if (favicon) {
+      favicon.href = iconHref;
+    }
+
+    if (appleIcon) {
+      appleIcon.href = iconHref;
+    }
+  }, [logoMood]);
+
+  useEffect(() => {
     async function carregarPerfis() {
       if (!isPremium) {
         setPerfis([]);
