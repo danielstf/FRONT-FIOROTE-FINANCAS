@@ -13,6 +13,10 @@ export type PremiumStatusResponse = {
   exibirAnuncios: boolean;
   premiumExpiraEm: string | null;
   premiumDiasRestantes: number;
+  precos: {
+    mensal: number;
+    recorrente: number;
+  };
   ultimoPagamento: {
     id: string;
     status: PagamentoStatus;

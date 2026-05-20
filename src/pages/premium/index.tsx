@@ -25,6 +25,13 @@ function formatDateOnly(value: string) {
   }).format(new Date(value));
 }
 
+function formatMoney(value: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+}
+
 export function PremiumPage() {
   const { atualizarUsuarioSessao } = useAuth();
   const [premiumStatus, setPremiumStatus] =
@@ -41,6 +48,8 @@ export function PremiumPage() {
   const hasPendingPayment = premiumStatus?.ultimoPagamento?.status === "PENDING";
   const isAssinatura = premiumStatus?.ultimoPagamento?.tipo === "ASSINATURA";
   const isCancelado = Boolean(premiumStatus?.ultimoPagamento?.canceladoEm);
+  const precoMensal = premiumStatus?.precos.mensal ?? 8;
+  const precoRecorrente = premiumStatus?.precos.recorrente ?? 5;
 
   async function carregarStatus() {
     setError("");
@@ -123,7 +132,8 @@ export function PremiumPage() {
                   : "Escolha seu Premium mensal."}
               </h1>
               <p className="max-w-xl text-sm text-muted-foreground">
-                O mensal avulso custa R$ 8,00. O recorrente custa R$ 5,00 por mês.
+                O mensal avulso custa {formatMoney(precoMensal)}. O recorrente custa{" "}
+                {formatMoney(precoRecorrente)} por mês.
                 Ao cancelar, o acesso continua até acabar o período já pago.
               </p>
             </div>
@@ -170,7 +180,9 @@ export function PremiumPage() {
                 <div className="grid w-full max-w-2xl gap-3 sm:grid-cols-2">
                   <div className="rounded-lg border border-border bg-background/70 p-4">
                     <p className="text-sm text-muted-foreground">Mensal avulso</p>
-                    <p className="mt-1 text-2xl font-semibold">R$ 8,00</p>
+                    <p className="mt-1 text-2xl font-semibold">
+                      {formatMoney(precoMensal)}
+                    </p>
                     <p className="mt-2 min-h-10 text-sm text-muted-foreground">
                       Pague uma vez e use por 30 dias.
                     </p>
@@ -184,12 +196,14 @@ export function PremiumPage() {
                       ) : (
                         <CreditCard className="h-4 w-4" />
                       )}
-                      Comprar por R$ 8
+                      Comprar por {formatMoney(precoMensal)}
                     </Button>
                   </div>
                   <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
                     <p className="text-sm text-primary">Recorrente</p>
-                    <p className="mt-1 text-2xl font-semibold">R$ 5,00/mês</p>
+                    <p className="mt-1 text-2xl font-semibold">
+                      {formatMoney(precoRecorrente)}/mês
+                    </p>
                     <p className="mt-2 min-h-10 text-sm text-muted-foreground">
                       Cobrança automática mensal, com cancelamento livre.
                     </p>
@@ -203,7 +217,7 @@ export function PremiumPage() {
                       ) : (
                         <CreditCard className="h-4 w-4" />
                       )}
-                      Assinar por R$ 5
+                      Assinar por {formatMoney(precoRecorrente)}
                     </Button>
                   </div>
                 </div>
@@ -303,7 +317,7 @@ export function PremiumPage() {
           <div>
             <p className="font-semibold">Validade mensal</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              R$ 8 avulso ou R$ 5 recorrente.
+              {formatMoney(precoMensal)} avulso ou {formatMoney(precoRecorrente)} recorrente.
             </p>
           </div>
         </div>
