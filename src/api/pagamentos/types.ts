@@ -5,6 +5,8 @@ export type PagamentoStatus =
   | "CANCELLED"
   | "REFUNDED";
 
+export type PremiumCheckoutTipo = "MENSAL" | "RECORRENTE";
+
 export type PremiumStatusResponse = {
   plano: "FREE" | "PREMIUM";
   premium: boolean;
@@ -27,6 +29,7 @@ export type PremiumStatusResponse = {
 
 export type CheckoutPremiumResponse = {
   pagamentoId: string;
+  preferenceId?: string | null;
   preapprovalId: string | null;
   checkoutUrl: string | null;
   sandboxCheckoutUrl?: string | null;

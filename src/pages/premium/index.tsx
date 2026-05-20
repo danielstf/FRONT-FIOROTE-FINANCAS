@@ -11,7 +11,10 @@ import {
 } from "lucide-react";
 import { getApiErrorMessage } from "../../api/errors";
 import { pagamentosApi } from "../../api/pagamentos/pagamentos-api";
-import type { PremiumStatusResponse } from "../../api/pagamentos/types";
+import type {
+  PremiumCheckoutTipo,
+  PremiumStatusResponse,
+} from "../../api/pagamentos/types";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { useAuth } from "../../providers/auth-provider";
@@ -27,7 +30,8 @@ export function PremiumPage() {
   const [premiumStatus, setPremiumStatus] =
     useState<PremiumStatusResponse | null>(null);
   const [loadingStatus, setLoadingStatus] = useState(true);
-  const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const [loadingCheckout, setLoadingCheckout] =
+    useState<PremiumCheckoutTipo | null>(null);
   const [loadingCancel, setLoadingCancel] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -36,6 +40,7 @@ export function PremiumPage() {
   const checkoutUrl = premiumStatus?.ultimoPagamento?.checkoutUrl ?? null;
   const hasPendingPayment = premiumStatus?.ultimoPagamento?.status === "PENDING";
   const isAssinatura = premiumStatus?.ultimoPagamento?.tipo === "ASSINATURA";
+  const isCancelado = Boolean(premiumStatus?.ultimoPagamento?.canceladoEm);
 
   async function carregarStatus() {
     setError("");
@@ -51,13 +56,13 @@ export function PremiumPage() {
     }
   }
 
-  async function criarCheckout() {
+  async function criarCheckout(tipo: PremiumCheckoutTipo) {
     setError("");
     setMessage("");
-    setLoadingCheckout(true);
+    setLoadingCheckout(tipo);
 
     try {
-      const data = await pagamentosApi.criarCheckoutPremium();
+      const data = await pagamentosApi.criarCheckoutPremium(tipo);
       const paymentUrl = data.checkoutUrl ?? data.sandboxCheckoutUrl;
 
       if (!paymentUrl) {
@@ -68,13 +73,13 @@ export function PremiumPage() {
     } catch (requestError) {
       setError(getApiErrorMessage(requestError));
     } finally {
-      setLoadingCheckout(false);
+      setLoadingCheckout(null);
     }
   }
 
   async function cancelarAssinatura() {
     const confirmed = window.confirm(
-      "Cancelar sua assinatura Premium? O acesso aos recursos Premium será removido.",
+      "Cancelar o Premium? A cobrança recorrente será interrompida e seu acesso continua até acabar a validade paga.",
     );
 
     if (!confirmed) return;
@@ -86,7 +91,7 @@ export function PremiumPage() {
     try {
       const data = await pagamentosApi.cancelarPremium();
       atualizarUsuarioSessao(data.usuario);
-      setMessage("Assinatura cancelada com sucesso.");
+      setMessage("Cancelamento confirmado. Seu Premium fica ativo até a validade paga.");
       await carregarStatus();
     } catch (requestError) {
       setError(getApiErrorMessage(requestError));
@@ -112,12 +117,14 @@ export function PremiumPage() {
             <div className="space-y-3">
               <h1 className="max-w-2xl text-2xl font-semibold tracking-normal text-card-foreground sm:text-3xl lg:text-4xl">
                 {isPremium
-                  ? "Sua assinatura Premium está ativa."
-                  : "Assine o Premium mensal e cancele quando quiser."}
+                  ? isCancelado
+                    ? "Seu Premium está cancelado, mas continua válido."
+                    : "Sua assinatura Premium está ativa."
+                  : "Escolha seu Premium mensal."}
               </h1>
               <p className="max-w-xl text-sm text-muted-foreground">
-                O Premium remove anúncios, libera relatórios e mantém sua área financeira mais limpa.
-                A cobrança é mensal e recorrente pelo Mercado Pago.
+                O mensal avulso custa R$ 8,00. O recorrente custa R$ 5,00 por mês.
+                Ao cancelar, o acesso continua até acabar o período já pago.
               </p>
             </div>
 
@@ -139,35 +146,74 @@ export function PremiumPage() {
                     <CheckCircle2 className="h-4 w-4" />
                     Assinatura ativa
                   </div>
-                  <Button
-                    onClick={cancelarAssinatura}
-                    disabled={loadingCancel || loadingStatus}
-                    variant="outline"
-                  >
-                    {loadingCancel ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
+                  {isCancelado ? (
+                    <div className="inline-flex items-center gap-2 rounded-md border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-sm font-medium text-amber-700 dark:text-amber-300">
                       <XCircle className="h-4 w-4" />
-                    )}
-                    Cancelar assinatura
-                  </Button>
+                      Cancelado no fim do período
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={cancelarAssinatura}
+                      disabled={loadingCancel || loadingStatus}
+                      variant="outline"
+                    >
+                      {loadingCancel ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <XCircle className="h-4 w-4" />
+                      )}
+                      Cancelar Premium
+                    </Button>
+                  )}
                 </>
               ) : checkoutUrl && hasPendingPayment ? (
                 <Button asChild>
                   <a href={checkoutUrl}>
                     <CreditCard className="h-4 w-4" />
-                    Continuar assinatura
+                    Continuar pagamento
                   </a>
                 </Button>
               ) : (
-                <Button onClick={criarCheckout} disabled={loadingCheckout || loadingStatus}>
-                  {loadingCheckout ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <CreditCard className="h-4 w-4" />
-                  )}
-                  Assinar Premium
-                </Button>
+                <div className="grid w-full max-w-2xl gap-3 sm:grid-cols-2">
+                  <div className="rounded-lg border border-border bg-background/70 p-4">
+                    <p className="text-sm text-muted-foreground">Mensal avulso</p>
+                    <p className="mt-1 text-2xl font-semibold">R$ 8,00</p>
+                    <p className="mt-2 min-h-10 text-sm text-muted-foreground">
+                      Pague uma vez e use por 30 dias.
+                    </p>
+                    <Button
+                      className="mt-4 w-full"
+                      onClick={() => criarCheckout("MENSAL")}
+                      disabled={Boolean(loadingCheckout) || loadingStatus}
+                    >
+                      {loadingCheckout === "MENSAL" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <CreditCard className="h-4 w-4" />
+                      )}
+                      Comprar por R$ 8
+                    </Button>
+                  </div>
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+                    <p className="text-sm text-primary">Recorrente</p>
+                    <p className="mt-1 text-2xl font-semibold">R$ 5,00/mês</p>
+                    <p className="mt-2 min-h-10 text-sm text-muted-foreground">
+                      Cobrança automática mensal, com cancelamento livre.
+                    </p>
+                    <Button
+                      className="mt-4 w-full"
+                      onClick={() => criarCheckout("RECORRENTE")}
+                      disabled={Boolean(loadingCheckout) || loadingStatus}
+                    >
+                      {loadingCheckout === "RECORRENTE" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <CreditCard className="h-4 w-4" />
+                      )}
+                      Assinar por R$ 5
+                    </Button>
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -215,7 +261,11 @@ export function PremiumPage() {
                     <div className="rounded-md border border-border p-3">
                       <p className="text-muted-foreground">Cobrança</p>
                       <p className="mt-1 font-semibold">
-                        {isAssinatura ? "Mensal recorrente" : "Mensal"}
+                        {isCancelado
+                          ? "Cancelada"
+                          : isAssinatura
+                            ? "Mensal recorrente"
+                            : "Mensal avulso"}
                       </p>
                       {premiumStatus?.ultimoPagamento?.assinaturaStatus && (
                         <p className="mt-1 text-xs text-muted-foreground">
@@ -245,7 +295,7 @@ export function PremiumPage() {
           <div>
             <p className="font-semibold">Validade mensal</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Cobrança automática uma vez por mês.
+              R$ 8 avulso ou R$ 5 recorrente.
             </p>
           </div>
         </div>
