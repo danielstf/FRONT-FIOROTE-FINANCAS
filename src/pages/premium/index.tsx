@@ -166,13 +166,6 @@ export function PremiumPage() {
                     </Button>
                   )}
                 </>
-              ) : checkoutUrl && hasPendingPayment ? (
-                <Button asChild>
-                  <a href={checkoutUrl}>
-                    <CreditCard className="h-4 w-4" />
-                    Continuar pagamento
-                  </a>
-                </Button>
               ) : (
                 <div className="grid w-full max-w-2xl gap-3 sm:grid-cols-2">
                   <div className="rounded-lg border border-border bg-background/70 p-4">
@@ -216,6 +209,21 @@ export function PremiumPage() {
                 </div>
               )}
             </div>
+
+            {!isPremium && checkoutUrl && hasPendingPayment && (
+              <div className="rounded-md border border-amber-500/25 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+                <p className="font-semibold">Existe um pagamento pendente.</p>
+                <p className="mt-1">
+                  Você pode continuar esse pagamento ou escolher um dos planos acima para iniciar outro checkout.
+                </p>
+                <Button asChild className="mt-3">
+                  <a href={checkoutUrl}>
+                    <CreditCard className="h-4 w-4" />
+                    Continuar pagamento pendente
+                  </a>
+                </Button>
+              </div>
+            )}
           </div>
 
           <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
