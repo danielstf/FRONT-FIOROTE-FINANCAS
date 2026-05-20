@@ -53,6 +53,7 @@ export type ListarDespesasParams = {
   somenteCartao?: boolean;
   somenteVencidas?: boolean;
   paga?: boolean;
+  relatorio?: boolean;
 };
 
 export type ExcluirDespesaParams = {

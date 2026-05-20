@@ -1,5 +1,9 @@
 import { api } from "../client";
-import type { CheckoutPremiumResponse, PremiumStatusResponse } from "./types";
+import type {
+  CancelarPremiumResponse,
+  CheckoutPremiumResponse,
+  PremiumStatusResponse,
+} from "./types";
 
 export const pagamentosApi = {
   async consultarPremium() {
@@ -12,6 +16,13 @@ export const pagamentosApi = {
   async criarCheckoutPremium() {
     const { data } = await api.post<CheckoutPremiumResponse>(
       "/pagamentos/premium/checkout",
+    );
+    return data;
+  },
+
+  async cancelarPremium() {
+    const { data } = await api.post<CancelarPremiumResponse>(
+      "/pagamentos/premium/cancelar",
     );
     return data;
   },

@@ -22,6 +22,7 @@ export type EditarReceitaPayload = Partial<CriarReceitaPayload>;
 
 export type ListarReceitasParams = {
   mes?: string;
+  relatorio?: boolean;
 };
 
 export type ExcluirReceitaParams = {

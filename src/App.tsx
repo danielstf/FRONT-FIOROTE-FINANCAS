@@ -23,6 +23,7 @@ import { RelatoriosPage } from "./pages/relatorios";
 import { SugestoesPage } from "./pages/sugestoes";
 import { RequireAdmin } from "./routes/require-admin";
 import { RequireAuth } from "./routes/require-auth";
+import { RequirePremium } from "./routes/require-premium";
 
 export function App() {
   return (
@@ -54,7 +55,14 @@ export function App() {
         <Route path="despesas/cadastro" element={<CadastroDespesaPage />} />
         <Route path="despesas/:despesaId/editar" element={<EditarDespesaPage />} />
         <Route path="cartoes" element={<CartoesPage />} />
-        <Route path="relatorios" element={<RelatoriosPage />} />
+        <Route
+          path="relatorios"
+          element={
+            <RequirePremium>
+              <RelatoriosPage />
+            </RequirePremium>
+          }
+        />
         <Route path="premium" element={<PremiumPage />} />
         <Route path="sugestoes" element={<SugestoesPage />} />
         <Route

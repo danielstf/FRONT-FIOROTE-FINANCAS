@@ -12,21 +12,21 @@ import {
 const content = {
   sucesso: {
     icon: CheckCircle2,
-    title: "Pagamento aprovado",
+    title: "Assinatura iniciada",
     description:
       "Recebemos o retorno de sucesso do Mercado Pago. Atualize o status no painel Premium para confirmar a ativação.",
   },
   pendente: {
     icon: Clock,
-    title: "Pagamento pendente",
+    title: "Assinatura pendente",
     description:
-      "O Mercado Pago marcou o pagamento como pendente. Assim que for aprovado, seu plano será atualizado.",
+      "O Mercado Pago marcou a assinatura como pendente. Assim que for aprovada, seu plano será atualizado.",
   },
   falha: {
     icon: AlertTriangle,
-    title: "Pagamento não concluído",
+    title: "Assinatura não concluída",
     description:
-      "O pagamento não foi concluído. Você pode voltar ao painel Premium e tentar novamente.",
+      "A assinatura não foi concluída. Você pode voltar ao painel Premium e tentar novamente.",
   },
 };
 

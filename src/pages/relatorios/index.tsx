@@ -164,7 +164,11 @@ export function RelatoriosPage() {
     try {
       setLoading(true);
       setError(null);
-      const resumo = await dashboardApi.resumoFinanceiro({ mes: nextMes, meses });
+      const resumo = await dashboardApi.resumoFinanceiro({
+        mes: nextMes,
+        meses,
+        relatorio: true,
+      });
       setData(resumo);
     } catch (requestError) {
       setError(getApiErrorMessage(requestError));
@@ -216,9 +220,13 @@ export function RelatoriosPage() {
       setError(null);
 
       const [resumos, receitasPorMes, despesasPorMes] = await Promise.all([
-        Promise.all(exportMonths.map((mes) => dashboardApi.resumoFinanceiro({ mes, meses: 1 }))),
-        Promise.all(exportMonths.map((mes) => receitasApi.listar({ mes }))),
-        Promise.all(exportMonths.map((mes) => despesasApi.listar({ mes }))),
+        Promise.all(
+          exportMonths.map((mes) =>
+            dashboardApi.resumoFinanceiro({ mes, meses: 1, relatorio: true }),
+          ),
+        ),
+        Promise.all(exportMonths.map((mes) => receitasApi.listar({ mes, relatorio: true }))),
+        Promise.all(exportMonths.map((mes) => despesasApi.listar({ mes, relatorio: true }))),
       ]);
       const linhas = resumos.flatMap((item) => item.graficos.linhaEvolucaoFinanceira);
       const receitas = receitasPorMes.flatMap((item) => item.receitas);

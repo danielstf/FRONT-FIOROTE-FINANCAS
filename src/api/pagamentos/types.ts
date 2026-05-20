@@ -16,6 +16,10 @@ export type PremiumStatusResponse = {
     status: PagamentoStatus;
     valor: number;
     checkoutUrl: string | null;
+    tipo: "CHECKOUT" | "ASSINATURA";
+    assinaturaStatus: string | null;
+    assinaturaId: string | null;
+    canceladoEm: string | null;
     criadoEm: string;
     atualizadoEm: string;
   } | null;
@@ -23,7 +27,19 @@ export type PremiumStatusResponse = {
 
 export type CheckoutPremiumResponse = {
   pagamentoId: string;
-  preferenceId: string;
+  preapprovalId: string | null;
   checkoutUrl: string | null;
   sandboxCheckoutUrl?: string | null;
+};
+
+export type CancelarPremiumResponse = {
+  usuario: {
+    id: string;
+    nome: string;
+    email: string;
+    role: "ADMIN" | "USER";
+    plano: "FREE" | "PREMIUM";
+    premiumExpiraEm?: string | null;
+    temSenha: boolean;
+  };
 };
