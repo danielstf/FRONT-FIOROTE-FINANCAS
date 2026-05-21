@@ -1,9 +1,45 @@
+import { useEffect } from "react";
 import { Megaphone } from "lucide-react";
 import { appAds } from "../config/ads";
 import { Button } from "./ui/button";
 
+declare global {
+  interface Window {
+    adsbygoogle?: unknown[];
+  }
+}
+
+const adsenseClient = "ca-pub-2022032035131535";
+const adsenseSlot = import.meta.env.VITE_GOOGLE_ADSENSE_SLOT as string | undefined;
+
 export function AdBanner() {
   const ad = appAds[0];
+
+  useEffect(() => {
+    if (!adsenseSlot) return;
+
+    try {
+      window.adsbygoogle = window.adsbygoogle ?? [];
+      window.adsbygoogle.push({});
+    } catch (error) {
+      console.warn("Nao foi possivel carregar anuncio do AdSense:", error);
+    }
+  }, []);
+
+  if (adsenseSlot) {
+    return (
+      <div className="rounded-lg border border-border bg-card p-2 shadow-sm">
+        <ins
+          className="adsbygoogle block min-h-24"
+          data-ad-client={adsenseClient}
+          data-ad-format="auto"
+          data-ad-slot={adsenseSlot}
+          data-full-width-responsive="true"
+          style={{ display: "block" }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg border border-primary/20 bg-primary/10 p-4 text-sm text-foreground">
