@@ -33,6 +33,8 @@ export type PremiumStatusResponse = {
 
 export type CheckoutPremiumResponse = {
   pagamentoId: string;
+  tipo?: PremiumCheckoutTipo;
+  valor?: number;
   preferenceId?: string | null;
   preapprovalId: string | null;
   checkoutUrl: string | null;

@@ -16,11 +16,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../components/ui/dialog";
+import { hasPremiumAtivo } from "../lib/premium";
 import { useAuth } from "../providers/auth-provider";
 
 export function AppLayout() {
   const { session, perfilFinanceiroId, selecionarPerfilFinanceiro } = useAuth();
-  const [showAds, setShowAds] = useState(session?.usuario.plano !== "PREMIUM");
+  const [showAds, setShowAds] = useState(!hasPremiumAtivo(session?.usuario));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [perfis, setPerfis] = useState<PerfilFinanceiro[]>([]);
@@ -29,20 +30,20 @@ export function AppLayout() {
   );
   const perfilSelecionado =
     perfis.find((perfil) => perfil.id === perfilFinanceiroId) ?? null;
-  const isPremium = session?.usuario.plano === "PREMIUM";
+  const isPremium = hasPremiumAtivo(session?.usuario);
 
   useEffect(() => {
     async function carregarAnuncios() {
       try {
         const status = await pagamentosApi.consultarPremium();
-        setShowAds(session?.usuario.plano !== "PREMIUM" && status.exibirAnuncios);
+        setShowAds(!status.premium && status.exibirAnuncios);
       } catch {
-        setShowAds(session?.usuario.plano !== "PREMIUM");
+        setShowAds(!isPremium);
       }
     }
 
     void carregarAnuncios();
-  }, [session?.usuario.plano]);
+  }, [isPremium]);
 
   useEffect(() => {
     function atualizarLogo(event: Event) {
