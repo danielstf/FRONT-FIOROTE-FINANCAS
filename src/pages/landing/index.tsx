@@ -15,6 +15,7 @@ import {
   TrendingUp,
   WalletCards,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { BrandLogo } from "../../components/brand-logo";
 import { Button } from "../../components/ui/button";
@@ -62,17 +63,23 @@ const features = [
   },
 ];
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const softTransition = {
+  duration: 0.7,
+  ease: [0.22, 1, 0.36, 1],
+} as const;
+
 export function LandingPage() {
   return (
     <main className="dark min-h-screen bg-background text-foreground">
       {/* ── HEADER ── */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4 lg:h-20 lg:px-8">
-          <BrandLogo
-            className="min-w-0 flex-1 sm:flex-none"
-            mood="positive"
-            size="nav"
-          />
+          <BrandLogo className="min-w-0 flex-1 sm:flex-none" size="nav" />
 
           <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground lg:flex xl:gap-8">
             <a
@@ -89,9 +96,9 @@ export function LandingPage() {
             </a>
             <a
               className="transition-colors hover:text-foreground"
-              href="#tutorial"
+              href="#seguranca"
             >
-              Tutorial
+              Segurança
             </a>
           </nav>
 
@@ -127,12 +134,24 @@ export function LandingPage() {
         <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-16 px-4 py-16 lg:grid-cols-[minmax(0,1fr)_480px] lg:px-8 lg:py-20">
           {/* Left copy */}
           <div className="max-w-2xl space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
+            <motion.div
+              className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary"
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              transition={softTransition}
+            >
               <TrendingUp className="h-3.5 w-3.5" />
               Gestão financeira simples, visual e segura
-            </div>
+            </motion.div>
 
-            <div className="space-y-5">
+            <motion.div
+              className="space-y-5"
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              transition={{ ...softTransition, delay: 0.1 }}
+            >
               <h1 className="text-5xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-6xl lg:text-[4rem]">
                 Organize seu{" "}
                 <span className="relative inline-block">
@@ -149,9 +168,15 @@ export function LandingPage() {
                 recorrências e relatórios com exportação em Excel. Funciona na
                 web e no app Android.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <motion.div
+              className="flex flex-col gap-3 sm:flex-row"
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              transition={{ ...softTransition, delay: 0.2 }}
+            >
               <Button
                 asChild
                 className="h-11 rounded-lg px-6 text-sm font-semibold"
@@ -168,9 +193,15 @@ export function LandingPage() {
               >
                 <Link to="/login">Acessar minha conta</Link>
               </Button>
-            </div>
+            </motion.div>
 
-            <div className="flex flex-wrap gap-5 text-xs font-medium text-muted-foreground">
+            <motion.div
+              className="flex flex-wrap gap-5 text-xs font-medium text-muted-foreground"
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              transition={{ ...softTransition, delay: 0.3 }}
+            >
               <span className="inline-flex items-center gap-1.5">
                 <BadgeCheck className="h-4 w-4 text-emerald-500" />
                 Plano grátis disponível
@@ -183,11 +214,17 @@ export function LandingPage() {
                 <MonitorSmartphone className="h-4 w-4 text-primary" />
                 Web e Android
               </span>
-            </div>
+            </motion.div>
           </div>
 
           {/* Right card / mock dashboard */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-2xl ring-1 ring-border/30">
+          <motion.div
+            className="rounded-2xl border border-border bg-card p-6 shadow-2xl ring-1 ring-border/30"
+            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ ...softTransition, delay: 0.28 }}
+            whileHover={{ y: -6 }}
+          >
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
@@ -254,7 +291,7 @@ export function LandingPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -263,7 +300,14 @@ export function LandingPage() {
         className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8"
         id="funcoes"
       >
-        <div className="mb-12 space-y-2">
+        <motion.div
+          className="mb-12 space-y-2"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.35 }}
+          variants={fadeUp}
+          transition={softTransition}
+        >
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">
             Funcionalidades
           </p>
@@ -274,30 +318,37 @@ export function LandingPage() {
             O essencial fica no plano grátis. Recursos avançados ficam no
             Premium.
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {features.map((feature) => (
-            <Card
-              className="group relative overflow-hidden border-border/70 shadow-none transition-shadow hover:shadow-md"
+          {features.map((feature, index) => (
+            <motion.div
               key={feature.title}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={fadeUp}
+              transition={{ ...softTransition, delay: index * 0.06 }}
+              whileHover={{ y: -5 }}
             >
-              {/* Subtle top accent */}
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-              <CardHeader className="gap-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
-                  <feature.icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <CardTitle className="text-base font-semibold">
-                    {feature.title}
-                  </CardTitle>
-                  <CardDescription className="mt-1 text-sm leading-relaxed">
-                    {feature.description}
-                  </CardDescription>
-                </div>
-              </CardHeader>
-            </Card>
+              <Card className="group relative h-full overflow-hidden border-border/70 shadow-none transition-shadow hover:shadow-md">
+                {/* Subtle top accent */}
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                <CardHeader className="gap-4">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
+                    <feature.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base font-semibold">
+                      {feature.title}
+                    </CardTitle>
+                    <CardDescription className="mt-1 text-sm leading-relaxed">
+                      {feature.description}
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+              </Card>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -305,7 +356,14 @@ export function LandingPage() {
       {/* ── PRICING ── */}
       <section className="border-y border-border bg-muted/30" id="precos">
         <div className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
-          <div className="mb-12 space-y-2">
+          <motion.div
+            className="mb-12 space-y-2"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.35 }}
+            variants={fadeUp}
+            transition={softTransition}
+          >
             <p className="text-xs font-semibold uppercase tracking-widest text-primary">
               Planos
             </p>
@@ -316,11 +374,19 @@ export function LandingPage() {
               O Premium libera relatórios completos, exportação Excel, perfis
               financeiros, recorrências e remoção de anúncios.
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid gap-5 md:grid-cols-2 lg:max-w-3xl">
             {/* Free plan */}
-            <Card className="border-border/70 shadow-sm">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={fadeUp}
+              transition={{ ...softTransition, delay: 0.08 }}
+              whileHover={{ y: -5 }}
+            >
+            <Card className="h-full border-border/70 shadow-sm">
               <CardHeader className="pb-4">
                 <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   Grátis
@@ -350,9 +416,18 @@ export function LandingPage() {
                 </Button>
               </CardContent>
             </Card>
+            </motion.div>
 
             {/* Premium plan */}
-            <Card className="relative border-primary/40 shadow-lg">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={fadeUp}
+              transition={{ ...softTransition, delay: 0.16 }}
+              whileHover={{ y: -5 }}
+            >
+            <Card className="relative h-full border-primary/40 shadow-lg">
               <div className="absolute -top-px inset-x-6 h-0.5 rounded-full bg-gradient-to-r from-transparent via-primary to-transparent" />
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
@@ -393,37 +468,50 @@ export function LandingPage() {
                 </Button>
               </CardContent>
             </Card>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* ── TUTORIAL ── */}
-      <section className="border-b border-border" id="tutorial">
+      {/* ── TRUST ── */}
+      <section className="border-b border-border" id="seguranca">
         <div className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
-          <div className="mb-12 space-y-2">
+          <motion.div
+            className="mb-12 space-y-2"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.35 }}
+            variants={fadeUp}
+            transition={softTransition}
+          >
             <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-              Tutorial
+              Segurança e rotina
             </p>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Aprenda o fluxo em poucos passos
+              Um painel financeiro feito para uso diário
             </h2>
             <p className="max-w-xl text-muted-foreground">
-              O tutorial em vídeo pode ser publicado aqui quando o arquivo
-              estiver pronto. Por enquanto, a página já mostra o roteiro de uso
-              do sistema.
+              O Fiorote Control prioriza leitura rápida, organização por mês e recursos úteis
+              para quem acompanha o próprio dinheiro com frequência.
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              ["1", "Cadastre receitas e despesas"],
-              ["2", "Separe perfis financeiros"],
-              ["3", "Acompanhe o dashboard mensal"],
-              ["4", "Exporte relatórios em Excel"],
-            ].map(([step, title]) => (
-              <div
+              ["01", "Login protegido"],
+              ["02", "Dados organizados por mês"],
+              ["03", "Dashboard para decisão rápida"],
+              ["04", "Exportação Premium quando precisar"],
+            ].map(([step, title], index) => (
+              <motion.div
                 className="group relative rounded-xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
                 key={step}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={fadeUp}
+                transition={{ ...softTransition, delay: index * 0.06 }}
+                whileHover={{ y: -5 }}
               >
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-base font-bold text-primary">
@@ -432,7 +520,7 @@ export function LandingPage() {
                 <h3 className="mt-5 text-sm font-semibold leading-snug">
                   {title}
                 </h3>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

@@ -150,15 +150,16 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   }
 
   return (
-    <Card className="w-full border-white/10 bg-slate-950/70 shadow-2xl shadow-black/35 backdrop-blur-xl before:hidden hover:shadow-2xl">
-      <CardHeader className="space-y-5 p-5 pb-4 sm:p-6 sm:pb-4">
-        <div className="grid grid-cols-2 rounded-lg border border-white/10 bg-white/5 p-1">
+    <Card className="w-full overflow-hidden rounded-2xl border-white/10 bg-[#080f1d]/95 shadow-2xl shadow-black/35 before:hidden hover:shadow-2xl">
+      <div className="h-1 bg-gradient-to-r from-cyan-300 via-blue-500 to-emerald-300" />
+      <CardHeader className="space-y-6 p-5 pb-4 sm:p-7 sm:pb-4">
+        <div className="grid grid-cols-2 rounded-xl border border-white/10 bg-slate-950/80 p-1">
           <Button
             asChild
             variant="ghost"
             className={cn(
-              "h-10 rounded-md text-slate-400 hover:text-white",
-              isLogin && "bg-white/10 text-white shadow-sm shadow-black/20",
+              "h-10 rounded-lg text-slate-400 hover:text-white",
+              isLogin && "bg-white text-slate-950 shadow-sm shadow-black/25 hover:text-slate-950",
             )}
           >
             <Link to="/login">Login</Link>
@@ -167,8 +168,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             asChild
             variant="ghost"
             className={cn(
-              "h-10 rounded-md text-slate-400 hover:text-white",
-              !isLogin && "bg-white/10 text-white shadow-sm shadow-black/20",
+              "h-10 rounded-lg text-slate-400 hover:text-white",
+              !isLogin && "bg-white text-slate-950 shadow-sm shadow-black/25 hover:text-slate-950",
             )}
           >
             <Link to="/cadastro">Cadastro</Link>
@@ -176,37 +177,39 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         </div>
         <div className="space-y-2">
           <CardTitle className="text-3xl text-white">{title}</CardTitle>
-          <CardDescription className="text-sm leading-6 text-slate-400">{description}</CardDescription>
+          <CardDescription className="text-sm leading-6 text-slate-400">
+            {description}
+          </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="p-5 pt-0 sm:p-6 sm:pt-0">
+      <CardContent className="p-5 pt-0 sm:p-7 sm:pt-0">
         <div className="mb-4 grid gap-3">
           {googleClientId ? (
             <div ref={googleButtonRef} className="min-h-10 w-full" />
           ) : (
-            <Button className="w-full border-white/10 bg-white/5 text-slate-300" disabled variant="outline">
+            <Button className="h-11 w-full border-white/10 bg-slate-950 text-slate-300" disabled variant="outline">
               Google não configurado
             </Button>
           )}
         </div>
         <div className="mb-5 flex items-center gap-3 text-xs text-slate-500">
           <span className="h-px flex-1 bg-white/10" />
-          <span>ou continue com email</span>
+          <span className="shrink-0">ou continue com email</span>
           <span className="h-px flex-1 bg-white/10" />
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           {!isLogin && (
             <div className="space-y-2">
-              <Label className="text-slate-300" htmlFor="nome">Nome</Label>
+              <Label className="text-xs font-semibold uppercase tracking-widest text-slate-400" htmlFor="nome">Nome</Label>
               <div className="relative">
-                <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                 <Input
                   id="nome"
                   value={nome}
                   onChange={(event) => setNome(event.target.value)}
                   placeholder="Seu nome"
-                  className="border-white/10 bg-white/5 pl-9 text-white placeholder:text-slate-600"
+                  className="h-12 rounded-lg border-white/10 bg-slate-950/80 pl-10 text-white placeholder:text-slate-600 focus:border-cyan-300/70 focus:ring-cyan-300/15"
                   required
                 />
               </div>
@@ -214,16 +217,16 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           )}
 
           <div className="space-y-2">
-            <Label className="text-slate-300" htmlFor="email">Email</Label>
+            <Label className="text-xs font-semibold uppercase tracking-widest text-slate-400" htmlFor="email">Email</Label>
             <div className="relative">
-              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="usuario@email.com"
-                className="border-white/10 bg-white/5 pl-9 text-white placeholder:text-slate-600"
+                className="h-12 rounded-lg border-white/10 bg-slate-950/80 pl-10 text-white placeholder:text-slate-600 focus:border-cyan-300/70 focus:ring-cyan-300/15"
                 required
               />
             </div>
@@ -231,7 +234,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
-              <Label className="text-slate-300" htmlFor="senha">Senha</Label>
+              <Label className="text-xs font-semibold uppercase tracking-widest text-slate-400" htmlFor="senha">Senha</Label>
               {isLogin && (
                 <Link
                   className="text-xs font-medium text-cyan-300 hover:text-cyan-200 hover:underline"
@@ -242,14 +245,14 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               )}
             </div>
             <div className="relative">
-              <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
               <Input
                 id="senha"
                 type={showPassword ? "text" : "password"}
                 value={senha}
                 onChange={(event) => setSenha(event.target.value)}
                 placeholder="Sua senha"
-                className="border-white/10 bg-white/5 pl-9 pr-11 text-white placeholder:text-slate-600"
+                className="h-12 rounded-lg border-white/10 bg-slate-950/80 pl-10 pr-11 text-white placeholder:text-slate-600 focus:border-cyan-300/70 focus:ring-cyan-300/15"
                 minLength={isLogin ? 1 : 6}
                 required
               />
@@ -289,7 +292,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             </p>
           )}
 
-          <Button type="submit" className="h-11 w-full bg-cyan-300 text-slate-950 shadow-cyan-950/30 hover:bg-cyan-200" disabled={loading}>
+          <Button type="submit" className="h-12 w-full rounded-lg bg-white text-slate-950 shadow-lg shadow-black/30 hover:bg-cyan-100" disabled={loading}>
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (

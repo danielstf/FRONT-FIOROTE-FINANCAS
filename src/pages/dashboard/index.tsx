@@ -144,16 +144,6 @@ export function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [perfilFinanceiroId]);
 
-  useEffect(() => {
-    if (!resumoMes) return;
-
-    window.dispatchEvent(
-      new CustomEvent("fiorote-saldo-change", {
-        detail: resumoMes.saldoFinal,
-      }),
-    );
-  }, [resumoMes]);
-
   return (
     <div className="space-y-6">
       <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">

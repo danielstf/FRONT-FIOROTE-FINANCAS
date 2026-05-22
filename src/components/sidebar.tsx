@@ -40,7 +40,6 @@ const menuItems = [
 
 type SidebarProps = {
   className?: string;
-  logoMood?: "positive" | "negative" | "neutral";
   onNavigate?: () => void;
   perfilSelecionado?: PerfilFinanceiro | null;
   onProfileClick?: () => void;
@@ -48,7 +47,6 @@ type SidebarProps = {
 
 export function Sidebar({
   className,
-  logoMood = "neutral",
   onNavigate,
   perfilSelecionado,
   onProfileClick,
@@ -76,7 +74,7 @@ export function Sidebar({
       renderedItems.push(
         <p
           key={`section-${item.section}`}
-          className="mb-1 mt-3 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/25"
+          className="mb-1 mt-4 inline-flex rounded-md border border-sidebar-border bg-sidebar-accent px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-sidebar-accent-foreground"
         >
           {item.section}
         </p>,
@@ -91,20 +89,21 @@ export function Sidebar({
         onClick={onNavigate}
         className={({ isActive }) =>
           cn(
-            "group relative flex h-9 items-center gap-2.5 rounded-lg px-3 text-[13.5px] font-normal text-sidebar-foreground/50 transition-colors hover:bg-white/[0.06] hover:text-sidebar-foreground/85",
-            isActive && "bg-primary/[0.12] font-medium text-primary",
+            "group relative flex h-10 items-center gap-2.5 rounded-lg px-3 text-[13.5px] font-semibold text-sidebar-foreground/75 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            isActive &&
+              "border border-primary/20 bg-primary/[0.14] font-bold text-primary shadow-sm",
           )
         }
       >
         {({ isActive }) => (
           <>
             {isActive && (
-              <span className="absolute left-0 top-1/2 h-[18px] w-[3px] -translate-y-1/2 rounded-r-full bg-primary" />
+              <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary" />
             )}
             <item.icon className="h-4 w-4 flex-shrink-0" />
             <span className="flex-1">{item.title}</span>
             {item.badge && (
-              <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-primary">
+              <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold leading-none text-primary-foreground">
                 {item.badge}
               </span>
             )}
@@ -122,7 +121,7 @@ export function Sidebar({
       )}
     >
       <div className="border-b border-sidebar-border px-5 py-5">
-        <BrandLogo className="justify-start" mood={logoMood} size="sidebar" />
+        <BrandLogo className="justify-start" size="sidebar" />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-2.5 py-3">{renderedItems}</nav>
@@ -130,7 +129,7 @@ export function Sidebar({
       <div className="border-t border-sidebar-border p-2.5">
         {session?.usuario && (
           <button
-            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-white/[0.06]"
+            className="flex w-full items-center gap-2.5 rounded-lg border border-sidebar-border bg-sidebar-accent/70 px-3 py-2.5 text-left transition-colors hover:bg-sidebar-accent"
             type="button"
             onClick={onProfileClick}
           >
@@ -140,14 +139,14 @@ export function Sidebar({
               label={perfilSelecionado?.nome ?? session.usuario.nome}
             />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[12.5px] font-medium text-sidebar-foreground/80">
+              <p className="truncate text-[12.5px] font-bold text-sidebar-foreground">
                 {session.usuario.nome}
               </p>
-              <p className="truncate text-[10.5px] text-sidebar-foreground/40">
+              <p className="truncate text-[10.5px] font-medium text-sidebar-foreground/60">
                 {perfilSelecionado?.nome ?? "Perfil principal"}
               </p>
             </div>
-            <ChevronDown className="h-4 w-4 shrink-0 text-sidebar-foreground/35" />
+            <ChevronDown className="h-4 w-4 shrink-0 text-sidebar-foreground/60" />
           </button>
         )}
       </div>
