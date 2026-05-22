@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadgeCheck,
   CreditCard,
   Loader2,
@@ -322,3 +322,4 @@ export function CartoesPage() {
     </div>
   );
 }
+

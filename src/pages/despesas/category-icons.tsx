@@ -1,4 +1,4 @@
-import {
+﻿import {
   Baby,
   Banknote,
   BookOpen,
@@ -122,3 +122,4 @@ export function getCategoryColor(category?: string | null) {
 
   return categoryColorMap[normalizeCategoryKey(category)] ?? "bg-muted text-muted-foreground";
 }
+

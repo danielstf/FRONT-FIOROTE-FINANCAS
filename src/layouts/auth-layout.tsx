@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+﻿import { motion } from "motion/react";
 import { ArrowUpRight, BadgeCheck, BarChart3, LockKeyhole, WalletCards } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import { BrandLogo } from "../components/brand-logo";
@@ -11,7 +11,7 @@ const metrics = [
 
 const signals = [
   { icon: WalletCards, label: "Fluxo mensal" },
-  { icon: BarChart3, label: "Relatórios Premium" },
+  { icon: BarChart3, label: "Relatórios VIP" },
   { icon: LockKeyhole, label: "Acesso protegido" },
 ];
 
@@ -87,7 +87,7 @@ export function AuthLayout() {
             </div>
 
             <p className="max-w-md text-xs leading-5 text-slate-500">
-              Fiorote Control combina cadastro financeiro, controle de recorrências e recursos Premium para análise mensal.
+              Fiorote Controle Financeiro combina cadastro financeiro, controle de recorrências e recursos VIP para análise mensal.
             </p>
           </motion.div>
 
@@ -109,3 +109,4 @@ export function AuthLayout() {
     </main>
   );
 }
+

@@ -33,7 +33,7 @@ export function Button({
     <Comp
       type={type}
       className={cn(
-        "relative isolate inline-flex h-10 items-center justify-center gap-2 overflow-hidden rounded-lg px-4 text-sm font-semibold tracking-normal transition-all duration-200 before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:opacity-0 before:transition-opacity after:pointer-events-none after:absolute after:inset-x-2 after:top-0 after:h-px after:bg-white/35 after:opacity-0 after:transition-opacity hover:-translate-y-0.5 hover:before:opacity-100 hover:after:opacity-100 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-60 disabled:shadow-none",
+        "relative isolate inline-flex h-9 items-center justify-center gap-1.5 overflow-hidden rounded-md px-3 text-[13px] font-semibold tracking-normal transition-all duration-200 before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:opacity-0 before:transition-opacity after:pointer-events-none after:absolute after:inset-x-2 after:top-0 after:h-px after:bg-white/35 after:opacity-0 after:transition-opacity hover:-translate-y-0.5 hover:before:opacity-100 hover:after:opacity-100 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-60 disabled:shadow-none",
         variants[variant],
         className,
       )}

@@ -1,4 +1,4 @@
-import {
+﻿import {
   BriefcaseBusiness,
   CircleUserRound,
   Gem,
@@ -61,3 +61,4 @@ export function Avatar({ value, label, className }: AvatarProps) {
     </span>
   );
 }
+

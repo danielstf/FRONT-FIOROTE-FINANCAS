@@ -2,6 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
+  ArrowRight,
   Tags,
   CreditCard,
   Loader2,
@@ -125,6 +126,7 @@ export function DespesaForm({
   const [categorias, setCategorias] = useState<string[]>(fallbackCategorias);
   const [cartoes, setCartoes] = useState<CartaoCredito[]>([]);
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<"dados" | "categoria">("dados");
   const [cartaoModalAberto, setCartaoModalAberto] = useState(false);
   const [novoCartaoNome, setNovoCartaoNome] = useState("");
   const [salvandoCartao, setSalvandoCartao] = useState(false);
@@ -214,6 +216,11 @@ export function DespesaForm({
       return;
     }
 
+    if (fixa && parcelas !== undefined) {
+      toast.error("Escolha despesa fixa ou parcelada. As duas opções não podem ficar ativas juntas.");
+      return;
+    }
+
     if (formaPagamento === "CARTAO_CREDITO" && !cartaoCreditoId) {
       toast.error("Selecione o cartão de crédito desta despesa.");
       return;
@@ -278,10 +285,49 @@ export function DespesaForm({
     }
   }
 
+  function irParaCategoria() {
+    const valorNumerico = parseMoney(valor);
+    const parcelas = numeroParcelas ? Number(numeroParcelas) : undefined;
+    const nomeNormalizado = normalizeRequiredText(nome);
+
+    if (!nomeNormalizado) {
+      toast.error("Informe o nome da despesa.");
+      return;
+    }
+
+    if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
+      toast.error("Informe um valor maior que zero.");
+      return;
+    }
+
+    if (parcelas !== undefined && (!Number.isInteger(parcelas) || parcelas <= 1)) {
+      toast.error("Para parcelar, informe 2 parcelas ou mais.");
+      return;
+    }
+
+    if (fixa && parcelas !== undefined) {
+      toast.error("Escolha despesa fixa ou parcelada antes de continuar.");
+      return;
+    }
+
+    if (formaPagamento === "CARTAO_CREDITO" && !cartaoCreditoId) {
+      toast.error("Selecione o cartão de crédito desta despesa.");
+      return;
+    }
+
+    if (fixa && !isPremium) {
+      toast.error("Despesa fixa é um recurso Premium.");
+      return;
+    }
+
+    setStep("categoria");
+  }
+
   return (
     <>
       <form className="grid gap-3" onSubmit={handleSubmit}>
-      <Card className="order-2 overflow-hidden shadow-sm">
+      {(mode === "edit" || step === "dados") && (
+      <Card className="overflow-hidden border-primary/10 shadow-sm">
         <CardHeader className="p-3">
           <div className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-md bg-destructive/10 text-destructive">
@@ -410,7 +456,10 @@ export function DespesaForm({
                   type="checkbox"
                   checked={fixa}
                   disabled={!isPremium}
-                  onChange={(event) => setFixa(event.target.checked)}
+                  onChange={(event) => {
+                    setFixa(event.target.checked);
+                    if (event.target.checked) setNumeroParcelas("");
+                  }}
                   className="mt-1 h-4 w-4 accent-blue-600 disabled:cursor-not-allowed"
                 />
                 <span>
@@ -433,10 +482,18 @@ export function DespesaForm({
                   type="number"
                   min="2"
                   value={numeroParcelas}
-                  onChange={(event) => setNumeroParcelas(event.target.value)}
+                  onChange={(event) => {
+                    setNumeroParcelas(event.target.value);
+                    if (event.target.value) setFixa(false);
+                  }}
                   placeholder="Ex: 6"
-                  disabled={mode === "edit"}
+                  disabled={mode === "edit" || fixa}
                 />
+                {fixa && (
+                  <p className="text-xs text-muted-foreground">
+                    Despesa fixa não pode ser parcelada.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -479,14 +536,21 @@ export function DespesaForm({
             )}
 
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Button type="submit" disabled={loading}>
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                {mode === "edit" ? "Salvar alterações" : "Salvar despesa"}
-              </Button>
+              {mode === "create" ? (
+                <Button type="button" onClick={irParaCategoria}>
+                  <ArrowRight className="h-4 w-4" />
+                  Próximo
+                </Button>
+              ) : (
+                <Button type="submit" disabled={loading}>
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  Editar
+                </Button>
+              )}
               {onCancel ? (
                 <Button type="button" variant="outline" onClick={onCancel}>
                   Cancelar
@@ -503,8 +567,10 @@ export function DespesaForm({
           </div>
         </CardContent>
       </Card>
+      )}
 
-      <Card className="order-1 self-start overflow-hidden shadow-sm">
+      {(mode === "edit" || step === "categoria") && (
+      <Card className="self-start overflow-hidden border-primary/10 shadow-sm">
         <CardHeader className="p-3 pb-2">
           <div className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
@@ -521,6 +587,14 @@ export function DespesaForm({
           </div>
         </CardHeader>
         <CardContent className="space-y-2 p-3 pt-0">
+          {mode === "create" && (
+            <div className="mb-2 flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/35 p-2 text-xs text-muted-foreground">
+              <span>Etapa 2 de 2</span>
+              <Button className="h-8 px-2 text-xs" type="button" variant="outline" onClick={() => setStep("dados")}>
+                Voltar aos dados
+              </Button>
+            </div>
+          )}
           <div className="grid max-h-[26vh] gap-1.5 overflow-y-auto rounded-lg border border-border bg-muted/25 p-1.5 sm:grid-cols-4 lg:grid-cols-8 xl:grid-cols-10">
             {categorias.map((opcao) => {
               const Icon = getCategoryIcon(opcao);
@@ -558,8 +632,24 @@ export function DespesaForm({
             onChange={(event) => setCategoria(toUppercaseText(event.target.value))}
             placeholder="Ou digite uma categoria personalizada"
           />
+          {mode === "create" && (
+            <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
+              <Button type="button" variant="outline" onClick={() => setStep("dados")}>
+                Voltar
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                Salvar
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
+      )}
 
       </form>
 

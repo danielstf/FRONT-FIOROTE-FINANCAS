@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   ArrowDownRight,
@@ -239,16 +239,19 @@ export function RelatoriosPage() {
             <meta charset="UTF-8" />
             <style>
               body { font-family: Arial, sans-serif; color: #0f172a; }
-              h1 { color: #0f172a; }
-              h2 { margin-top: 24px; }
-              table { border-collapse: collapse; margin-bottom: 18px; }
-              th { background: #f1f5f9; }
-              th, td { border: 1px solid #cbd5e1; padding: 6px 8px; }
+              h1 { color: #0f172a; margin-bottom: 6px; }
+              p { color: #475569; }
+              h2 { margin-top: 24px; color: #111827; }
+              table { border-collapse: collapse; margin-bottom: 18px; width: 100%; }
+              th { background: #e0f2fe; color: #0f172a; text-align: left; }
+              th, td { border: 1px solid #cbd5e1; padding: 7px 9px; }
+              tr:nth-child(even) { background: #f8fafc; }
             </style>
           </head>
           <body>
-            <h1>Relatório Fiorote Control - ${excelValue(label)}</h1>
-            ${excelTable("Resumo", ["Mês", "Receitas", "Despesas", "Saldo final"], linhas.map((item) => [formatMonth(item.mes), item.receitas, item.despesas, item.saldoFinal]))}
+            <h1>Relatório Fiorote Controle Financeiro - ${excelValue(label)}</h1>
+            <p>Resumo gerado com receitas, despesas, saldo final e lançamentos detalhados.</p>
+            ${excelTable("Resumo financeiro", ["Mês", "Receitas", "Despesas", "Saldo final"], linhas.map((item) => [formatMonth(item.mes), item.receitas, item.despesas, item.saldoFinal]))}
             ${excelChart(linhas)}
             ${excelTable("Receitas", ["Data", "Nome", "Valor", "Fixa", "Parcela"], receitas.map((item) => [item.data, item.nome, item.valor, item.fixa, item.parcelaAtual && item.numeroParcelas ? `${item.parcelaAtual}/${item.numeroParcelas}` : ""]), { index: 2, color: "#2563eb" })}
             ${excelTable("Despesas", ["Vencimento", "Nome", "Categoria", "Forma", "Valor", "Paga", "Fixa", "Parcela"], despesas.map((item) => [item.dataVencimento, item.nome, item.categoria, item.formaPagamento, item.valor, item.paga, item.fixa, item.parcelaAtual && item.numeroParcelas ? `${item.parcelaAtual}/${item.numeroParcelas}` : ""]), { index: 4, color: "#dc2626" })}
@@ -259,7 +262,7 @@ export function RelatoriosPage() {
       const link = document.createElement("a");
 
       link.href = URL.createObjectURL(blob);
-      link.download = `relatorio-fiorote-${label.toLowerCase().replaceAll(" ", "-")}.xls`;
+      link.download = `fiorote-controle-financeiro-${label.toLowerCase().replaceAll(" ", "-")}.xls`;
       link.click();
       URL.revokeObjectURL(link.href);
       setExportOpen(false);
@@ -444,6 +447,35 @@ export function RelatoriosPage() {
                 </Pie>
               </RechartsPieChart>
             </ChartContainer>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {categoriaData.map((item, index) => {
+                const totalCategorias = categoriaData.reduce(
+                  (sum, categoria) => sum + categoria.value,
+                  0,
+                );
+                const percentual = totalCategorias
+                  ? Math.round((item.value / totalCategorias) * 100)
+                  : 0;
+
+                return (
+                  <div
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm"
+                    key={item.name}
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span
+                        className="h-3 w-3 shrink-0 rounded-full"
+                        style={{ backgroundColor: pieColors[index % pieColors.length] }}
+                      />
+                      <span className="truncate font-medium">{item.name}</span>
+                    </span>
+                    <span className="shrink-0 text-xs font-bold text-muted-foreground">
+                      {percentual}% · {formatCurrency(item.value)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -617,3 +649,5 @@ function Metric({
     </Card>
   );
 }
+
+

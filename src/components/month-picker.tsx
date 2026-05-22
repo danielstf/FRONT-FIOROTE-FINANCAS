@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+﻿import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   type CSSProperties,
   useEffect,
@@ -234,3 +234,4 @@ export function MonthPicker({ value, onChange, className }: MonthPickerProps) {
     </div>
   );
 }
+

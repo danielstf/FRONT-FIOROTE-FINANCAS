@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+﻿import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Lightbulb, Loader2, Repeat2, Save, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
@@ -143,8 +143,8 @@ export function ReceitaForm({
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-      <Card className="shadow-sm">
-        <CardHeader>
+      <Card className="overflow-hidden border-blue-500/15 shadow-sm">
+        <CardHeader className="bg-gradient-to-br from-blue-500/10 via-background to-primary/5">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
               <TrendingUp className="h-5 w-5" />
@@ -260,7 +260,7 @@ export function ReceitaForm({
                 ) : (
                   <Save className="h-4 w-4" />
                 )}
-                {mode === "edit" ? "Salvar alterações" : "Salvar receita"}
+                {mode === "edit" ? "Editar" : "Salvar"}
               </Button>
               {!isPremium && (
                 <Button asChild type="button" variant="outline">
@@ -278,15 +278,15 @@ export function ReceitaForm({
       </Card>
 
       {showSuggestions && (
-        <Card className="shadow-sm">
-          <CardHeader>
+        <Card className="overflow-hidden border-primary/15 shadow-sm">
+          <CardHeader className="bg-muted/35">
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
                 <Lightbulb className="h-5 w-5" />
               </span>
               <div>
                 <CardTitle>Sugestões</CardTitle>
-                <CardDescription>Use uma opção da API para preencher rápido.</CardDescription>
+                <CardDescription>Use uma opção salva para preencher rápido.</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -309,3 +309,4 @@ export function ReceitaForm({
     </div>
   );
 }
+

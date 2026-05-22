@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+﻿import { useState, type FormEvent } from "react";
 import {
   HeartHandshake,
   Lightbulb,
@@ -204,3 +204,4 @@ export function SugestoesPage() {
     </div>
   );
 }
+

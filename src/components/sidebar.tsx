@@ -1,8 +1,10 @@
-import {
+﻿import {
   BarChart3,
   ChevronDown,
   CreditCard,
+  Crown,
   Home,
+  LogOut,
   MessageSquareText,
   ReceiptText,
   Settings,
@@ -28,11 +30,11 @@ const menuItems = [
   { title: "Cartões", href: "/app/cartoes", icon: CreditCard },
   { title: "Relatórios", href: "/app/relatorios", icon: BarChart3 },
   {
-    title: "Premium",
+    title: "VIP",
     href: "/app/premium",
-    icon: CreditCard,
+    icon: Crown,
     section: "Conta",
-    badge: "Pro",
+    badge: "plan",
   },
   { title: "Atendimento", href: "/app/sugestoes", icon: MessageSquareText },
   { title: "Configurações", href: "/app/configuracoes", icon: Settings },
@@ -51,7 +53,8 @@ export function Sidebar({
   perfilSelecionado,
   onProfileClick,
 }: SidebarProps) {
-  const { session } = useAuth();
+  const { session, logout } = useAuth();
+  const planBadge = session?.usuario.plano === "PREMIUM" ? "VIP" : "FREE";
   const items =
     session?.usuario.role === "ADMIN"
       ? [
@@ -102,9 +105,17 @@ export function Sidebar({
             )}
             <item.icon className="h-4 w-4 flex-shrink-0" />
             <span className="flex-1">{item.title}</span>
-            {item.badge && (
-              <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold leading-none text-primary-foreground">
-                {item.badge}
+            {item.badge === "plan" && (
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-black leading-none",
+                  planBadge === "VIP"
+                    ? "border-amber-400/50 bg-amber-400/15 text-amber-600 dark:text-amber-300"
+                    : "border-sidebar-border bg-sidebar-accent text-sidebar-foreground/65",
+                )}
+              >
+                <Crown className="h-3 w-3" />
+                {planBadge}
               </span>
             )}
           </>
@@ -126,8 +137,7 @@ export function Sidebar({
 
       <nav className="flex-1 overflow-y-auto px-2.5 py-3">{renderedItems}</nav>
 
-      <div className="border-t border-sidebar-border p-2.5">
-        {session?.usuario && (
+      <div className="grid gap-2 border-t border-sidebar-border p-2.5">        {session?.usuario && (
           <button
             className="flex w-full items-center gap-2.5 rounded-lg border border-sidebar-border bg-sidebar-accent/70 px-3 py-2.5 text-left transition-colors hover:bg-sidebar-accent"
             type="button"
@@ -149,7 +159,18 @@ export function Sidebar({
             <ChevronDown className="h-4 w-4 shrink-0 text-sidebar-foreground/60" />
           </button>
         )}
+        <button
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-destructive/25 bg-destructive/10 px-3 text-sm font-bold text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
+          type="button"
+          onClick={logout}
+        >
+          <LogOut className="h-4 w-4" />
+          Sair do sistema
+        </button>
       </div>
     </aside>
   );
 }
+
+
+

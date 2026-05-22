@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { ArrowLeft, TrendingUp } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { ReceitaForm } from "../receita-form";
@@ -35,3 +35,4 @@ export function CadastroReceitaPage() {
     </div>
   );
 }
+

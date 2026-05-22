@@ -1,4 +1,4 @@
-import type { FormaPagamentoDespesa } from "../../api/despesas/types";
+﻿import type { FormaPagamentoDespesa } from "../../api/despesas/types";
 export { formatCurrency, moneyToInput, parseMoney } from "../../lib/money";
 
 export function formatDate(value: string | null) {
@@ -49,3 +49,4 @@ export const formasPagamentoOptions = Object.entries(formaPagamentoLabel).map(
     label,
   }),
 );
+

@@ -1,9 +1,8 @@
-import {
+﻿import {
   BadgeCheck,
   Crown,
   KeyRound,
   Loader2,
-  LogOut,
   PencilLine,
   Plus,
   Save,
@@ -51,7 +50,6 @@ export function ConfiguracoesPage() {
     atualizarUsuarioSessao,
     perfilFinanceiroId,
     selecionarPerfilFinanceiro,
-    logout,
   } = useAuth();
   const usuarioTemSenha = session?.usuario.temSenha ?? true;
   const isPremium = session?.usuario.plano === "PREMIUM";
@@ -159,7 +157,7 @@ export function ConfiguracoesPage() {
     event.preventDefault();
 
     if (!isPremium) {
-      toast.error("Perfis financeiros são exclusivos para usuários Premium.");
+      toast.error("Perfis financeiros são exclusivos para usuários VIP.");
       return;
     }
 
@@ -212,32 +210,14 @@ export function ConfiguracoesPage() {
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
               <Sparkles className="h-4 w-4" />
-              Conta e perfis
+              Conta e preferências
             </div>
             <h1 className="text-2xl font-semibold tracking-normal lg:text-3xl">
               Configurações da conta
             </h1>
             <p className="max-w-2xl text-sm text-muted-foreground">
-              Atualize seus dados, ajuste o tema e organize perfis financeiros.
+              Atualize seus dados, ajuste o tema, troque a senha e organize perfis VIP.
             </p>
-            <div className="grid gap-3 pt-2 sm:grid-cols-3">
-              <div className="rounded-lg border border-border bg-background p-3">
-                <p className="text-xs text-muted-foreground">Plano</p>
-                <p className="mt-1 font-semibold text-primary">
-                  {session?.usuario.plano ?? "FREE"}
-                </p>
-              </div>
-              <div className="rounded-lg border border-border bg-background p-3">
-                <p className="text-xs text-muted-foreground">Senha</p>
-                <p className="mt-1 font-semibold">
-                  {usuarioTemSenha ? "Ativa" : "Pendente"}
-                </p>
-              </div>
-              <div className="rounded-lg border border-border bg-background p-3">
-                <p className="text-xs text-muted-foreground">Perfis</p>
-                <p className="mt-1 font-semibold">{perfis.length + 1}</p>
-              </div>
-            </div>
           </div>
           <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
             <CardContent className="flex items-center gap-3 p-5">
@@ -351,38 +331,20 @@ export function ConfiguracoesPage() {
               </div>
               <ThemeToggle />
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-destructive/10 text-destructive">
-                  <LogOut className="h-5 w-5" />
-                </span>
-                <div className="min-w-0">
-                  <p className="font-semibold text-destructive">
-                    Sair da conta
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Encerre sua sessão neste dispositivo.
-                  </p>
-                </div>
-              </div>
-              <Button variant="destructive" onClick={logout}>
-                Sair
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="shadow-sm">
-        <CardHeader>
+      <Card className="overflow-hidden border-amber-400/20 shadow-sm">
+        <CardHeader className="bg-gradient-to-br from-amber-400/15 via-background to-primary/10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Crown className="h-5 w-5 text-primary" />
-                Perfis financeiros
+                Perfis VIP
               </CardTitle>
               <CardDescription>
-                Usuários Premium podem criar até 5 perfis com dados separados.
+                Usuários VIP podem criar até 5 perfis com dados separados.
               </CardDescription>
             </div>
             <Button onClick={abrirNovoPerfil} disabled={!isPremium}>
@@ -393,9 +355,14 @@ export function ConfiguracoesPage() {
         </CardHeader>
         <CardContent>
           {!isPremium && (
-            <p className="mb-4 rounded-md border border-primary/25 bg-primary/10 px-3 py-2 text-sm text-primary">
-              Assine o Premium para criar perfis financeiros.
-            </p>
+            <div className="mb-4 rounded-xl border border-amber-400/25 bg-amber-400/10 p-4 text-sm">
+              <p className="font-semibold text-amber-700 dark:text-amber-300">
+                Perfis extras são um recurso VIP.
+              </p>
+              <p className="mt-1 text-muted-foreground">
+                Use o plano VIP para separar finanças pessoais, família ou empresa.
+              </p>
+            </div>
           )}
 
           <div className="grid content-start gap-3">

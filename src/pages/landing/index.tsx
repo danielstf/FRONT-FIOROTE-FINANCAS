@@ -1,4 +1,4 @@
-import {
+﻿import {
   ArrowRight,
   BadgeCheck,
   BarChart3,
@@ -58,7 +58,7 @@ const features = [
   },
   {
     title: "Web e Android",
-    description: "Use no navegador e no aplicativo Android do Fiorote Control.",
+    description: "Use no navegador e no aplicativo Android do Fiorote Controle Financeiro.",
     icon: Smartphone,
   },
 ];
@@ -76,7 +76,7 @@ const softTransition = {
 export function LandingPage() {
   return (
     <main className="dark min-h-screen bg-background text-foreground">
-      {/* ── HEADER ── */}
+      {/* HEADER */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4 lg:h-20 lg:px-8">
           <BrandLogo className="min-w-0 flex-1 sm:flex-none" size="nav" />
@@ -117,7 +117,7 @@ export function LandingPage() {
         </div>
       </header>
 
-      {/* ── HERO ── */}
+      {/* HERO */}
       <section className="relative overflow-hidden border-b border-border">
         {/* Subtle grid background */}
         <div
@@ -295,7 +295,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── FEATURES ── */}
+      {/* FEATURES */}
       <section
         className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8"
         id="funcoes"
@@ -353,7 +353,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── PRICING ── */}
+      {/* PRICING */}
       <section className="border-y border-border bg-muted/30" id="precos">
         <div className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
           <motion.div
@@ -473,7 +473,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── TRUST ── */}
+      {/* TRUST */}
       <section className="border-b border-border" id="seguranca">
         <div className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
           <motion.div
@@ -491,7 +491,7 @@ export function LandingPage() {
               Um painel financeiro feito para uso diário
             </h2>
             <p className="max-w-xl text-muted-foreground">
-              O Fiorote Control prioriza leitura rápida, organização por mês e recursos úteis
+              O Fiorote Controle Financeiro prioriza leitura rápida, organização por mês e recursos úteis
               para quem acompanha o próprio dinheiro com frequência.
             </p>
           </motion.div>
@@ -528,3 +528,4 @@ export function LandingPage() {
     </main>
   );
 }
+

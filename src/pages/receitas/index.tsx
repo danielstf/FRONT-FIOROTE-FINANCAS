@@ -173,11 +173,11 @@ export function ReceitasPage() {
                 />
               </div>
               <Button
-                className="h-11 px-5"
+                className="h-10 shrink-0 px-4 text-sm sm:mt-1"
                 onClick={() => setCadastroAberto(true)}
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-white/15">
-                  <Plus className="h-4 w-4" />
+                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-white/15">
+                  <Plus className="h-3.5 w-3.5" />
                 </span>
                 Nova receita
               </Button>
@@ -328,13 +328,19 @@ export function ReceitasPage() {
       </Card>
 
       <Dialog open={cadastroAberto} onOpenChange={setCadastroAberto}>
-        <DialogContent className="max-w-5xl">
+        <DialogContent className="max-h-[calc(100vh-1rem)] max-w-5xl overflow-y-auto p-0">
+          <div className="border-b border-border bg-gradient-to-br from-blue-500/15 via-background to-primary/10 p-5">
           <DialogHeader>
-            <DialogTitle>Nova receita</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+              Nova receita
+            </DialogTitle>
             <DialogDescription>
               Cadastre uma entrada sem sair da lista de receitas.
             </DialogDescription>
           </DialogHeader>
+          </div>
+          <div className="p-4">
           <ReceitaForm
             defaultMonth={mes}
             onCancel={() => setCadastroAberto(false)}
@@ -344,6 +350,7 @@ export function ReceitasPage() {
               void carregarReceitas(mesCriado);
             }}
           />
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -353,13 +360,19 @@ export function ReceitasPage() {
           if (!open) setReceitaEditando(null);
         }}
       >
-        <DialogContent className="max-w-5xl">
+        <DialogContent className="max-h-[calc(100vh-1rem)] max-w-5xl overflow-y-auto p-0">
+          <div className="border-b border-border bg-gradient-to-br from-blue-500/15 via-background to-primary/10 p-5">
           <DialogHeader>
-            <DialogTitle>Editar receita</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <Pencil className="h-5 w-5 text-blue-600" />
+              Editar receita
+            </DialogTitle>
             <DialogDescription>
               Atualize esta entrada sem sair da lista.
             </DialogDescription>
           </DialogHeader>
+          </div>
+          <div className="p-4">
           {receitaEditando && (
             <ReceitaForm
               key={receitaEditando.id}
@@ -373,6 +386,7 @@ export function ReceitasPage() {
               }}
             />
           )}
+          </div>
         </DialogContent>
       </Dialog>
 
