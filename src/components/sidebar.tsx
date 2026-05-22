@@ -137,7 +137,8 @@ export function Sidebar({
 
       <nav className="flex-1 overflow-y-auto px-2.5 py-3">{renderedItems}</nav>
 
-      <div className="grid gap-2 border-t border-sidebar-border p-2.5">        {session?.usuario && (
+      <div className="grid gap-2 border-t border-sidebar-border p-2.5">
+        {session?.usuario && (
           <button
             className="flex w-full items-center gap-2.5 rounded-lg border border-sidebar-border bg-sidebar-accent/70 px-3 py-2.5 text-left transition-colors hover:bg-sidebar-accent"
             type="button"
@@ -160,7 +161,7 @@ export function Sidebar({
           </button>
         )}
         <button
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-destructive/25 bg-destructive/10 px-3 text-sm font-bold text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-destructive/20 bg-transparent px-3 text-sm font-bold text-destructive transition-colors hover:border-destructive/35 hover:bg-destructive/10 hover:text-destructive"
           type="button"
           onClick={logout}
         >

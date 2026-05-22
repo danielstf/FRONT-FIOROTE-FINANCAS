@@ -13,8 +13,6 @@ import {
   WalletCards,
 } from "lucide-react";
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -61,7 +59,6 @@ type ViewMode = "ano" | "mes";
 const chartConfig: ChartConfig = {
   receitas: { label: "Receitas", color: "#2563eb" },
   despesas: { label: "Despesas", color: "#dc2626" },
-  saldoFinal: { label: "Saldo", color: "#0f9f6e" },
 };
 
 const pieColors = ["#dc2626", "#f97316", "#eab308", "#8b5cf6", "#2563eb", "#0f9f6e"];
@@ -479,35 +476,6 @@ export function RelatoriosPage() {
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Evolução do saldo
-          </CardTitle>
-          <CardDescription>
-            {viewMode === "ano" ? "Área com saldo final mês a mês." : "Saldo final do mês selecionado."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer className="h-72 w-full" config={chartConfig}>
-            <AreaChart accessibilityLayer data={chartData} margin={{ left: 0, right: 12, top: 12 }}>
-              <CartesianGrid vertical={false} />
-              <XAxis axisLine={false} dataKey="label" tickLine={false} tickMargin={10} />
-              <ChartTooltip
-                content={
-                  <ChartTooltipContent
-                    formatter={(value) => formatCurrency(Number(value))}
-                    nameFormatter={(name) => chartConfig[name]?.label ?? name}
-                  />
-                }
-              />
-              <Area dataKey="saldoFinal" fill="var(--color-saldoFinal)" fillOpacity={0.18} stroke="var(--color-saldoFinal)" strokeWidth={2} type="monotone" />
-            </AreaChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>

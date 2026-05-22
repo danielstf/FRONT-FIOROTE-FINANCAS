@@ -22,6 +22,7 @@ import { Label } from "./ui/label";
 import { cn } from "../lib/utils";
 import { useAuth } from "../providers/auth-provider";
 import { getApiErrorMessage } from "../api/errors";
+import { capitalizeName, capitalizeNameInput } from "../lib/text";
 
 type AuthMode = "login" | "cadastro";
 
@@ -138,7 +139,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         return;
       }
 
-      await cadastrar({ nome, email, senha });
+      await cadastrar({ nome: capitalizeName(nome), email, senha });
       setMessage("Cadastro criado com sucesso. Faça login para continuar.");
       setSenha("");
       navigate("/login");
@@ -207,7 +208,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 <Input
                   id="nome"
                   value={nome}
-                  onChange={(event) => setNome(event.target.value)}
+                  onChange={(event) => setNome(capitalizeNameInput(event.target.value))}
                   placeholder="Seu nome"
                   className="h-12 rounded-lg border-white/10 bg-slate-950/80 pl-10 text-white placeholder:text-slate-600 focus:border-cyan-300/70 focus:ring-cyan-300/15"
                   required

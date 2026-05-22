@@ -30,7 +30,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../components/ui/dialog";
-import { Label } from "../../components/ui/label";
 import { useAuth } from "../../providers/auth-provider";
 import { ReceitaForm } from "./receita-form";
 
@@ -144,10 +143,6 @@ export function ReceitasPage() {
         <div className="grid gap-6 p-5 lg:grid-cols-[1fr_360px] lg:p-6">
           <div className="space-y-5">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 rounded-md border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400">
-                <Sparkles className="h-4 w-4" />
-                Entradas do mês
-              </div>
               <div className="flex items-center gap-3">
                 <span className="flex h-12 w-12 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
                   <TrendingUp className="h-6 w-6" />
@@ -160,27 +155,10 @@ export function ReceitasPage() {
                 Acompanhe suas entradas por mês, edite lançamentos e mantenha o
                 total mensal sempre limpo.
               </p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-              <div className="space-y-2">
-                <Label>Mês de referência</Label>
-                <MonthPicker
-                  value={mes}
-                  onChange={(selectedMonth) => {
-                    setMes(selectedMonth);
-                    void carregarReceitas(selectedMonth);
-                  }}
-                />
+              <div className="inline-flex items-center gap-2 rounded-md border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400">
+                <Sparkles className="h-4 w-4" />
+                Entradas do mês
               </div>
-              <Button
-                className="h-10 shrink-0 px-4 text-sm sm:mt-1"
-                onClick={() => setCadastroAberto(true)}
-              >
-                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-white/15">
-                  <Plus className="h-3.5 w-3.5" />
-                </span>
-                Nova receita
-              </Button>
             </div>
           </div>
 
@@ -217,17 +195,37 @@ export function ReceitasPage() {
 
       <Card className="shadow-sm">
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
-              <ArrowUpRight className="h-5 w-5" />
-            </span>
-            <div>
-              <CardTitle className="capitalize">
-                Entradas de {getMonthOnlyName(mes)}
-              </CardTitle>
-              <CardDescription>
-                Gerencie as receitas cadastradas em {formatMonthName(mes)}.
-              </CardDescription>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                <ArrowUpRight className="h-5 w-5" />
+              </span>
+              <div>
+                <CardTitle className="capitalize">
+                  Entradas de {getMonthOnlyName(mes)}
+                </CardTitle>
+                <CardDescription>
+                  Gerencie as receitas cadastradas em {formatMonthName(mes)}.
+                </CardDescription>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start lg:self-auto">
+              <MonthPicker
+                value={mes}
+                onChange={(selectedMonth) => {
+                  setMes(selectedMonth);
+                  void carregarReceitas(selectedMonth);
+                }}
+              />
+              <Button
+                aria-label="Adicionar receita"
+                className="h-10 w-10 shrink-0 px-0"
+                title="Adicionar receita"
+                onClick={() => setCadastroAberto(true)}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </CardHeader>

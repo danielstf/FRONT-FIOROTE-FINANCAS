@@ -186,10 +186,6 @@ export function DespesasPage() {
           <div className="space-y-5">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
               <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 rounded-full border border-destructive/20 bg-destructive/8 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-destructive">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Contas do mês
-                </div>
                 <div className="flex items-center gap-3">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive ring-1 ring-destructive/20">
                     <ReceiptText className="h-5 w-5" />
@@ -204,34 +200,16 @@ export function DespesasPage() {
                     {formatMonthName(mes)}
                   </span>.
                 </p>
+                <div className="inline-flex items-center gap-2 rounded-full border border-destructive/20 bg-destructive/8 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-destructive">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Contas do mês
+                </div>
               </div>
 
-              <Button
-                className="h-10 shrink-0 px-4 text-sm sm:mt-1"
-                variant="destructive"
-                onClick={() => setCadastroAberto(true)}
-              >
-                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-white/15">
-                  <Plus className="h-3.5 w-3.5" />
-                </span>
-                Nova despesa
-              </Button>
             </div>
 
             {/* Filters */}
-            <div className="grid gap-3 rounded-xl border border-border bg-muted/30 p-4 sm:grid-cols-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  Mês
-                </Label>
-                <MonthPicker
-                  value={mes}
-                  onChange={(value) => {
-                    setMes(value);
-                    void carregarDespesas(value, formaPagamento, status);
-                  }}
-                />
-              </div>
+            <div className="grid gap-3 rounded-xl border border-border bg-muted/30 p-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label
                   htmlFor="forma-despesa"
@@ -359,15 +337,36 @@ export function DespesasPage() {
       {/* ── LIST CARD ── */}
       <Card className="shadow-sm">
         <CardHeader className="border-b border-border pb-4">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive ring-1 ring-destructive/20">
-              <ReceiptText className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <CardTitle className="text-base font-semibold">Contas cadastradas</CardTitle>
-              <CardDescription className="text-xs">
-                Categorias com ícones, recorrência, parcelas e controle de pagamento.
-              </CardDescription>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive ring-1 ring-destructive/20">
+                <ReceiptText className="h-5 w-5" />
+              </span>
+              <div className="min-w-0">
+                <CardTitle className="text-base font-semibold">Contas cadastradas</CardTitle>
+                <CardDescription className="text-xs">
+                  Categorias com ícones, recorrência, parcelas e controle de pagamento.
+                </CardDescription>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start lg:self-auto">
+              <MonthPicker
+                value={mes}
+                onChange={(value) => {
+                  setMes(value);
+                  void carregarDespesas(value, formaPagamento, status);
+                }}
+              />
+              <Button
+                aria-label="Adicionar despesa"
+                className="h-10 w-10 shrink-0 px-0"
+                title="Adicionar despesa"
+                variant="destructive"
+                onClick={() => setCadastroAberto(true)}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </CardHeader>
