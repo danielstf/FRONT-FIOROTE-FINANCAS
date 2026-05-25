@@ -182,7 +182,7 @@ function AnimatedSection({
 
 export function LandingPage() {
   return (
-    <main className="dark min-h-screen bg-background text-foreground">
+    <main className="min-h-screen bg-background text-foreground">
       {/* ── HEADER ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:gap-4 lg:h-20 lg:px-8">
