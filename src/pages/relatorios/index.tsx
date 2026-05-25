@@ -29,13 +29,6 @@ import { receitasApi } from "../../api/receitas/receitas-api";
 import { MonthPicker } from "../../components/month-picker";
 import { Button } from "../../components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
-import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
@@ -115,7 +108,6 @@ export function RelatoriosPage() {
   const [ano, setAno] = useState(anoAtual);
   const [viewMode, setViewMode] = useState<ViewMode>("ano");
   const [viewMonth, setViewMonth] = useState(mesAtual);
-  const [mesBase, setMesBase] = useState(mesAtual);
   const [data, setData] = useState<Awaited<ReturnType<typeof dashboardApi.resumoFinanceiro>> | null>(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);

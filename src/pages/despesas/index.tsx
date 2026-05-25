@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import {
   AlertTriangle,
   CalendarDays,
@@ -72,12 +72,6 @@ export function DespesasPage() {
   const [escopoExclusao, setEscopoExclusao] = useState<"mes" | "todas">("mes");
   const [error, setError] = useState("");
 
-  const maiorDespesa = useMemo(() => {
-    return despesas.reduce<Despesa | null>((maior, despesa) => {
-      if (!maior || despesa.valor > maior.valor) return despesa;
-      return maior;
-    }, null);
-  }, [despesas]);
   const despesaExcluindoParcelada = Boolean(despesaExcluindo?.parcelamentoId);
   const despesaExcluindoRecorrente = Boolean(despesaExcluindo?.fixa);
   const despesaExcluindoComEscopo =
