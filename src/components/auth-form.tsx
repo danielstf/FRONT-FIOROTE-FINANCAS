@@ -152,7 +152,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
   return (
     <Card className="w-full overflow-hidden rounded-2xl border-white/10 bg-[#080f1d]/95 shadow-2xl shadow-black/35 before:hidden hover:shadow-2xl">
-      <div className="h-1 bg-gradient-to-r from-cyan-300 via-blue-500 to-emerald-300" />
+      <div className="h-0.75 bg-linear-to-r from-cyan-300 via-blue-500 to-emerald-300" />
       <CardHeader className="space-y-6 p-5 pb-4 sm:p-7 sm:pb-4">
         <div className="grid grid-cols-2 rounded-xl border border-white/10 bg-slate-950/80 p-1">
           <Button

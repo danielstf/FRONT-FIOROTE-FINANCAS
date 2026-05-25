@@ -1,4 +1,4 @@
-﻿import {
+import {
   BadgeCheck,
   Crown,
   KeyRound,
@@ -6,8 +6,7 @@
   PencilLine,
   Plus,
   Save,
-  ShieldCheck,
-  Sparkles,
+  Settings,
   SunMoon,
   Trash2,
   UserRound,
@@ -25,13 +24,6 @@ import {
   getAvatarOption,
 } from "../../components/ui/avatar";
 import { Button } from "../../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -58,15 +50,12 @@ export function ConfiguracoesPage() {
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [perfis, setPerfis] = useState<PerfilFinanceiro[]>([]);
-  const [perfilEditando, setPerfilEditando] = useState<PerfilFinanceiro | null>(
-    null,
-  );
+  const [perfilEditando, setPerfilEditando] = useState<PerfilFinanceiro | null>(null);
   const [perfilNome, setPerfilNome] = useState("");
   const [perfilAvatar, setPerfilAvatar] = useState("user");
   const [senhaModalAberto, setSenhaModalAberto] = useState(false);
   const [perfilModalAberto, setPerfilModalAberto] = useState(false);
-  const [perfilExcluindo, setPerfilExcluindo] =
-    useState<PerfilFinanceiro | null>(null);
+  const [perfilExcluindo, setPerfilExcluindo] = useState<PerfilFinanceiro | null>(null);
   const [loadingPerfis, setLoadingPerfis] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
@@ -75,7 +64,6 @@ export function ConfiguracoesPage() {
 
   async function carregarPerfis() {
     if (!isPremium) return;
-
     setLoadingPerfis(true);
     try {
       const data = await perfisApi.listar();
@@ -107,21 +95,13 @@ export function ConfiguracoesPage() {
 
   async function salvarSenha(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    if (novaSenha !== confirmarSenha) {
-      toast.error("A confirmação da senha não confere.");
-      return;
-    }
-
+    if (novaSenha !== confirmarSenha) { toast.error("A confirmação da senha não confere."); return; }
     setSavingPassword(true);
     try {
       const response = await authApi.trocarSenha({
-        senhaAtual: usuarioTemSenha
-          ? senhaAtual.trim() || undefined
-          : undefined,
+        senhaAtual: usuarioTemSenha ? senhaAtual.trim() || undefined : undefined,
         novaSenha,
       });
-
       if (response.usuario) atualizarUsuarioSessao(response.usuario);
       setSenhaAtual("");
       setNovaSenha("");
@@ -155,25 +135,16 @@ export function ConfiguracoesPage() {
 
   async function salvarPerfilFinanceiro(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    if (!isPremium) {
-      toast.error("Perfis financeiros são exclusivos para usuários VIP.");
-      return;
-    }
-
+    if (!isPremium) { toast.error("Perfis financeiros são exclusivos para usuários VIP."); return; }
     setSavingPerfil(true);
     try {
       if (perfilEditando) {
-        await perfisApi.editar(perfilEditando.id, {
-          nome: perfilNome,
-          avatar: perfilAvatar,
-        });
+        await perfisApi.editar(perfilEditando.id, { nome: perfilNome, avatar: perfilAvatar });
         toast.success("Perfil atualizado com sucesso.");
       } else {
         await perfisApi.criar({ nome: perfilNome, avatar: perfilAvatar });
         toast.success("Perfil criado com sucesso.");
       }
-
       limparPerfil();
       setPerfilModalAberto(false);
       await carregarPerfis();
@@ -186,12 +157,10 @@ export function ConfiguracoesPage() {
 
   async function excluirPerfil() {
     if (!perfilExcluindo) return;
-
     setDeletingPerfil(true);
     try {
       await perfisApi.excluir(perfilExcluindo.id);
-      if (perfilFinanceiroId === perfilExcluindo.id)
-        selecionarPerfilFinanceiro(null);
+      if (perfilFinanceiroId === perfilExcluindo.id) selecionarPerfilFinanceiro(null);
       if (perfilEditando?.id === perfilExcluindo.id) limparPerfil();
       setPerfilExcluindo(null);
       toast.success("Perfil excluído com sucesso.");
@@ -205,227 +174,179 @@ export function ConfiguracoesPage() {
 
   return (
     <div className="space-y-5">
-      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-        <div className="grid gap-6 p-5 lg:grid-cols-[1fr_360px] lg:p-7">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
-              <Sparkles className="h-4 w-4" />
-              Conta e preferências
-            </div>
-            <h1 className="text-2xl font-semibold tracking-normal lg:text-3xl">
-              Configurações da conta
-            </h1>
-            <p className="max-w-2xl text-sm text-muted-foreground">
-              Atualize seus dados, ajuste o tema, troque a senha e organize perfis VIP.
-            </p>
-          </div>
-          <Card className="self-start border-primary/20 bg-background/80 shadow-sm">
-            <CardContent className="flex items-center gap-3 p-5">
-              <span className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <ShieldCheck className="h-6 w-6" />
-              </span>
-              <div className="min-w-0">
-                <p className="truncate font-semibold">
-                  {session?.usuario.nome}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {session?.usuario.email}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Page header */}
+      <div className="flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <Settings className="h-4.5 w-4.5" />
         </div>
-      </section>
+        <div>
+          <h1 className="text-lg font-semibold text-foreground">Configurações</h1>
+          <p className="text-xs text-muted-foreground">{session?.usuario.email}</p>
+        </div>
+      </div>
 
+      {/* Grid: dados + segurança */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserRound className="h-5 w-5 text-primary" />
-              Dados do usuário
-            </CardTitle>
-            <CardDescription>Altere o nome exibido no sistema.</CardDescription>
-          </CardHeader>
-          <CardContent>
+        {/* Dados do usuário */}
+        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <UserRound className="h-3.5 w-3.5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Dados do usuário</p>
+              <p className="text-xs text-muted-foreground">Altere o nome exibido no sistema.</p>
+            </div>
+          </div>
+          <div className="p-5">
             <form className="grid gap-4" onSubmit={salvarDados}>
               <div className="space-y-2">
-                <Label htmlFor="nome">Nome</Label>
+                <Label htmlFor="nome" className="text-xs font-medium text-muted-foreground">Nome</Label>
                 <Input
                   id="nome"
                   value={nome}
-                  onChange={(event) => setNome(event.target.value)}
+                  onChange={(e) => setNome(e.target.value)}
+                  className="h-10"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label>Email</Label>
-                <Input value={session?.usuario.email ?? ""} disabled />
+                <Label className="text-xs font-medium text-muted-foreground">Email</Label>
+                <Input value={session?.usuario.email ?? ""} className="h-10" disabled />
               </div>
-              <Button
-                className="w-full sm:w-fit"
-                type="submit"
-                disabled={savingProfile}
-              >
-                {savingProfile ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
+              <Button type="submit" disabled={savingProfile} className="h-10 w-fit gap-2">
+                {savingProfile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Salvar nome
               </Button>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {usuarioTemSenha ? (
-                <KeyRound className="h-5 w-5 text-primary" />
-              ) : (
-                <BadgeCheck className="h-5 w-5 text-primary" />
-              )}
-              Segurança e tema
-            </CardTitle>
-            <CardDescription>
-              A senha fica escondida até você abrir a alteração.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3">
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background p-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                  {usuarioTemSenha ? (
-                    <KeyRound className="h-5 w-5" />
-                  ) : (
-                    <BadgeCheck className="h-5 w-5" />
-                  )}
-                </span>
-                <div className="min-w-0">
-                  <p className="font-semibold">
-                    {usuarioTemSenha ? "Senha cadastrada" : "Senha pendente"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Atualize sua senha em uma janela segura.
-                  </p>
+        {/* Segurança e tema */}
+        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <KeyRound className="h-3.5 w-3.5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Segurança e tema</p>
+              <p className="text-xs text-muted-foreground">A senha fica escondida até você abrir a alteração.</p>
+            </div>
+          </div>
+          <div className="divide-y divide-border/60">
+            <div className="flex items-center justify-between gap-3 px-5 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+                  {usuarioTemSenha ? <KeyRound className="h-4 w-4" /> : <BadgeCheck className="h-4 w-4" />}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{usuarioTemSenha ? "Senha cadastrada" : "Senha pendente"}</p>
+                  <p className="text-xs text-muted-foreground">Atualize em uma janela segura.</p>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => setSenhaModalAberto(true)}
-              >
+              <Button variant="outline" className="h-9" onClick={() => setSenhaModalAberto(true)}>
                 {usuarioTemSenha ? "Trocar" : "Cadastrar"}
               </Button>
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background p-3">
+            <div className="flex items-center justify-between gap-3 px-5 py-4">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                  <SunMoon className="h-5 w-5" />
-                </span>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+                  <SunMoon className="h-4 w-4" />
+                </div>
                 <div>
-                  <p className="font-semibold">Tema do sistema</p>
-                  <p className="text-xs text-muted-foreground">
-                    Alterne entre claro e escuro.
-                  </p>
+                  <p className="text-sm font-semibold">Tema do sistema</p>
+                  <p className="text-xs text-muted-foreground">Alterne entre claro e escuro.</p>
                 </div>
               </div>
               <ThemeToggle />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      <Card className="overflow-hidden border-amber-400/20 shadow-sm">
-        <CardHeader className="bg-gradient-to-br from-amber-400/15 via-background to-primary/10">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Crown className="h-5 w-5 text-primary" />
-                Perfis VIP
-              </CardTitle>
-              <CardDescription>
-                Usuários VIP podem criar até 5 perfis com dados separados.
-              </CardDescription>
+      {/* Perfis VIP */}
+      <div className="rounded-2xl border border-amber-400/20 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4 bg-linear-to-r from-amber-400/8 to-transparent">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400/15 text-amber-400">
+              <Crown className="h-3.5 w-3.5" />
             </div>
-            <Button onClick={abrirNovoPerfil} disabled={!isPremium}>
-              <Plus className="h-4 w-4" />
-              Novo perfil
-            </Button>
+            <div>
+              <p className="text-sm font-semibold">Perfis VIP</p>
+              <p className="text-xs text-muted-foreground">Usuários VIP criam até 5 perfis com dados separados.</p>
+            </div>
           </div>
-        </CardHeader>
-        <CardContent>
+          <Button onClick={abrirNovoPerfil} disabled={!isPremium} className="h-9 gap-2">
+            <Plus className="h-3.5 w-3.5" />
+            Novo perfil
+          </Button>
+        </div>
+
+        <div className="p-5 space-y-3">
           {!isPremium && (
-            <div className="mb-4 rounded-xl border border-amber-400/25 bg-amber-400/10 p-4 text-sm">
-              <p className="font-semibold text-amber-700 dark:text-amber-300">
-                Perfis extras são um recurso VIP.
-              </p>
-              <p className="mt-1 text-muted-foreground">
+            <div className="rounded-xl border border-amber-400/25 bg-amber-400/8 p-4">
+              <p className="text-sm font-semibold text-amber-500">Recurso exclusivo VIP</p>
+              <p className="mt-1 text-xs text-muted-foreground">
                 Use o plano VIP para separar finanças pessoais, família ou empresa.
               </p>
             </div>
           )}
 
-          <div className="grid content-start gap-3">
-            {loadingPerfis && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Carregando perfis...
-              </div>
-            )}
-            {!loadingPerfis && perfis.length === 0 && (
-              <div className="rounded-lg border border-dashed border-border bg-muted/35 p-6 text-center text-sm text-muted-foreground">
-                Nenhum perfil financeiro cadastrado.
-              </div>
-            )}
-            {perfis.map((perfil) => (
-              <div
-                className="flex flex-col gap-3 rounded-lg border border-border bg-background p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
-                key={perfil.id}
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <Avatar value={perfil.avatar} label={perfil.nome} />
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold">{perfil.nome}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Avatar {getAvatarOption(perfil.avatar).label}
-                    </p>
+          {loadingPerfis && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Carregando perfis...
+            </div>
+          )}
+
+          {!loadingPerfis && perfis.length === 0 && isPremium && (
+            <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
+              Nenhum perfil financeiro cadastrado.
+            </div>
+          )}
+
+          {perfis.length > 0 && (
+            <div className="divide-y divide-border/60 rounded-xl border border-border overflow-hidden">
+              {perfis.map((perfil) => (
+                <div
+                  key={perfil.id}
+                  className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/30"
+                >
+                  <Avatar value={perfil.avatar} label={perfil.nome} className="h-9 w-9 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{perfil.nome}</p>
+                    <p className="text-xs text-muted-foreground">Avatar {getAvatarOption(perfil.avatar).label}</p>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <Button
+                      aria-label="Editar perfil"
+                      className="h-8 w-8 rounded-lg px-0"
+                      variant="outline"
+                      onClick={() => editarPerfil(perfil)}
+                    >
+                      <PencilLine className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      aria-label="Excluir perfil"
+                      className="h-8 w-8 rounded-lg px-0 text-destructive hover:text-destructive"
+                      variant="outline"
+                      onClick={() => setPerfilExcluindo(perfil)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    aria-label="Editar perfil"
-                    className="h-9 w-9 px-0"
-                    title="Editar perfil"
-                    variant="outline"
-                    onClick={() => editarPerfil(perfil)}
-                  >
-                    <PencilLine className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    aria-label="Excluir perfil"
-                    className="h-9 w-9 px-0 text-destructive hover:text-destructive"
-                    title="Excluir perfil"
-                    variant="outline"
-                    onClick={() => setPerfilExcluindo(perfil)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
+      {/* Dialog: Trocar senha */}
       <Dialog open={senhaModalAberto} onOpenChange={setSenhaModalAberto}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>
-              {usuarioTemSenha ? "Trocar senha" : "Cadastrar senha"}
-            </DialogTitle>
-            <DialogDescription>
-              Confirme os dados para atualizar o acesso da conta.
-            </DialogDescription>
+            <DialogTitle>{usuarioTemSenha ? "Trocar senha" : "Cadastrar senha"}</DialogTitle>
+            <DialogDescription>Confirme os dados para atualizar o acesso da conta.</DialogDescription>
           </DialogHeader>
           <form className="grid gap-4" onSubmit={salvarSenha}>
             {usuarioTemSenha && (
@@ -435,7 +356,7 @@ export function ConfiguracoesPage() {
                   id="senhaAtual"
                   type="password"
                   value={senhaAtual}
-                  onChange={(event) => setSenhaAtual(event.target.value)}
+                  onChange={(e) => setSenhaAtual(e.target.value)}
                   required
                 />
               </div>
@@ -447,7 +368,7 @@ export function ConfiguracoesPage() {
                 minLength={6}
                 type="password"
                 value={novaSenha}
-                onChange={(event) => setNovaSenha(event.target.value)}
+                onChange={(e) => setNovaSenha(e.target.value)}
                 required
               />
             </div>
@@ -458,24 +379,14 @@ export function ConfiguracoesPage() {
                 minLength={6}
                 type="password"
                 value={confirmarSenha}
-                onChange={(event) => setConfirmarSenha(event.target.value)}
+                onChange={(e) => setConfirmarSenha(e.target.value)}
                 required
               />
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setSenhaModalAberto(false)}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={savingPassword}>
-                {savingPassword ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
+              <Button type="button" variant="outline" onClick={() => setSenhaModalAberto(false)}>Cancelar</Button>
+              <Button type="submit" disabled={savingPassword} className="gap-2">
+                {savingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Confirmar
               </Button>
             </div>
@@ -483,21 +394,16 @@ export function ConfiguracoesPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Dialog: Perfil financeiro */}
       <Dialog
         open={perfilModalAberto}
-        onOpenChange={(open) => {
-          setPerfilModalAberto(open);
-          if (!open) limparPerfil();
-        }}
+        onOpenChange={(open) => { setPerfilModalAberto(open); if (!open) limparPerfil(); }}
       >
         <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>
-              {perfilEditando ? "Editar perfil" : "Novo perfil"}
-            </DialogTitle>
+            <DialogTitle>{perfilEditando ? "Editar perfil" : "Novo perfil"}</DialogTitle>
             <DialogDescription>
-              Defina o nome e o ícone usado para identificar o perfil
-              financeiro.
+              Defina o nome e o ícone usado para identificar o perfil financeiro.
             </DialogDescription>
           </DialogHeader>
           <form className="grid gap-4" onSubmit={salvarPerfilFinanceiro}>
@@ -506,7 +412,7 @@ export function ConfiguracoesPage() {
               <Input
                 id="perfil-nome"
                 value={perfilNome}
-                onChange={(event) => setPerfilNome(event.target.value)}
+                onChange={(e) => setPerfilNome(e.target.value)}
                 placeholder="Ex: Pessoal, Família, Empresa"
                 disabled={!isPremium}
                 required
@@ -518,7 +424,6 @@ export function ConfiguracoesPage() {
                 {avatarOptions.map((avatar) => {
                   const Icon = avatar.icon;
                   const selected = perfilAvatar === avatar.value;
-
                   return (
                     <button
                       aria-label={avatar.label}
@@ -540,19 +445,9 @@ export function ConfiguracoesPage() {
               </div>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setPerfilModalAberto(false)}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={!isPremium || savingPerfil}>
-                {savingPerfil ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
+              <Button type="button" variant="outline" onClick={() => setPerfilModalAberto(false)}>Cancelar</Button>
+              <Button type="submit" disabled={!isPremium || savingPerfil} className="gap-2">
+                {savingPerfil ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 {perfilEditando ? "Salvar perfil" : "Criar perfil"}
               </Button>
             </div>
@@ -560,45 +455,33 @@ export function ConfiguracoesPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Dialog: Excluir perfil */}
       <Dialog
         open={Boolean(perfilExcluindo)}
-        onOpenChange={(open) => {
-          if (!open) setPerfilExcluindo(null);
-        }}
+        onOpenChange={(open) => { if (!open) setPerfilExcluindo(null); }}
       >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Excluir perfil</DialogTitle>
             <DialogDescription>
-              Confirme para remover este perfil financeiro e seus dados
-              vinculados.
+              Confirme para remover este perfil financeiro e seus dados vinculados.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/35 p-4">
-            <Avatar
-              value={perfilExcluindo?.avatar}
-              label={perfilExcluindo?.nome ?? ""}
-            />
+          <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 p-4">
+            <Avatar value={perfilExcluindo?.avatar} label={perfilExcluindo?.nome ?? ""} />
             <div className="min-w-0">
               <p className="truncate font-semibold">{perfilExcluindo?.nome}</p>
-              <p className="text-xs text-muted-foreground">
-                Esta ação não pode ser desfeita.
-              </p>
+              <p className="text-xs text-muted-foreground">Esta ação não pode ser desfeita.</p>
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button type="button" variant="outline" onClick={() => setPerfilExcluindo(null)}>Cancelar</Button>
             <Button
-              type="button"
-              variant="outline"
-              onClick={() => setPerfilExcluindo(null)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              className="bg-destructive text-white hover:bg-destructive/90"
+              variant="destructive"
               type="button"
               onClick={excluirPerfil}
               disabled={deletingPerfil}
+              className="gap-2"
             >
               {deletingPerfil && <Loader2 className="h-4 w-4 animate-spin" />}
               Excluir perfil

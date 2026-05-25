@@ -1,6 +1,7 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { Check, Menu, Settings, UserRound } from "lucide-react";
+import { Check, Menu, Settings, UserRound, X } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { pagamentosApi } from "../api/pagamentos/pagamentos-api";
 import { perfisApi } from "../api/perfis/perfis-api";
 import type { PerfilFinanceiro } from "../api/perfis/types";
@@ -75,113 +76,161 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-dvh overflow-x-hidden bg-background text-foreground lg:grid lg:h-dvh lg:grid-cols-[260px_1fr] lg:divide-x lg:divide-sidebar-border lg:overflow-hidden">
+    <div className="min-h-dvh overflow-x-hidden bg-background text-foreground lg:grid lg:h-dvh lg:grid-cols-[240px_1fr] lg:overflow-hidden">
+      {/* Sidebar desktop */}
       <Sidebar
-        className="hidden lg:flex lg:flex-col"
+        className="hidden lg:flex lg:flex-col border-r border-sidebar-border/50"
         perfilSelecionado={perfilSelecionado}
         onProfileClick={() => setProfileMenuOpen(true)}
       />
 
-      <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <DialogContent className="left-0 top-0 h-dvh max-h-dvh w-72 max-w-[calc(100%-2rem)] translate-x-0 translate-y-0 gap-0 overflow-hidden rounded-none border-y-0 border-l-0 p-0 shadow-2xl data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left">
-          <Sidebar
-            className="flex h-full flex-col border-r-0"
-            perfilSelecionado={perfilSelecionado}
-            onProfileClick={() => {
-              setMobileMenuOpen(false);
-              setProfileMenuOpen(true);
-            }}
-            onNavigate={() => setMobileMenuOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Mobile sidebar overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              key="overlay"
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <motion.div
+              key="drawer"
+              className="fixed left-0 top-0 z-50 h-dvh w-64 lg:hidden"
+              initial={{ x: -260 }}
+              animate={{ x: 0 }}
+              exit={{ x: -260 }}
+              transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
+            >
+              <Sidebar
+                className="flex h-full flex-col border-r border-sidebar-border/50"
+                perfilSelecionado={perfilSelecionado}
+                onProfileClick={() => {
+                  setMobileMenuOpen(false);
+                  setProfileMenuOpen(true);
+                }}
+                onNavigate={() => setMobileMenuOpen(false)}
+              />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
+      {/* Profile dialog */}
       <Dialog open={profileMenuOpen} onOpenChange={setProfileMenuOpen}>
-        <DialogContent className="overflow-hidden p-0 sm:max-w-lg">
-          <div className="border-b border-border bg-gradient-to-br from-primary/15 via-background to-emerald-500/10 p-5">
-            <DialogHeader className="flex-row items-center gap-3 space-y-0 text-left">
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
-                <UserRound className="h-6 w-6" />
+        <DialogContent className="overflow-hidden p-0 sm:max-w-md">
+          <div className="relative border-b border-border bg-linear-to-br from-primary/10 via-background to-background p-6">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent"
+            />
+            <DialogHeader className="flex-row items-center gap-4 space-y-0 text-left">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                <UserRound className="h-5 w-5" />
               </span>
               <div>
-                <DialogTitle>Selecionar perfil</DialogTitle>
-                <DialogDescription>
-                  Escolha qual área financeira deseja usar agora.
+                <DialogTitle className="text-base">Selecionar perfil</DialogTitle>
+                <DialogDescription className="text-sm">
+                  Escolha qual área financeira usar agora.
                 </DialogDescription>
               </div>
             </DialogHeader>
           </div>
 
-          <div className="grid gap-2.5 p-5">
+          <div className="grid gap-2 p-4">
             <button
-              className="flex w-full items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3 text-left transition-colors hover:border-primary/45 hover:bg-primary/10"
+              className="group flex w-full items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3.5 text-left transition-all duration-150 hover:border-primary/35 hover:bg-primary/10"
               type="button"
               onClick={() => escolherPerfil(null)}
             >
-              <Avatar value="user" label="Perfil principal" />
+              <Avatar value="user" label="Perfil principal" className="h-8 w-8" />
               <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold">Perfil principal</p>
+                <p className="truncate text-sm font-semibold">Perfil principal</p>
                 <p className="truncate text-xs text-muted-foreground">
                   {session?.usuario.email}
                 </p>
               </div>
               {!perfilFinanceiroId && (
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  <Check className="h-4 w-4" />
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <Check className="h-3.5 w-3.5" />
                 </span>
               )}
             </button>
 
             {perfis.map((perfil) => (
               <button
-                className="flex w-full items-center gap-3 rounded-xl border border-border bg-background p-3 text-left transition-colors hover:border-primary/35 hover:bg-accent"
+                className="group flex w-full items-center gap-3 rounded-xl border border-border bg-background p-3.5 text-left transition-all duration-150 hover:border-border/80 hover:bg-accent"
                 key={perfil.id}
                 type="button"
                 onClick={() => escolherPerfil(perfil.id)}
               >
-                <Avatar value={perfil.avatar} label={perfil.nome} />
+                <Avatar value={perfil.avatar} label={perfil.nome} className="h-8 w-8" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">{perfil.nome}</p>
+                  <p className="truncate text-sm font-semibold">{perfil.nome}</p>
                   <p className="text-xs text-muted-foreground">Perfil financeiro</p>
                 </div>
                 {perfilFinanceiroId === perfil.id && (
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <Check className="h-4 w-4" />
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <Check className="h-3.5 w-3.5" />
                   </span>
                 )}
               </button>
             ))}
 
             {!isPremium && (
-              <p className="rounded-md border border-primary/25 bg-primary/10 px-3 py-2 text-sm text-primary">
+              <p className="rounded-lg border border-primary/20 bg-primary/8 px-3.5 py-2.5 text-xs text-primary">
                 Perfis extras ficam disponíveis no plano VIP.
               </p>
             )}
           </div>
 
-          <Button asChild className="mx-5 mb-5 w-[calc(100%-2.5rem)]" variant="outline">
-            <Link to="/app/configuracoes" onClick={() => setProfileMenuOpen(false)}>
-              <Settings className="h-4 w-4" />
-              Gerenciar perfis
-            </Link>
-          </Button>
+          <div className="border-t border-border p-4">
+            <Button asChild className="w-full" variant="outline">
+              <Link to="/app/configuracoes" onClick={() => setProfileMenuOpen(false)}>
+                <Settings className="h-3.5 w-3.5" />
+                Gerenciar perfis
+              </Link>
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
-      <Button
-        aria-label="Abrir menu"
-        className="fixed left-3 top-3 z-30 h-10 w-10 rounded-full px-0 text-muted-foreground shadow-lg lg:hidden"
-        variant="outline"
-        onClick={() => setMobileMenuOpen(true)}
-      >
-        <Menu className="h-4.5 w-4.5" />
-      </Button>
+      {/* Mobile top bar */}
+      <div className="fixed left-0 right-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-border/50 bg-background/90 px-4 backdrop-blur-md lg:hidden">
+        <button
+          aria-label="Abrir menu"
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-border/80 hover:bg-accent hover:text-foreground"
+          onClick={() => setMobileMenuOpen((v) => !v)}
+        >
+          {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        </button>
 
-      <div className="flex min-h-dvh min-w-0 flex-col lg:min-h-0">
+        <div className="flex-1" />
+
+        {session?.usuario && (
+          <button
+            className="flex h-8 items-center gap-2 rounded-lg border border-border px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:border-border/80 hover:bg-accent hover:text-foreground"
+            onClick={() => setProfileMenuOpen(true)}
+          >
+            <Avatar
+              className="h-5 w-5"
+              value={perfilSelecionado?.avatar}
+              label={perfilSelecionado?.nome ?? session.usuario.nome}
+            />
+            <span className="max-w-30 truncate">{session.usuario.nome}</span>
+          </button>
+        )}
+      </div>
+
+      {/* Main content */}
+      <div className="flex min-h-dvh min-w-0 flex-col lg:min-h-0 lg:overflow-hidden">
         <main className="flex-1 lg:min-h-0 lg:overflow-y-auto">
-          <div className="mx-auto w-full max-w-8xl space-y-6 px-3 pb-5 pt-16 sm:px-5 sm:pb-6 lg:px-8 lg:py-7">
+          <div className="mx-auto w-full max-w-7xl space-y-5 px-4 pb-6 pt-18 sm:px-6 lg:px-8 lg:py-6">
             {showAds && (
-              <div className="overflow-hidden rounded-xl border border-border shadow-sm">
+              <div className="overflow-hidden rounded-xl border border-border/50 shadow-sm">
                 <AdBanner />
               </div>
             )}
@@ -189,8 +238,8 @@ export function AppLayout() {
           </div>
         </main>
       </div>
+
       <FloatingShare />
     </div>
   );
 }
-

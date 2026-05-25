@@ -8,7 +8,6 @@ import {
   Plus,
   ReceiptText,
   Repeat2,
-  Sparkles,
   ThumbsDown,
   ThumbsUp,
   Trash2,
@@ -19,14 +18,6 @@ import type { Despesa, FormaPagamentoDespesa } from "../../api/despesas/types";
 import { getApiErrorMessage } from "../../api/errors";
 import { MonthPicker } from "../../components/month-picker";
 import { Button } from "../../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
-import { Label } from "../../components/ui/label";
 import { Select } from "../../components/ui/select";
 import {
   Dialog,
@@ -176,154 +167,85 @@ export function DespesasPage() {
   }, [perfilFinanceiroId]);
 
   return (
-    <div className="space-y-6">
-
-      {/* ── HERO CARD ── */}
-      <Card className="overflow-hidden shadow-sm">
-        <CardContent className="grid gap-6 p-5 lg:grid-cols-[1fr_360px] lg:p-6">
-
-          {/* Left: title + filters */}
-          <div className="space-y-5">
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive ring-1 ring-destructive/20">
-                    <ReceiptText className="h-5 w-5" />
-                  </span>
-                  <h1 className="text-2xl font-bold tracking-tight text-card-foreground sm:text-3xl">
-                    Despesas sob controle.
-                  </h1>
-                </div>
-                <p className="max-w-2xl text-sm text-muted-foreground">
-                  Acompanhe contas, vencimentos, formas de pagamento e parcelas de{" "}
-                  <span className="capitalize font-medium text-foreground">
-                    {formatMonthName(mes)}
-                  </span>.
-                </p>
-                <div className="inline-flex items-center gap-2 rounded-full border border-destructive/20 bg-destructive/8 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-destructive">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Contas do mês
-                </div>
-              </div>
-
-            </div>
-
-            {/* Filters */}
-            <div className="grid gap-3 rounded-xl border border-border bg-muted/30 p-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor="forma-despesa"
-                  className="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
-                >
-                  Forma
-                </Label>
-                <Select
-                  id="forma-despesa"
-                  value={formaPagamento}
-                  onChange={(event) => {
-                    const value = event.target.value as FormaPagamentoDespesa | "";
-                    setFormaPagamento(value);
-                    void carregarDespesas(mes, value, status);
-                  }}
-                >
-                  <option value="">Todas</option>
-                  {formasPagamentoOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor="status-despesa"
-                  className="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
-                >
-                  Status
-                </Label>
-                <Select
-                  id="status-despesa"
-                  value={status}
-                  onChange={(event) => {
-                    const value = event.target.value as StatusFilter;
-                    setStatus(value);
-                    void carregarDespesas(mes, formaPagamento, value);
-                  }}
-                >
-                  <option value="todas">Todas</option>
-                  <option value="pendentes">Pendentes</option>
-                  <option value="pagas">Pagas</option>
-                  <option value="vencidas">Vencidas</option>
-                </Select>
-              </div>
-            </div>
+    <div className="space-y-5">
+      {/* ── Page header ── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
+            <ReceiptText className="h-4.5 w-4.5" />
           </div>
-
-          {/* Right: totals panel */}
-          <div className="rounded-xl border border-border bg-background p-5 shadow-sm">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              <CalendarDays className="h-3.5 w-3.5" />
-              <span className="capitalize">Total de {formatMonthName(mes)}</span>
-            </div>
-            <p className="mt-3 text-4xl font-bold tracking-tight text-red-600 dark:text-red-400">
-              {formatCurrency(total)}
-            </p>
-            <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-xl border border-border bg-card p-3">
-                <p className="text-xs font-medium text-muted-foreground">Pendentes</p>
-                <p className="mt-1.5 text-xl font-bold text-red-600 dark:text-red-400">
-                  {formatCurrency(totalPendente)}
-                </p>
-              </div>
-              <div className="rounded-xl border border-border bg-card p-3">
-                <p className="text-xs font-medium text-muted-foreground">Pagas</p>
-                <p className="mt-1.5 text-xl font-bold text-emerald-600 dark:text-emerald-400">
-                  {formatCurrency(totalPago)}
-                </p>
-              </div>
-            </div>
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">Despesas</h1>
+            <p className="text-xs text-muted-foreground capitalize">{formatMonthName(mes)}</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Select
+            value={formaPagamento}
+            onChange={(event) => {
+              const value = event.target.value as FormaPagamentoDespesa | "";
+              setFormaPagamento(value);
+              void carregarDespesas(mes, value, status);
+            }}
+            className="h-10 text-sm"
+          >
+            <option value="">Forma: Todas</option>
+            {formasPagamentoOptions.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </Select>
+          <Select
+            value={status}
+            onChange={(event) => {
+              const value = event.target.value as StatusFilter;
+              setStatus(value);
+              void carregarDespesas(mes, formaPagamento, value);
+            }}
+            className="h-10 text-sm"
+          >
+            <option value="todas">Status: Todas</option>
+            <option value="pendentes">Pendentes</option>
+            <option value="pagas">Pagas</option>
+            <option value="vencidas">Vencidas</option>
+          </Select>
+          <div className="w-40">
+            <MonthPicker
+              value={mes}
+              onChange={(value) => { setMes(value); void carregarDespesas(value, formaPagamento, status); }}
+            />
+          </div>
+          <Button
+            variant="destructive"
+            className="h-10 gap-2"
+            onClick={() => setCadastroAberto(true)}
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Nova despesa</span>
+          </Button>
+        </div>
+      </div>
 
-      {/* ── STAT CARDS ── */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {[
-          {
-            label: "Contas vencidas",
-            value: contasVencidas,
-            icon: AlertTriangle,
-            formatted: String(contasVencidas),
-          },
-          {
-            label: "Maior despesa",
-            value: maiorDespesa?.valor ?? 0,
-            icon: ReceiptText,
-            formatted: maiorDespesa ? formatCurrency(maiorDespesa.valor) : "R$ 0,00",
-          },
-          {
-            label: "Lançamentos",
-            value: despesas.length,
-            icon: CreditCard,
-            formatted: String(despesas.length),
-          },
-        ].map(({ label, icon: Icon, formatted }) => (
-          <Card key={label} className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <div>
-                <CardDescription className="text-xs font-semibold uppercase tracking-widest">
-                  {label}
-                </CardDescription>
-                <CardTitle className="mt-1 text-2xl font-bold text-red-600 dark:text-red-400">
-                  {formatted}
-                </CardTitle>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-destructive/8 text-destructive">
-                <Icon className="h-4.5 w-4.5" />
-              </div>
-            </CardHeader>
-          </Card>
-        ))}
+      {/* ── Stats ── */}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="relative overflow-hidden rounded-2xl border border-red-500/20 bg-red-500/6 p-5">
+          <div aria-hidden className="pointer-events-none absolute right-0 top-0 h-20 w-20 -translate-y-4 translate-x-4 rounded-full bg-red-500/15 blur-2xl" />
+          <p className="text-xs font-medium text-muted-foreground">Total do mês</p>
+          <p className="mt-2 text-2xl font-bold text-red-500">{loading ? "—" : formatCurrency(total)}</p>
+        </div>
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="text-xs font-medium text-muted-foreground">Pendentes</p>
+          <p className="mt-2 text-2xl font-bold text-red-500">{loading ? "—" : formatCurrency(totalPendente)}</p>
+        </div>
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="text-xs font-medium text-muted-foreground">Pagas</p>
+          <p className="mt-2 text-2xl font-bold text-emerald-500">{loading ? "—" : formatCurrency(totalPago)}</p>
+        </div>
+        <div className={cn("rounded-2xl border bg-card p-5", contasVencidas > 0 ? "border-destructive/30 bg-destructive/5" : "border-border")}>
+          <p className="text-xs font-medium text-muted-foreground">Vencidas</p>
+          <p className={cn("mt-2 text-2xl font-bold", contasVencidas > 0 ? "text-destructive" : "text-foreground")}>
+            {loading ? "—" : contasVencidas}
+          </p>
+        </div>
       </div>
 
       {/* ── ERROR ── */}
@@ -334,76 +256,41 @@ export function DespesasPage() {
         </div>
       )}
 
-      {/* ── LIST CARD ── */}
-      <Card className="shadow-sm">
-        <CardHeader className="border-b border-border pb-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive ring-1 ring-destructive/20">
-                <ReceiptText className="h-5 w-5" />
-              </span>
-              <div className="min-w-0">
-                <CardTitle className="text-base font-semibold">Contas cadastradas</CardTitle>
-                <CardDescription className="text-xs">
-                  Categorias com ícones, recorrência, parcelas e controle de pagamento.
-                </CardDescription>
-              </div>
+      {/* ── LIST ── */}
+      <div className="rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
+              <ReceiptText className="h-3.5 w-3.5" />
             </div>
-
-            <div className="flex items-center gap-2 self-start lg:self-auto">
-              <MonthPicker
-                value={mes}
-                onChange={(value) => {
-                  setMes(value);
-                  void carregarDespesas(value, formaPagamento, status);
-                }}
-              />
-              <Button
-                aria-label="Adicionar despesa"
-                className="h-10 w-10 shrink-0 px-0"
-                title="Adicionar despesa"
-                variant="destructive"
-                onClick={() => setCadastroAberto(true)}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
+            <p className="text-sm font-semibold">Contas cadastradas</p>
           </div>
-        </CardHeader>
+          <p className="text-xs text-muted-foreground">{despesas.length} {despesas.length === 1 ? "item" : "itens"}</p>
+        </div>
 
-        <CardContent className="pt-5">
-          {/* Loading */}
-          {loading && (
-            <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 px-5 py-4 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin shrink-0 text-primary" />
-              Carregando despesas...
+        {loading && (
+          <div className="flex items-center gap-2.5 p-5 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Carregando...
+          </div>
+        )}
+
+        {!loading && despesas.length === 0 && (
+          <div className="flex flex-col items-center justify-center gap-3 py-14 text-center">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted">
+              <ReceiptText className="h-5 w-5 text-muted-foreground" />
             </div>
-          )}
-
-          {/* Empty */}
-          {!loading && despesas.length === 0 && (
-            <div className="rounded-xl border border-dashed border-border bg-muted/30 p-10 text-center">
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
-                <ReceiptText className="h-5 w-5" />
-              </div>
-              <p className="font-semibold text-foreground">Nenhuma despesa encontrada.</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Cadastre uma conta para iniciar o controle do mês.
-              </p>
-              <Button
-                className="mt-5"
-                variant="destructive"
-                onClick={() => setCadastroAberto(true)}
-              >
-                <Plus className="h-4 w-4" />
-                Cadastrar despesa
-              </Button>
+            <div>
+              <p className="text-sm font-medium text-foreground">Nenhuma despesa encontrada.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Cadastre uma conta para iniciar o controle.</p>
             </div>
-          )}
+            <Button variant="destructive" className="mt-1 h-9 gap-2 text-sm" onClick={() => setCadastroAberto(true)}>
+              <Plus className="h-3.5 w-3.5" /> Cadastrar despesa
+            </Button>
+          </div>
+        )}
 
-          {/* List */}
-          {!loading && despesas.length > 0 && (
-            <div className="grid gap-3">
+        {!loading && despesas.length > 0 && (
+            <div className="divide-y divide-border/60">
               {despesas.map((despesa) => {
                 const CategoryIcon = getCategoryIcon(despesa.categoria);
 
@@ -411,9 +298,8 @@ export function DespesasPage() {
                   <div
                     key={despesa.id}
                     className={cn(
-                      "grid gap-4 rounded-xl border border-border bg-background p-3 shadow-sm transition-colors hover:border-destructive/35 hover:bg-card sm:grid-cols-[1fr_auto] sm:p-4",
-                      despesa.paga && "border-emerald-500/25",
-                      despesa.vencida && !despesa.paga && "border-destructive/35 bg-destructive/5",
+                      "flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between",
+                      despesa.vencida && !despesa.paga && "bg-destructive/4",
                     )}
                   >
                     <div className="flex gap-3">
@@ -565,8 +451,7 @@ export function DespesasPage() {
               })}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
 
       {/* ── DIALOG: cadastro ── */}
       <Dialog open={cadastroAberto} onOpenChange={setCadastroAberto}>

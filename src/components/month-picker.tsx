@@ -44,11 +44,7 @@ function toMonthValue(year: number, month: number) {
 function formatMonthLabel(value: string) {
   const { year, month } = parseMonth(value);
   const date = new Date(year, month - 1, 1);
-  const label = new Intl.DateTimeFormat("pt-BR", {
-    month: "long",
-    year: "numeric",
-  }).format(date);
-
+  const label = new Intl.DateTimeFormat("pt-BR", { month: "long" }).format(date);
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 

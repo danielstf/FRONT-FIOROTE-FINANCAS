@@ -1,4 +1,4 @@
-﻿import {
+import {
   ArrowRight,
   BadgeCheck,
   BarChart3,
@@ -12,8 +12,11 @@
   PieChart,
   Repeat2,
   Smartphone,
+  Star,
   TrendingUp,
+  UserPlus,
   WalletCards,
+  Zap,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
@@ -27,86 +30,181 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 
+// ─── Data ────────────────────────────────────────────────────────────────────
+
 const features = [
   {
     title: "Controle financeiro",
     description:
-      "Cadastre receitas, despesas, cartões, vencimentos e pagamentos.",
+      "Cadastre receitas, despesas, cartões, vencimentos e pagamentos em poucos cliques.",
     icon: WalletCards,
   },
   {
     title: "Relatórios Premium",
     description:
-      "Compare meses, anos, categorias e saldos com gráficos claros.",
+      "Compare meses, anos e categorias com gráficos claros e exportação Excel.",
     icon: PieChart,
   },
   {
     title: "Exportação Excel",
-    description: "Baixe relatórios por mês, ano ou meses selecionados.",
+    description:
+      "Baixe relatórios completos por mês, ano ou intervalos personalizados.",
     icon: FileSpreadsheet,
   },
   {
     title: "Perfis financeiros",
-    description: "Separe dados por perfil, como pessoal, família ou empresa.",
+    description:
+      "Separe dados por perfil: pessoal, familiar ou empresarial, tudo num só lugar.",
     icon: Layers3,
   },
   {
     title: "Recorrências",
     description:
-      "Controle receitas e despesas fixas com escopo mensal ou futuro.",
+      "Controle receitas e despesas fixas com exclusão por mês ou a partir de uma data.",
     icon: Repeat2,
   },
   {
     title: "Web e Android",
-    description: "Use no navegador e no aplicativo Android do Fiorote Controle Financeiro.",
+    description:
+      "Acesse no navegador ou no aplicativo Android — sincronizado em tempo real.",
     icon: Smartphone,
   },
 ];
 
+const steps = [
+  {
+    step: "01",
+    icon: UserPlus,
+    title: "Crie sua conta grátis",
+    description:
+      "Cadastro rápido com e-mail ou Google. Nenhum cartão necessário para começar.",
+  },
+  {
+    step: "02",
+    icon: WalletCards,
+    title: "Lance receitas e despesas",
+    description:
+      "Registre entradas, contas fixas, parcelamentos e cartões de crédito por mês.",
+  },
+  {
+    step: "03",
+    icon: BarChart3,
+    title: "Acompanhe seu saldo",
+    description:
+      "Dashboard mensal com saldo, vencimentos e alertas para manter as finanças em dia.",
+  },
+];
+
+const stats = [
+  { value: "100%", label: "Gratuito para começar" },
+  { value: "Web + App", label: "Android e navegador" },
+  { value: "5 perfis", label: "Por conta Premium" },
+  { value: "R$ 5/mês", label: "Plano Premium" },
+];
+
+const premiumItems = [
+  "Relatórios visuais avançados",
+  "Exportação Excel",
+  "Até 5 perfis financeiros",
+  "Receitas e despesas fixas",
+  "Sem anúncios",
+];
+
+const freeItems = ["Receitas, despesas e cartões", "Dashboard mensal"];
+
+// ─── Animations ──────────────────────────────────────────────────────────────
+
 const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 };
 
-const softTransition = {
-  duration: 0.7,
+const easeOut = {
+  duration: 0.65,
   ease: [0.22, 1, 0.36, 1],
 } as const;
+
+function delay(d: number) {
+  return { ...easeOut, delay: d };
+}
+
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+      {children}
+    </p>
+  );
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      {children}
+    </h2>
+  );
+}
+
+function SectionDescription({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
+      {children}
+    </p>
+  );
+}
+
+function AnimatedSection({
+  children,
+  className,
+  id,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  id?: string;
+}) {
+  return (
+    <motion.div
+      className={className}
+      id={id}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.25 }}
+      variants={fadeUp}
+      transition={easeOut}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
 
 export function LandingPage() {
   return (
     <main className="dark min-h-screen bg-background text-foreground">
-      {/* HEADER */}
+      {/* ── HEADER ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur-md">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4 lg:h-20 lg:px-8">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:gap-4 lg:h-20 lg:px-8">
           <BrandLogo className="min-w-0 flex-1 sm:flex-none" size="nav" />
 
           <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground lg:flex xl:gap-8">
-            <a
-              className="transition-colors hover:text-foreground"
-              href="#funcoes"
-            >
+            <a className="transition-colors hover:text-foreground" href="#funcoes">
               Funções
             </a>
-            <a
-              className="transition-colors hover:text-foreground"
-              href="#precos"
-            >
-              Planos
+            <a className="transition-colors hover:text-foreground" href="#como-funciona">
+              Como funciona
             </a>
-            <a
-              className="transition-colors hover:text-foreground"
-              href="#seguranca"
-            >
-              Segurança
+            <a className="transition-colors hover:text-foreground" href="#precos">
+              Planos
             </a>
           </nav>
 
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <Button asChild className="hidden sm:inline-flex" variant="ghost">
               <Link to="/login">Entrar</Link>
             </Button>
-            <Button asChild className="px-3 sm:px-4">
+            <Button asChild>
               <Link to="/cadastro">
                 <span className="sm:hidden">Começar</span>
                 <span className="hidden sm:inline">Começar grátis</span>
@@ -117,21 +215,25 @@ export function LandingPage() {
         </div>
       </header>
 
-      {/* HERO */}
+      {/* ── HERO ───────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b border-border">
-        {/* Subtle grid background */}
+        {/* Background grid */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.03]"
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.025]"
           style={{
             backgroundImage:
               "linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px)",
             backgroundSize: "40px 40px",
           }}
         />
-        {/* Soft glow */}
-        <div className="pointer-events-none absolute -top-32 left-1/2 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
+        {/* Glow */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-40 left-1/2 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-primary/6 blur-3xl"
+        />
 
-        <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-16 px-4 py-16 lg:grid-cols-[minmax(0,1fr)_480px] lg:px-8 lg:py-20">
+        <div className="relative mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-7xl items-center gap-16 px-4 py-16 lg:grid-cols-[minmax(0,1fr)_480px] lg:px-8 lg:py-24">
           {/* Left copy */}
           <div className="max-w-2xl space-y-8">
             <motion.div
@@ -139,10 +241,10 @@ export function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={fadeUp}
-              transition={softTransition}
+              transition={delay(0)}
             >
               <TrendingUp className="h-3.5 w-3.5" />
-              Gestão financeira simples, visual e segura
+              Gestão financeira simples e visual
             </motion.div>
 
             <motion.div
@@ -150,23 +252,23 @@ export function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={fadeUp}
-              transition={{ ...softTransition, delay: 0.1 }}
+              transition={delay(0.1)}
             >
-              <h1 className="text-5xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-6xl lg:text-[4rem]">
+              <h1 className="text-5xl font-bold leading-[1.1] tracking-tight sm:text-6xl lg:text-[4rem]">
                 Organize seu{" "}
                 <span className="relative inline-block">
                   <span className="relative z-10 text-primary">dinheiro</span>
                   <span
-                    className="absolute bottom-1 left-0 z-0 h-3 w-full rounded-sm bg-primary/15"
                     aria-hidden
+                    className="absolute bottom-1 left-0 z-0 h-3 w-full rounded-sm bg-primary/15"
                   />
                 </span>{" "}
                 todos os meses
               </h1>
               <p className="text-base leading-7 text-muted-foreground sm:text-lg">
                 Controle entradas, contas, cartões, perfis financeiros,
-                recorrências e relatórios com exportação em Excel. Funciona na
-                web e no app Android.
+                recorrências e relatórios com exportação Excel. Funciona na web
+                e no app Android.
               </p>
             </motion.div>
 
@@ -175,22 +277,15 @@ export function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={fadeUp}
-              transition={{ ...softTransition, delay: 0.2 }}
+              transition={delay(0.2)}
             >
-              <Button
-                asChild
-                className="h-11 rounded-lg px-6 text-sm font-semibold"
-              >
+              <Button asChild className="h-11 rounded-lg px-6 text-sm font-semibold">
                 <Link to="/cadastro">
                   Criar conta grátis
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button
-                asChild
-                className="h-11 rounded-lg px-6 text-sm"
-                variant="outline"
-              >
+              <Button asChild variant="outline" className="h-11 rounded-lg px-6 text-sm">
                 <Link to="/login">Acessar minha conta</Link>
               </Button>
             </motion.div>
@@ -200,7 +295,7 @@ export function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={fadeUp}
-              transition={{ ...softTransition, delay: 0.3 }}
+              transition={delay(0.3)}
             >
               <span className="inline-flex items-center gap-1.5">
                 <BadgeCheck className="h-4 w-4 text-emerald-500" />
@@ -217,22 +312,23 @@ export function LandingPage() {
             </motion.div>
           </div>
 
-          {/* Right card / mock dashboard */}
+          {/* Right — mock dashboard */}
           <motion.div
-            className="rounded-2xl border border-border bg-card p-6 shadow-2xl ring-1 ring-border/30"
-            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+            className="rounded-2xl border border-border bg-card p-6 shadow-2xl ring-1 ring-white/5"
+            initial={{ opacity: 0, y: 28, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ ...softTransition, delay: 0.28 }}
-            whileHover={{ y: -6 }}
+            transition={delay(0.28)}
+            whileHover={{ y: -6, transition: { duration: 0.3 } }}
           >
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  Perfil Família
+                  Perfil Família · Mai 2025
                 </p>
                 <p className="mt-1.5 text-4xl font-bold text-emerald-500">
                   R$ 4.820,00
                 </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">Saldo positivo</p>
               </div>
               <div className="rounded-xl bg-primary/10 p-3 text-primary">
                 <BarChart3 className="h-6 w-6" />
@@ -241,31 +337,19 @@ export function LandingPage() {
 
             <div className="grid gap-2.5">
               {[
-                [
-                  "Receitas",
-                  "R$ 7.200,00",
-                  "Entradas do mês",
-                  "text-emerald-500",
-                ],
-                [
-                  "Despesas",
-                  "R$ 2.380,00",
-                  "Contas e cartões",
-                  "text-rose-500",
-                ],
-                ["Saldo", "R$ 4.820,00", "Positivo", "text-foreground"],
-              ].map(([label, value, detail, valueColor]) => (
+                { label: "Receitas", value: "R$ 7.200,00", detail: "Entradas do mês", color: "text-emerald-500" },
+                { label: "Despesas", value: "R$ 2.380,00", detail: "Contas e cartões", color: "text-rose-500" },
+                { label: "Saldo", value: "R$ 4.820,00", detail: "Positivo", color: "text-foreground" },
+              ].map(({ label, value, detail, color }) => (
                 <div
-                  className="rounded-xl border border-border bg-muted/40 px-4 py-3"
                   key={label}
+                  className="rounded-xl border border-border bg-muted/40 px-4 py-3"
                 >
                   <div className="flex items-center justify-between gap-3 text-sm">
                     <span className="text-muted-foreground">{label}</span>
-                    <span className={`font-bold ${valueColor}`}>{value}</span>
+                    <span className={`font-bold ${color}`}>{value}</span>
                   </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {detail}
-                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{detail}</p>
                 </div>
               ))}
             </div>
@@ -275,65 +359,71 @@ export function LandingPage() {
                 Recursos ativos
               </p>
               <div className="grid gap-2.5 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">
-                    Cartão principal
-                  </span>
-                  <CreditCard className="h-4 w-4 text-primary" />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Receita fixa</span>
-                  <Repeat2 className="h-4 w-4 text-emerald-500" />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Relatório Excel</span>
-                  <FileSpreadsheet className="h-4 w-4 text-primary" />
-                </div>
+                {[
+                  { label: "Cartão principal", icon: CreditCard, color: "text-primary" },
+                  { label: "Receita fixa mensal", icon: Repeat2, color: "text-emerald-500" },
+                  { label: "Relatório Excel", icon: FileSpreadsheet, color: "text-primary" },
+                ].map(({ label, icon: Icon, color }) => (
+                  <div key={label} className="flex items-center justify-between">
+                    <span className="text-muted-foreground">{label}</span>
+                    <Icon className={`h-4 w-4 ${color}`} />
+                  </div>
+                ))}
               </div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section
-        className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8"
-        id="funcoes"
-      >
-        <motion.div
-          className="mb-12 space-y-2"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.35 }}
-          variants={fadeUp}
-          transition={softTransition}
-        >
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            Funcionalidades
-          </p>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Funções principais
-          </h2>
-          <p className="max-w-xl text-muted-foreground">
-            O essencial fica no plano grátis. Recursos avançados ficam no
-            Premium.
-          </p>
-        </motion.div>
+      {/* ── STATS ──────────────────────────────────────────────────────────── */}
+      <section className="border-b border-border bg-muted/20">
+        <div className="mx-auto w-full max-w-7xl px-4 py-10 lg:px-8">
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+            {stats.map(({ value, label }, i) => (
+              <motion.div
+                key={label}
+                className="text-center"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.4 }}
+                variants={fadeUp}
+                transition={delay(i * 0.07)}
+              >
+                <p className="text-2xl font-bold text-foreground sm:text-3xl">{value}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURES ───────────────────────────────────────────────────────── */}
+      <section className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8" id="funcoes">
+        <AnimatedSection className="mb-12 space-y-3">
+          <SectionLabel>Funcionalidades</SectionLabel>
+          <SectionHeading>O que você encontra aqui</SectionHeading>
+          <SectionDescription>
+            O essencial está no plano grátis. Relatórios, exportação e perfis
+            múltiplos ficam no Premium.
+          </SectionDescription>
+        </AnimatedSection>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {features.map((feature, index) => (
+          {features.map((feature, i) => (
             <motion.div
               key={feature.title}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
+              viewport={{ once: true, amount: 0.15 }}
               variants={fadeUp}
-              transition={{ ...softTransition, delay: index * 0.06 }}
-              whileHover={{ y: -5 }}
+              transition={delay(i * 0.06)}
+              whileHover={{ y: -5, transition: { duration: 0.25 } }}
             >
-              <Card className="group relative h-full overflow-hidden border-border/70 shadow-none transition-shadow hover:shadow-md">
-                {/* Subtle top accent */}
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+              <Card className="group relative h-full overflow-hidden border-border/60 shadow-none transition-shadow hover:shadow-md">
+                <div
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+                />
                 <CardHeader className="gap-4">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
                     <feature.icon className="h-5 w-5" />
@@ -353,179 +443,302 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* PRICING */}
-      <section className="border-y border-border bg-muted/30" id="precos">
+      {/* ── HOW IT WORKS ───────────────────────────────────────────────────── */}
+      <section
+        className="border-y border-border bg-muted/20"
+        id="como-funciona"
+      >
         <div className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
-          <motion.div
-            className="mb-12 space-y-2"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.35 }}
-            variants={fadeUp}
-            transition={softTransition}
-          >
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-              Planos
-            </p>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Comece grátis, evolua quando precisar
-            </h2>
-            <p className="max-w-xl text-muted-foreground">
-              O Premium libera relatórios completos, exportação Excel, perfis
-              financeiros, recorrências e remoção de anúncios.
-            </p>
-          </motion.div>
+          <AnimatedSection className="mb-14 space-y-3">
+            <SectionLabel>Como funciona</SectionLabel>
+            <SectionHeading>Comece em menos de 2 minutos</SectionHeading>
+            <SectionDescription>
+              Sem configurações complexas — é só criar a conta e lançar suas
+              primeiras movimentações.
+            </SectionDescription>
+          </AnimatedSection>
 
-          <div className="grid gap-5 md:grid-cols-2 lg:max-w-3xl">
-            {/* Free plan */}
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={fadeUp}
-              transition={{ ...softTransition, delay: 0.08 }}
-              whileHover={{ y: -5 }}
-            >
-            <Card className="h-full border-border/70 shadow-sm">
-              <CardHeader className="pb-4">
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  Grátis
-                </p>
-                <CardTitle className="text-4xl font-bold">R$ 0</CardTitle>
-                <CardDescription>
-                  Para começar o controle financeiro.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                <ul className="space-y-2.5 text-sm text-muted-foreground">
-                  <li className="flex items-start gap-2.5">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                    Receitas, despesas e cartões
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                    Dashboard mensal
-                  </li>
-                  <li className="flex items-start gap-2.5 opacity-60">
-                    <BellRing className="mt-0.5 h-4 w-4 shrink-0" />
-                    Exibição de anúncios
-                  </li>
-                </ul>
-                <Button asChild className="w-full" variant="outline">
-                  <Link to="/cadastro">Começar grátis</Link>
-                </Button>
-              </CardContent>
-            </Card>
-            </motion.div>
+          <div className="relative grid gap-8 md:grid-cols-3">
+            {/* Connecting line (desktop) */}
+            <div
+              aria-hidden
+              className="absolute top-10 left-[16.67%] right-[16.67%] hidden h-px bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20 md:block"
+            />
 
-            {/* Premium plan */}
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={fadeUp}
-              transition={{ ...softTransition, delay: 0.16 }}
-              whileHover={{ y: -5 }}
-            >
-            <Card className="relative h-full border-primary/40 shadow-lg">
-              <div className="absolute -top-px inset-x-6 h-0.5 rounded-full bg-gradient-to-r from-transparent via-primary to-transparent" />
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-                    Premium
-                  </p>
-                  <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
-                    Recomendado
-                  </span>
-                </div>
-                <CardTitle className="text-4xl font-bold">
-                  R$ 5,00{" "}
-                  <span className="text-base font-normal text-muted-foreground">
-                    /mês
-                  </span>
-                </CardTitle>
-                <CardDescription>
-                  Para separar perfis e analisar melhor.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                <ul className="space-y-2.5 text-sm text-muted-foreground">
-                  {[
-                    "Relatórios visuais",
-                    "Exportação Excel",
-                    "Até 5 perfis financeiros",
-                    "Receitas e despesas fixas",
-                    "Sem anúncios",
-                  ].map((item) => (
-                    <li className="flex items-start gap-2.5" key={item}>
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <Button asChild className="w-full">
-                  <Link to="/cadastro">Criar conta</Link>
-                </Button>
-              </CardContent>
-            </Card>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* TRUST */}
-      <section className="border-b border-border" id="seguranca">
-        <div className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
-          <motion.div
-            className="mb-12 space-y-2"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.35 }}
-            variants={fadeUp}
-            transition={softTransition}
-          >
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-              Segurança e rotina
-            </p>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Um painel financeiro feito para uso diário
-            </h2>
-            <p className="max-w-xl text-muted-foreground">
-              O Fiorote Controle Financeiro prioriza leitura rápida, organização por mês e recursos úteis
-              para quem acompanha o próprio dinheiro com frequência.
-            </p>
-          </motion.div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              ["01", "Login protegido"],
-              ["02", "Dados organizados por mês"],
-              ["03", "Dashboard para decisão rápida"],
-              ["04", "Exportação Premium quando precisar"],
-            ].map(([step, title], index) => (
+            {steps.map(({ step, icon: Icon, title, description }, i) => (
               <motion.div
-                className="group relative rounded-xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
                 key={step}
+                className="relative flex flex-col items-center gap-4 text-center"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
                 variants={fadeUp}
-                transition={{ ...softTransition, delay: index * 0.06 }}
-                whileHover={{ y: -5 }}
+                transition={delay(i * 0.1)}
               >
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-base font-bold text-primary">
-                  {step}
-                </span>
-                <h3 className="mt-5 text-sm font-semibold leading-snug">
-                  {title}
-                </h3>
+                <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-primary/25 bg-primary/8 text-primary shadow-sm ring-4 ring-background">
+                  <Icon className="h-8 w-8" />
+                  <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shadow">
+                    {step}
+                  </span>
+                </div>
+                <div className="space-y-1.5">
+                  <h3 className="text-base font-semibold text-foreground">{title}</h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {description}
+                  </p>
+                </div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* ── PRICING ────────────────────────────────────────────────────────── */}
+      <section id="precos">
+        <div className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
+          <AnimatedSection className="mb-14 space-y-3">
+            <SectionLabel>Planos</SectionLabel>
+            <SectionHeading>Comece grátis, evolua quando precisar</SectionHeading>
+            <SectionDescription>
+              O Premium libera relatórios completos, exportação Excel, perfis
+              financeiros e remove anúncios.
+            </SectionDescription>
+          </AnimatedSection>
+
+          <div className="grid gap-5 md:grid-cols-2 lg:max-w-3xl">
+            {/* Free */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.15 }}
+              variants={fadeUp}
+              transition={delay(0.08)}
+              whileHover={{ y: -5, transition: { duration: 0.25 } }}
+            >
+              <Card className="h-full border-border/60 shadow-sm">
+                <CardHeader className="pb-4">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    Grátis
+                  </p>
+                  <CardTitle className="text-4xl font-bold">R$ 0</CardTitle>
+                  <CardDescription className="text-sm">
+                    Para começar o controle financeiro sem custo.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  <ul className="space-y-2.5 text-sm text-muted-foreground">
+                    {freeItems.map((item) => (
+                      <li key={item} className="flex items-center gap-2.5">
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                        {item}
+                      </li>
+                    ))}
+                    <li className="flex items-center gap-2.5 opacity-55">
+                      <BellRing className="h-4 w-4 shrink-0" />
+                      Exibição de anúncios
+                    </li>
+                  </ul>
+                  <Button asChild className="w-full" variant="outline">
+                    <Link to="/cadastro">Começar grátis</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Premium */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.15 }}
+              variants={fadeUp}
+              transition={delay(0.18)}
+              whileHover={{ y: -5, transition: { duration: 0.25 } }}
+            >
+              <Card className="relative h-full border-primary/35 shadow-lg">
+                <div
+                  aria-hidden
+                  className="absolute inset-x-6 -top-px h-0.5 rounded-full bg-gradient-to-r from-transparent via-primary to-transparent"
+                />
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+                      Premium
+                    </p>
+                    <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                      <Star className="h-3 w-3 fill-primary" />
+                      Recomendado
+                    </span>
+                  </div>
+                  <CardTitle className="text-4xl font-bold">
+                    R$ 5,00{" "}
+                    <span className="text-base font-normal text-muted-foreground">
+                      /mês
+                    </span>
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    Para quem quer visibilidade total das finanças.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  <ul className="space-y-2.5 text-sm text-muted-foreground">
+                    {premiumItems.map((item) => (
+                      <li key={item} className="flex items-center gap-2.5">
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button asChild className="w-full">
+                    <Link to="/cadastro">
+                      Criar conta
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TRUST ──────────────────────────────────────────────────────────── */}
+      <section className="border-y border-border bg-muted/20">
+        <div className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
+          <AnimatedSection className="mb-12 space-y-3">
+            <SectionLabel>Segurança e rotina</SectionLabel>
+            <SectionHeading>Feito para uso diário</SectionHeading>
+            <SectionDescription>
+              O Fiorote Controle Financeiro prioriza leitura rápida, organização
+              por mês e recursos úteis para quem acompanha o próprio dinheiro
+              com frequência.
+            </SectionDescription>
+          </AnimatedSection>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { n: "01", icon: LockKeyhole, title: "Login protegido", desc: "Autenticação por e-mail ou Google." },
+              { n: "02", icon: Zap, title: "Dados por mês", desc: "Organização mensal clara e sem ruído." },
+              { n: "03", icon: BarChart3, title: "Dashboard de decisão", desc: "Saldo, vencimentos e alertas rápidos." },
+              { n: "04", icon: FileSpreadsheet, title: "Exportação Premium", desc: "Excel completo quando precisar." },
+            ].map(({ n, icon: Icon, title, desc }, i) => (
+              <motion.div
+                key={n}
+                className="group relative rounded-xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.15 }}
+                variants={fadeUp}
+                transition={delay(i * 0.07)}
+                whileHover={{ y: -5, transition: { duration: 0.25 } }}
+              >
+                <div
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+                />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-4 text-sm font-semibold text-foreground">{title}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FINAL CTA ──────────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden border-b border-border">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-primary/4"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-0 h-[300px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-3xl"
+        />
+        <div className="relative mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-4 py-24 text-center lg:px-8">
+          <AnimatedSection className="space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+              Comece agora
+            </p>
+            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
+              Suas finanças organizadas em minutos
+            </h2>
+            <p className="text-base text-muted-foreground sm:text-lg">
+              Crie sua conta grátis e comece a lançar receitas e despesas hoje
+              mesmo. Sem cartão de crédito.
+            </p>
+          </AnimatedSection>
+
+          <motion.div
+            className="flex flex-col gap-3 sm:flex-row"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.4 }}
+            variants={fadeUp}
+            transition={delay(0.15)}
+          >
+            <Button asChild className="h-12 rounded-lg px-8 text-sm font-semibold">
+              <Link to="/cadastro">
+                Criar conta grátis
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="h-12 rounded-lg px-8 text-sm">
+              <Link to="/login">Já tenho conta</Link>
+            </Button>
+          </motion.div>
+
+          <motion.p
+            className="text-xs text-muted-foreground"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            transition={delay(0.25)}
+          >
+            Plano grátis para sempre · Premium por R$ 5/mês
+          </motion.p>
+        </div>
+      </section>
+
+      {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
+      <footer className="bg-background">
+        <div className="mx-auto w-full max-w-7xl px-4 py-12 lg:px-8">
+          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+            <BrandLogo size="nav" />
+
+            <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+              <a className="transition-colors hover:text-foreground" href="#funcoes">
+                Funções
+              </a>
+              <a className="transition-colors hover:text-foreground" href="#precos">
+                Planos
+              </a>
+              <Link className="transition-colors hover:text-foreground" to="/login">
+                Entrar
+              </Link>
+              <Link className="transition-colors hover:text-foreground" to="/cadastro">
+                Cadastrar
+              </Link>
+            </nav>
+          </div>
+
+          <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-border pt-8 text-xs text-muted-foreground sm:flex-row">
+            <p>© {new Date().getFullYear()} Fiorote Controle Financeiro. Todos os direitos reservados.</p>
+            <div className="flex items-center gap-4">
+              <span className="inline-flex items-center gap-1.5">
+                <BadgeCheck className="h-3.5 w-3.5 text-emerald-500" />
+                Plano grátis disponível
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <MonitorSmartphone className="h-3.5 w-3.5 text-primary" />
+                Web e Android
+              </span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
-

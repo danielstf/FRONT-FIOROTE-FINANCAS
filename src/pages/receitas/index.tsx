@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   ArrowUpRight,
@@ -6,9 +6,9 @@ import {
   Loader2,
   Pencil,
   Plus,
-  Sparkles,
   Trash2,
   TrendingUp,
+  WalletCards,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getApiErrorMessage } from "../../api/errors";
@@ -16,13 +16,6 @@ import { receitasApi } from "../../api/receitas/receitas-api";
 import type { Receita } from "../../api/receitas/types";
 import { MonthPicker } from "../../components/month-picker";
 import { Button } from "../../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -38,10 +31,7 @@ function getCurrentMonth() {
 }
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
 function formatMonth(value: string) {
@@ -52,20 +42,7 @@ function formatMonth(value: string) {
 function formatMonthName(value: string) {
   const [year, month] = value.split("-");
   const date = new Date(Number(year), Number(month) - 1, 1);
-
-  return new Intl.DateTimeFormat("pt-BR", {
-    month: "long",
-    year: "numeric",
-  }).format(date);
-}
-
-function getMonthOnlyName(value: string) {
-  const [year, month] = value.split("-");
-  const date = new Date(Number(year), Number(month) - 1, 1);
-
-  return new Intl.DateTimeFormat("pt-BR", {
-    month: "long",
-  }).format(date);
+  return new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(date);
 }
 
 export function ReceitasPage() {
@@ -83,17 +60,14 @@ export function ReceitasPage() {
   const [escopoExclusao, setEscopoExclusao] = useState<"mes" | "todas">("mes");
   const [error, setError] = useState("");
 
-  const maiorReceita = useMemo(() => {
-    return receitas.reduce<Receita | null>((maior, receita) => {
-      if (!maior || receita.valor > maior.valor) return receita;
-      return maior;
-    }, null);
-  }, [receitas]);
+  const maiorReceita = useMemo(
+    () => receitas.reduce<Receita | null>((m, r) => (!m || r.valor > m.valor ? r : m), null),
+    [receitas],
+  );
 
   async function carregarReceitas(mesSelecionado = mes) {
     setError("");
     setLoading(true);
-
     try {
       const data = await receitasApi.listar({ mes: mesSelecionado });
       setReceitas(data.receitas);
@@ -110,7 +84,6 @@ export function ReceitasPage() {
     if (!receitaExcluindo) return;
     setError("");
     setDeletingId(receitaExcluindo.id);
-
     try {
       await receitasApi.excluir(receitaExcluindo.id, {
         escopo: receitaExcluindo.fixa ? escopoExclusao : undefined,
@@ -138,328 +111,238 @@ export function ReceitasPage() {
   }, [perfilFinanceiroId]);
 
   return (
-    <div className="space-y-6">
-      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-        <div className="grid gap-6 p-5 lg:grid-cols-[1fr_360px] lg:p-6">
-          <div className="space-y-5">
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <span className="flex h-12 w-12 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                  <TrendingUp className="h-6 w-6" />
-                </span>
-                <h1 className="text-2xl font-semibold tracking-normal text-card-foreground sm:text-3xl lg:text-4xl">
-                  Receitas organizadas para fechar o mês.
-                </h1>
-              </div>
-              <p className="max-w-2xl text-sm text-muted-foreground">
-                Acompanhe suas entradas por mês, edite lançamentos e mantenha o
-                total mensal sempre limpo.
-              </p>
-              <div className="inline-flex items-center gap-2 rounded-md border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400">
-                <Sparkles className="h-4 w-4" />
-                Entradas do mês
-              </div>
-            </div>
+    <div className="space-y-5">
+      {/* ── Page header ── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+            <TrendingUp className="h-4.5 w-4.5" />
           </div>
-
-          <div className="rounded-lg border border-border bg-background p-5 shadow-sm">
-            <p className="text-sm capitalize text-muted-foreground">
-              Total de {formatMonthName(mes)}
-            </p>
-            <p className="mt-2 text-3xl font-semibold tracking-normal text-blue-600 dark:text-blue-400 sm:text-4xl">
-              {formatCurrency(total)}
-            </p>
-            <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-md border border-border bg-card p-3">
-                <p className="text-muted-foreground">Lançamentos</p>
-                <p className="mt-1 text-xl font-semibold text-blue-600 dark:text-blue-400">
-                  {receitas.length}
-                </p>
-              </div>
-              <div className="rounded-md border border-border bg-card p-3">
-                <p className="text-muted-foreground">Maior receita</p>
-                <p className="mt-1 truncate text-xl font-semibold text-blue-600 dark:text-blue-400">
-                  {maiorReceita ? formatCurrency(maiorReceita.valor) : "R$ 0,00"}
-                </p>
-              </div>
-            </div>
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">Receitas</h1>
+            <p className="text-xs text-muted-foreground capitalize">{formatMonthName(mes)}</p>
           </div>
         </div>
-      </section>
+        <div className="flex items-center gap-2">
+          <div className="w-44">
+            <MonthPicker
+              value={mes}
+              onChange={(m) => { setMes(m); void carregarReceitas(m); }}
+            />
+          </div>
+          <Button className="h-10 gap-2" onClick={() => setCadastroAberto(true)}>
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Nova receita</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* ── Stats ── */}
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="relative overflow-hidden rounded-2xl border border-blue-500/20 bg-blue-500/6 p-5">
+          <div aria-hidden className="pointer-events-none absolute right-0 top-0 h-20 w-20 -translate-y-4 translate-x-4 rounded-full bg-blue-500/15 blur-2xl" />
+          <p className="text-xs font-medium text-muted-foreground">Total do mês</p>
+          <p className="mt-2 text-2xl font-bold text-blue-500">{loading ? "—" : formatCurrency(total)}</p>
+        </div>
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="text-xs font-medium text-muted-foreground">Lançamentos</p>
+          <p className="mt-2 text-2xl font-bold text-foreground">{loading ? "—" : receitas.length}</p>
+        </div>
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="text-xs font-medium text-muted-foreground">Maior receita</p>
+          <p className="mt-2 text-2xl font-bold text-blue-500 truncate">
+            {loading ? "—" : maiorReceita ? formatCurrency(maiorReceita.valor) : "R$ 0,00"}
+          </p>
+        </div>
+      </div>
 
       {error && (
-        <p className="rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <p className="rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-sm text-destructive">
           {error}
         </p>
       )}
 
-      <Card className="shadow-sm">
-        <CardHeader>
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                <ArrowUpRight className="h-5 w-5" />
-              </span>
-              <div>
-                <CardTitle className="capitalize">
-                  Entradas de {getMonthOnlyName(mes)}
-                </CardTitle>
-                <CardDescription>
-                  Gerencie as receitas cadastradas em {formatMonthName(mes)}.
-                </CardDescription>
-              </div>
+      {/* ── List ── */}
+      <div className="rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+              <ArrowUpRight className="h-3.5 w-3.5" />
             </div>
-
-            <div className="flex items-center gap-2 self-start lg:self-auto">
-              <MonthPicker
-                value={mes}
-                onChange={(selectedMonth) => {
-                  setMes(selectedMonth);
-                  void carregarReceitas(selectedMonth);
-                }}
-              />
-              <Button
-                aria-label="Adicionar receita"
-                className="h-10 w-10 shrink-0 px-0"
-                title="Adicionar receita"
-                onClick={() => setCadastroAberto(true)}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
+            <p className="text-sm font-semibold text-foreground">Entradas do mês</p>
           </div>
-        </CardHeader>
-        <CardContent>
-          {loading && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Carregando receitas...
-            </div>
-          )}
+          <p className="text-xs text-muted-foreground capitalize">{formatMonthName(mes)}</p>
+        </div>
 
-          {!loading && receitas.length === 0 && (
-            <div className="rounded-lg border border-dashed border-border bg-muted/35 p-8 text-center">
-              <p className="font-medium text-foreground">
-                Nenhuma receita cadastrada para este mês.
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Comece adicionando uma entrada para compor o total mensal.
-              </p>
-              <Button
-                className="mt-4"
-                onClick={() => setCadastroAberto(true)}
+        {loading && (
+          <div className="flex items-center gap-2.5 p-5 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Carregando...
+          </div>
+        )}
+
+        {!loading && receitas.length === 0 && (
+          <div className="flex flex-col items-center justify-center gap-3 py-14 text-center">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted">
+              <WalletCards className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">Nenhuma receita neste mês.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Comece cadastrando uma entrada.</p>
+            </div>
+            <Button className="mt-1 h-9 gap-2 text-sm" onClick={() => setCadastroAberto(true)}>
+              <Plus className="h-3.5 w-3.5" /> Cadastrar receita
+            </Button>
+          </div>
+        )}
+
+        {!loading && receitas.length > 0 && (
+          <div className="divide-y divide-border/60">
+            {receitas.map((receita) => (
+              <div
+                key={receita.id}
+                className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/30"
               >
-                <Plus className="h-4 w-4" />
-                Cadastrar receita
-              </Button>
-            </div>
-          )}
-
-          {!loading && receitas.length > 0 && (
-            <div className="grid gap-3">
-              {receitas.map((receita) => (
-                <div
-                  key={receita.id}
-                  className="group grid gap-4 rounded-lg border border-border bg-background p-3 shadow-sm transition-colors hover:border-blue-500/35 hover:bg-card sm:grid-cols-[1fr_auto] sm:p-4"
-                >
-                  <div className="flex gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                      <ArrowUpRight className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold text-blue-600 dark:text-blue-400">
-                        {receita.nome}
-                      </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                        <span className="inline-flex items-center gap-1">
-                          <CalendarDays className="h-3.5 w-3.5" />
-                          {formatMonth(receita.mes)}
-                        </span>
-                        <span>
-                          Criada em{" "}
-                          {new Date(receita.criadoEm).toLocaleDateString("pt-BR")}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-3 sm:justify-end">
-                    <strong className="text-lg text-blue-600 dark:text-blue-400">
-                      {formatCurrency(receita.valor)}
-                    </strong>
-                    <div className="flex gap-2">
-                      <Button
-                        className="h-9 w-9 px-0"
-                        title="Editar receita"
-                        variant="outline"
-                        onClick={() =>
-                          setReceitaEditando(
-                            receita.fixa ? { ...receita, mes } : receita,
-                          )
-                        }
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        className="h-9 w-9 px-0 text-destructive hover:text-destructive"
-                        title="Excluir receita"
-                        variant="outline"
-                        onClick={() => {
-                          setEscopoExclusao("mes");
-                          setReceitaExcluindo(receita);
-                        }}
-                        disabled={deletingId === receita.id}
-                      >
-                        {deletingId === receita.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-foreground">{receita.nome}</p>
+                  <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1">
+                      <CalendarDays className="h-3 w-3" />
+                      {formatMonth(receita.mes)}
+                    </span>
+                    {receita.fixa && (
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                        Fixa
+                      </span>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <span className="shrink-0 text-sm font-semibold text-blue-500">
+                  {formatCurrency(receita.valor)}
+                </span>
+                <div className="flex shrink-0 gap-1.5">
+                  <Button
+                    className="h-8 w-8 rounded-lg px-0"
+                    variant="outline"
+                    title="Editar"
+                    onClick={() => setReceitaEditando(receita.fixa ? { ...receita, mes } : receita)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    className="h-8 w-8 rounded-lg px-0 text-destructive hover:text-destructive"
+                    variant="outline"
+                    title="Excluir"
+                    disabled={deletingId === receita.id}
+                    onClick={() => { setEscopoExclusao("mes"); setReceitaExcluindo(receita); }}
+                  >
+                    {deletingId === receita.id
+                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      : <Trash2 className="h-3.5 w-3.5" />}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
+      {/* ── Dialog: Cadastro ── */}
       <Dialog open={cadastroAberto} onOpenChange={setCadastroAberto}>
-        <DialogContent className="max-h-[calc(100vh-1rem)] max-w-5xl overflow-y-auto p-0">
-          <div className="border-b border-border bg-gradient-to-br from-blue-500/15 via-background to-primary/10 p-5">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
-              Nova receita
-            </DialogTitle>
-            <DialogDescription>
-              Cadastre uma entrada sem sair da lista de receitas.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="max-h-[calc(100vh-1rem)] max-w-4xl overflow-y-auto p-0">
+          <div className="relative border-b border-border p-5">
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-blue-500/50 to-transparent" />
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <TrendingUp className="h-4.5 w-4.5 text-blue-500" />
+                Nova receita
+              </DialogTitle>
+              <DialogDescription>Cadastre uma entrada sem sair da lista.</DialogDescription>
+            </DialogHeader>
           </div>
-          <div className="p-4">
-          <ReceitaForm
-            defaultMonth={mes}
-            onCancel={() => setCadastroAberto(false)}
-            onSuccess={(mesCriado) => {
-              setCadastroAberto(false);
-              setMes(mesCriado);
-              void carregarReceitas(mesCriado);
-            }}
-          />
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={Boolean(receitaEditando)}
-        onOpenChange={(open) => {
-          if (!open) setReceitaEditando(null);
-        }}
-      >
-        <DialogContent className="max-h-[calc(100vh-1rem)] max-w-5xl overflow-y-auto p-0">
-          <div className="border-b border-border bg-gradient-to-br from-blue-500/15 via-background to-primary/10 p-5">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Pencil className="h-5 w-5 text-blue-600" />
-              Editar receita
-            </DialogTitle>
-            <DialogDescription>
-              Atualize esta entrada sem sair da lista.
-            </DialogDescription>
-          </DialogHeader>
-          </div>
-          <div className="p-4">
-          {receitaEditando && (
+          <div className="p-5">
             <ReceitaForm
-              key={receitaEditando.id}
-              mode="edit"
-              receita={receitaEditando}
-              onCancel={() => setReceitaEditando(null)}
-              onSuccess={(mesEditado) => {
-                setReceitaEditando(null);
-                setMes(mesEditado);
-                void carregarReceitas(mesEditado);
-              }}
+              defaultMonth={mes}
+              onCancel={() => setCadastroAberto(false)}
+              onSuccess={(mesCriado) => { setCadastroAberto(false); setMes(mesCriado); void carregarReceitas(mesCriado); }}
             />
-          )}
           </div>
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={Boolean(receitaExcluindo)}
-        onOpenChange={(open) => {
-          if (!open) setReceitaExcluindo(null);
-        }}
-      >
+      {/* ── Dialog: Edição ── */}
+      <Dialog open={Boolean(receitaEditando)} onOpenChange={(open) => { if (!open) setReceitaEditando(null); }}>
+        <DialogContent className="max-h-[calc(100vh-1rem)] max-w-4xl overflow-y-auto p-0">
+          <div className="relative border-b border-border p-5">
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-blue-500/50 to-transparent" />
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Pencil className="h-4.5 w-4.5 text-blue-500" />
+                Editar receita
+              </DialogTitle>
+              <DialogDescription>Atualize esta entrada sem sair da lista.</DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="p-5">
+            {receitaEditando && (
+              <ReceitaForm
+                key={receitaEditando.id}
+                mode="edit"
+                receita={receitaEditando}
+                onCancel={() => setReceitaEditando(null)}
+                onSuccess={(mesEditado) => { setReceitaEditando(null); setMes(mesEditado); void carregarReceitas(mesEditado); }}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Dialog: Exclusão ── */}
+      <Dialog open={Boolean(receitaExcluindo)} onOpenChange={(open) => { if (!open) setReceitaExcluindo(null); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Excluir receita</DialogTitle>
             <DialogDescription>
-              Escolha se deseja remover apenas este mês ou encerrar a receita fixa
-              deste mês em diante.
+              {receitaExcluindo?.fixa
+                ? "Escolha se deseja remover apenas este mês ou encerrar a receita fixa deste mês em diante."
+                : "Esta ação remove a receita definitivamente."}
             </DialogDescription>
           </DialogHeader>
-          <div className="rounded-lg border border-border bg-muted/35 p-4 text-sm">
-            <p className="font-medium text-foreground">{receitaExcluindo?.nome}</p>
-            <p className="mt-1 text-blue-600 dark:text-blue-400">
-              {formatCurrency(receitaExcluindo?.valor ?? 0)}
-            </p>
+          <div className="rounded-xl border border-border bg-muted/30 p-4">
+            <p className="text-sm font-semibold text-foreground">{receitaExcluindo?.nome}</p>
+            <p className="mt-0.5 text-sm font-bold text-blue-500">{formatCurrency(receitaExcluindo?.valor ?? 0)}</p>
           </div>
           {receitaExcluindo?.fixa && (
-            <div className="grid gap-2 rounded-lg border border-border bg-background p-3 text-sm">
-              <p className="font-medium text-foreground">Como deseja excluir?</p>
-              <label className="flex cursor-pointer items-start gap-2 rounded-md border border-border bg-background p-3">
-                <input
-                  className="mt-1 h-4 w-4 accent-primary"
-                  checked={escopoExclusao === "mes"}
-                  name="escopo-receita"
-                  type="radio"
-                  onChange={() => setEscopoExclusao("mes")}
-                />
-                <span>
-                  <span className="block font-medium">Somente a selecionada</span>
-                  <span className="text-xs text-muted-foreground">
-                    Remove apenas {formatMonth(mes)}.
+            <div className="grid gap-2">
+              {(["mes", "todas"] as const).map((opcao) => (
+                <label key={opcao} className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-background p-3 transition-colors hover:bg-muted/40">
+                  <input
+                    className="mt-1 h-4 w-4 accent-primary"
+                    checked={escopoExclusao === opcao}
+                    name="escopo-receita"
+                    type="radio"
+                    onChange={() => setEscopoExclusao(opcao)}
+                  />
+                  <span>
+                    <span className="block text-sm font-semibold">
+                      {opcao === "mes" ? "Somente a selecionada" : "Esta e as próximas"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {opcao === "mes"
+                        ? `Remove apenas ${formatMonth(mes)}.`
+                        : "Mantém os meses anteriores e encerra a recorrência."}
+                    </span>
                   </span>
-                </span>
-              </label>
-              <label className="flex cursor-pointer items-start gap-2 rounded-md border border-border bg-background p-3">
-                <input
-                  className="mt-1 h-4 w-4 accent-primary"
-                  checked={escopoExclusao === "todas"}
-                  name="escopo-receita"
-                  type="radio"
-                  onChange={() => setEscopoExclusao("todas")}
-                />
-                <span>
-                  <span className="block font-medium">Esta e as próximas</span>
-                  <span className="text-xs text-muted-foreground">
-                    Mantém os meses anteriores e encerra a recorrência daqui para frente.
-                  </span>
-                </span>
-              </label>
+                </label>
+              ))}
             </div>
           )}
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setReceitaExcluindo(null)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={excluirReceita}
-              disabled={deletingId === receitaExcluindo?.id}
-            >
-              {deletingId === receitaExcluindo?.id && (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              )}
+            <Button variant="outline" onClick={() => setReceitaExcluindo(null)}>Cancelar</Button>
+            <Button variant="destructive" disabled={deletingId === receitaExcluindo?.id} onClick={excluirReceita}>
+              {deletingId === receitaExcluindo?.id && <Loader2 className="h-4 w-4 animate-spin" />}
               {receitaExcluindo?.fixa && escopoExclusao === "mes"
                 ? "Excluir selecionada"
                 : receitaExcluindo?.fixa

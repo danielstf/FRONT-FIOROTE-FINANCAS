@@ -1,4 +1,3 @@
-﻿
 import {
   AlertTriangle,
   ArrowUpRight,
@@ -7,8 +6,9 @@ import {
   CreditCard,
   Loader2,
   ReceiptText,
-  Sparkles,
   ThumbsUp,
+  TrendingDown,
+  TrendingUp,
   WalletCards,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -21,8 +21,6 @@ import { getApiErrorMessage } from "../../api/errors";
 import { receitasApi } from "../../api/receitas/receitas-api";
 import type { Receita } from "../../api/receitas/types";
 import { MonthPicker } from "../../components/month-picker";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
-import { Label } from "../../components/ui/label";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../providers/auth-provider";
 
@@ -40,24 +38,15 @@ function formatCurrency(value: number) {
 function formatMonthName(value: string) {
   const [year, month] = value.split("-");
   const date = new Date(Number(year), Number(month) - 1, 1);
-
-  return new Intl.DateTimeFormat("pt-BR", {
-    month: "long",
-    year: "numeric",
-  }).format(date);
+  return new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(date);
 }
 
 function formatDate(value: string | null) {
   if (!value) return "Sem vencimento";
-
   const [datePart] = value.split("T");
   const [year, month, day] = datePart.split("-").map(Number);
-
   if (!year || !month || !day) return "Data inválida";
-
-  return new Intl.DateTimeFormat("pt-BR").format(
-    new Date(year, month - 1, day),
-  );
+  return new Intl.DateTimeFormat("pt-BR").format(new Date(year, month - 1, day));
 }
 
 export function DashboardPage() {
@@ -77,44 +66,15 @@ export function DashboardPage() {
   const saldo = resumoMes?.saldoFinal ?? totalReceitas - totalDespesas;
   const saldoPositivo = saldo >= 0;
 
-  const stats = [
-    {
-      label: "Receitas",
-      value: formatCurrency(totalReceitas),
-      icon: WalletCards,
-      color: "text-blue-600 dark:text-blue-400",
-      iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-      borderAccent: "border-l-blue-500/40",
-    },
-    {
-      label: "Despesas",
-      value: formatCurrency(totalDespesas),
-      icon: ReceiptText,
-      color: "text-red-600 dark:text-red-400",
-      iconBg: "bg-red-500/10 text-red-600 dark:text-red-400",
-      borderAccent: "border-l-red-500/40",
-    },
-    {
-      label: "Pendentes",
-      value: formatCurrency(totalDespesasPendentes),
-      icon: AlertTriangle,
-      color: "text-amber-600 dark:text-amber-400",
-      iconBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-      borderAccent: "border-l-amber-500/40",
-    },
-  ];
-
   async function carregarDashboard(mesSelecionado = mes) {
     setError("");
     setLoading(true);
-
     try {
       const [resumoResult, receitasResult, despesasResult] = await Promise.all([
         dashboardApi.resumoFinanceiro({ mes: mesSelecionado, meses: 6 }),
         receitasApi.listar({ mes: mesSelecionado }),
         despesasApi.listar({ mes: mesSelecionado, paga: false }),
       ]);
-
       setResumo(resumoResult);
       setReceitas(receitasResult.receitas);
       setDespesasPendentes(despesasResult.despesas);
@@ -127,7 +87,6 @@ export function DashboardPage() {
 
   async function marcarComoPaga(despesa: Despesa) {
     setPayingId(despesa.id);
-
     try {
       await despesasApi.alterarPagamento(despesa.id, true, mes);
       toast.success("Despesa marcada como paga.");
@@ -145,257 +104,281 @@ export function DashboardPage() {
   }, [perfilFinanceiroId]);
 
   return (
-    <div className="space-y-6">
-      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-        <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_300px] lg:p-7">
-          <div className="space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
-              <Sparkles className="h-4 w-4" />
-              <span className="capitalize">{formatMonthName(mes)}</span>
-            </div>
-
-            <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-normal text-card-foreground sm:text-3xl lg:text-4xl">
-                Olá, {session?.usuario.nome}.{" "}
-                <span className="block sm:inline">
-                  Seu mês está{" "}
-                  <span className={saldoPositivo ? "text-emerald-600" : "text-red-600"}>
-                    {saldoPositivo ? "positivo" : "negativo"}
-                  </span>
-                  .
-                </span>
-              </h1>
-              <p className="max-w-2xl text-sm text-muted-foreground">
-                Acompanhe o saldo, veja entradas recentes e resolva suas pendências
-                sem sair do dashboard.
-              </p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              {stats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className={cn(
-                    "rounded-lg border border-l-4 border-border bg-background p-4 transition-shadow hover:shadow-sm",
-                    stat.borderAccent,
-                  )}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      {stat.label}
-                    </p>
-                    <span className={cn("flex h-7 w-7 items-center justify-center rounded-md", stat.iconBg)}>
-                      <stat.icon className="h-3.5 w-3.5" />
-                    </span>
-                  </div>
-                  <p className={cn("mt-2 text-lg font-bold", stat.color)}>
-                    {stat.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <Card className="self-start border border-primary/20 bg-background shadow-sm">
-            <CardContent className="space-y-5 p-5">
-              <div className="min-w-0">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Saldo final
-                </p>
-                <p
-                  className={cn(
-                    "mt-1 break-words text-2xl font-bold tracking-tight sm:text-3xl",
-                    saldoPositivo
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-red-600 dark:text-red-400",
-                  )}
-                >
-                  {formatCurrency(saldo)}
-                </p>
-              </div>
-
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-4 py-3">
-                  <span className="text-xs font-medium text-muted-foreground">Contas vencidas</span>
-                  <strong className={cn(
-                    "text-sm",
-                    (resumoMes?.contasVencidas ?? 0) > 0
-                      ? "text-red-600 dark:text-red-400"
-                      : "text-emerald-600 dark:text-emerald-400"
-                  )}>
-                    {resumoMes?.contasVencidas ?? 0}
-                  </strong>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Mês de referência
-                  </Label>
-                  <MonthPicker
-                    value={mes}
-                    onChange={(selectedMonth) => {
-                      setMes(selectedMonth);
-                      void carregarDashboard(selectedMonth);
-                    }}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+    <div className="space-y-5">
+      {/* ── Header ─────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            Olá, {session?.usuario.nome} 👋
+          </h1>
+          <p className="text-sm text-muted-foreground capitalize">
+            {formatMonthName(mes)}
+          </p>
         </div>
-      </section>
+        <div className="w-full max-w-52 shrink-0">
+          <MonthPicker
+            value={mes}
+            onChange={(selectedMonth) => {
+              setMes(selectedMonth);
+              void carregarDashboard(selectedMonth);
+            }}
+          />
+        </div>
+      </div>
 
       {error && (
-        <p className="rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <p className="rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-sm text-destructive">
           {error}
         </p>
       )}
 
-      {/* Listas */}
-      <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
+      {/* ── Stats ──────────────────────────────────────────────────── */}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {/* Saldo */}
+        <div
+          className={cn(
+            "relative overflow-hidden rounded-2xl border p-5 sm:col-span-2 xl:col-span-1",
+            saldoPositivo
+              ? "border-emerald-500/20 bg-emerald-500/6"
+              : "border-red-500/20 bg-red-500/6",
+          )}
+        >
+          <div
+            aria-hidden
+            className={cn(
+              "pointer-events-none absolute right-0 top-0 h-24 w-24 -translate-y-6 translate-x-6 rounded-full blur-2xl",
+              saldoPositivo ? "bg-emerald-500/20" : "bg-red-500/20",
+            )}
+          />
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+            Saldo final
+          </p>
+          <p
+            className={cn(
+              "mt-2 text-3xl font-bold tracking-tight",
+              saldoPositivo ? "text-emerald-500" : "text-red-500",
+            )}
+          >
+            {loading ? "—" : formatCurrency(saldo)}
+          </p>
+          <div className="mt-3 flex items-center gap-1.5">
+            {saldoPositivo ? (
+              <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+            ) : (
+              <TrendingDown className="h-3.5 w-3.5 text-red-500" />
+            )}
+            <span className={cn("text-xs font-medium", saldoPositivo ? "text-emerald-500" : "text-red-500")}>
+              {saldoPositivo ? "Mês positivo" : "Mês negativo"}
+            </span>
+          </div>
+
+          {(resumoMes?.contasVencidas ?? 0) > 0 && (
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-destructive/25 bg-destructive/10 px-2.5 py-1 text-[11px] font-semibold text-destructive">
+              <AlertTriangle className="h-3 w-3" />
+              {resumoMes?.contasVencidas} vencida(s)
+            </div>
+          )}
+        </div>
+
         {/* Receitas */}
-        <Card className="shadow-sm">
-          <CardHeader className="border-b border-border pb-4">
-            <CardTitle className="text-base">Receitas do mês</CardTitle>
-            <CardDescription>
-              Entradas cadastradas em{" "}
-              <span className="capitalize font-medium">{formatMonthName(mes)}</span>.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            {loading && (
-              <div className="flex items-center gap-2 p-5 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Carregando receitas...
-              </div>
-            )}
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-5">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute right-0 top-0 h-20 w-20 -translate-y-4 translate-x-4 rounded-full bg-blue-500/10 blur-2xl"
+          />
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+              <WalletCards className="h-4 w-4" />
+            </div>
+            <ArrowUpRight className="h-3.5 w-3.5 text-blue-500/60" />
+          </div>
+          <p className="mt-3 text-xs font-medium text-muted-foreground">Receitas</p>
+          <p className="mt-1 text-2xl font-bold text-blue-500">
+            {loading ? "—" : formatCurrency(totalReceitas)}
+          </p>
+        </div>
 
-            {!loading && receitas.length === 0 && (
-              <div className="flex flex-col items-center justify-center gap-2 p-10 text-center">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                  <WalletCards className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <p className="text-sm font-medium text-foreground">Nenhuma receita neste mês.</p>
-              </div>
-            )}
+        {/* Despesas */}
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-5">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute right-0 top-0 h-20 w-20 -translate-y-4 translate-x-4 rounded-full bg-red-500/10 blur-2xl"
+          />
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
+              <ReceiptText className="h-4 w-4" />
+            </div>
+            <TrendingDown className="h-3.5 w-3.5 text-red-500/60" />
+          </div>
+          <p className="mt-3 text-xs font-medium text-muted-foreground">Despesas</p>
+          <p className="mt-1 text-2xl font-bold text-red-500">
+            {loading ? "—" : formatCurrency(totalDespesas)}
+          </p>
+        </div>
 
-            {!loading && receitas.length > 0 && (
-              <div className="divide-y divide-border">
-                {receitas.slice(0, 5).map((receita) => (
-                  <div
-                    key={receita.id}
-                    className="flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                        <ArrowUpRight className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-foreground">
-                          {receita.nome}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(receita.criadoEm).toLocaleDateString("pt-BR")}
-                        </p>
-                      </div>
-                    </div>
-                    <strong className="shrink-0 self-end text-sm text-blue-600 dark:text-blue-400 sm:self-auto">
-                      {formatCurrency(receita.valor)}
-                    </strong>
+        {/* Pendentes */}
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-5">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute right-0 top-0 h-20 w-20 -translate-y-4 translate-x-4 rounded-full bg-amber-500/10 blur-2xl"
+          />
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+              <AlertTriangle className="h-4 w-4" />
+            </div>
+            <CreditCard className="h-3.5 w-3.5 text-amber-500/60" />
+          </div>
+          <p className="mt-3 text-xs font-medium text-muted-foreground">Pendentes</p>
+          <p className="mt-1 text-2xl font-bold text-amber-500">
+            {loading ? "—" : formatCurrency(totalDespesasPendentes)}
+          </p>
+        </div>
+      </div>
+
+      {/* ── Lists ──────────────────────────────────────────────────── */}
+      <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+        {/* Receitas do mês */}
+        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Receitas do mês</h2>
+              <p className="text-xs text-muted-foreground capitalize mt-0.5">
+                Entradas de {formatMonthName(mes)}
+              </p>
+            </div>
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+              <WalletCards className="h-3.5 w-3.5" />
+            </div>
+          </div>
+
+          {loading && (
+            <div className="flex items-center gap-2.5 p-5 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Carregando...
+            </div>
+          )}
+
+          {!loading && receitas.length === 0 && (
+            <div className="flex flex-col items-center justify-center gap-2.5 py-12 text-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                <WalletCards className="h-4.5 w-4.5 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground">Nenhuma receita neste mês.</p>
+            </div>
+          )}
+
+          {!loading && receitas.length > 0 && (
+            <div className="divide-y divide-border/60">
+              {receitas.slice(0, 5).map((receita) => (
+                <div
+                  key={receita.id}
+                  className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/30"
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+                    <ArrowUpRight className="h-3.5 w-3.5" />
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {receita.nome}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(receita.criadoEm).toLocaleDateString("pt-BR")}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-sm font-semibold text-blue-500">
+                    {formatCurrency(receita.valor)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Despesas pendentes */}
-        <Card className="shadow-sm">
-          <CardHeader className="border-b border-border pb-4">
-            <CardTitle className="text-base">Despesas pendentes</CardTitle>
-            <CardDescription>
-              Contas não pagas de{" "}
-              <span className="capitalize font-medium">{formatMonthName(mes)}</span>.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            {loading && (
-              <div className="flex items-center gap-2 p-5 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Carregando despesas...
-              </div>
-            )}
+        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Despesas pendentes</h2>
+              <p className="text-xs text-muted-foreground capitalize mt-0.5">
+                Contas em aberto de {formatMonthName(mes)}
+              </p>
+            </div>
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
+              <ReceiptText className="h-3.5 w-3.5" />
+            </div>
+          </div>
 
-            {!loading && despesasPendentes.length === 0 && (
-              <div className="flex flex-col items-center justify-center gap-3 p-10 text-center">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                </div>
-                <p className="text-sm font-medium text-foreground">
-                  Nenhuma despesa pendente neste mês.
-                </p>
-              </div>
-            )}
+          {loading && (
+            <div className="flex items-center gap-2.5 p-5 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Carregando...
+            </div>
+          )}
 
-            {!loading && despesasPendentes.length > 0 && (
-              <div className="divide-y divide-border max-h-[620px] overflow-y-auto">
-                {despesasPendentes.map((despesa) => (
-                  <div
-                    key={despesa.id}
+          {!loading && despesasPendentes.length === 0 && (
+            <div className="flex flex-col items-center justify-center gap-2.5 py-12 text-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10">
+                <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" />
+              </div>
+              <p className="text-sm text-muted-foreground">Tudo em dia! Nenhuma pendência.</p>
+            </div>
+          )}
+
+          {!loading && despesasPendentes.length > 0 && (
+            <div className="divide-y divide-border/60 max-h-130 overflow-y-auto">
+              {despesasPendentes.map((despesa) => (
+                <div
+                  key={despesa.id}
+                  className={cn(
+                    "flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/30",
+                    despesa.vencida && "bg-destructive/4 hover:bg-destructive/7",
+                  )}
+                >
+                  <button
                     className={cn(
-                      "flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between",
-                      despesa.vencida && "bg-destructive/5 hover:bg-destructive/8",
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all",
+                      despesa.vencida
+                        ? "border-destructive/30 bg-destructive/10 text-destructive hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-500"
+                        : "border-red-500/20 bg-red-500/10 text-red-500 hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-500",
                     )}
+                    title="Marcar como paga"
+                    type="button"
+                    onClick={() => marcarComoPaga(despesa)}
+                    disabled={payingId === despesa.id}
                   >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <button
-                        className={cn(
-                          "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-colors",
-                          despesa.vencida
-                            ? "border-destructive/30 bg-destructive/10 text-destructive hover:bg-emerald-500/10 hover:text-emerald-700 hover:border-emerald-500/30"
-                            : "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-emerald-500/10 hover:text-emerald-700 hover:border-emerald-500/30",
-                        )}
-                        title="Marcar como paga"
-                        type="button"
-                        onClick={() => marcarComoPaga(despesa)}
-                        disabled={payingId === despesa.id}
-                      >
-                        {payingId === despesa.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <ThumbsUp className="h-4 w-4" />
-                        )}
-                      </button>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-foreground">
-                          {despesa.nome}
-                        </p>
-                        <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                          <span className="inline-flex items-center gap-1">
-                            <CalendarDays className="h-3 w-3" />
-                            {formatDate(despesa.dataVencimento)}
-                          </span>
-                          {despesa.vencida && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 font-semibold text-destructive">
-                              <AlertTriangle className="h-2.5 w-2.5" />
-                              Vencida
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between gap-3 sm:justify-end">
-                      <CreditCard className="h-4 w-4 text-muted-foreground" />
-                      <strong className="shrink-0 text-sm text-red-600 dark:text-red-400">
-                        {formatCurrency(despesa.valor)}
-                      </strong>
+                    {payingId === despesa.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <ThumbsUp className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {despesa.nome}
+                    </p>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                        <CalendarDays className="h-3 w-3" />
+                        {formatDate(despesa.dataVencimento)}
+                      </span>
+                      {despesa.vencida && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
+                          <AlertTriangle className="h-2.5 w-2.5" />
+                          Vencida
+                        </span>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+
+                  <span className="shrink-0 text-sm font-semibold text-red-500">
+                    {formatCurrency(despesa.valor)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
