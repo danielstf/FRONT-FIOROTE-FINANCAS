@@ -188,44 +188,84 @@ export function CartoesPage() {
           )}
 
           {!loading && cartoes.length > 0 && (
-            <div className="divide-y divide-border/60">
-              {cartoes.map((cartao) => (
+            <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
+              {cartoes.map((cartao, index) => {
+                const gradients = [
+                  "from-blue-600 via-blue-500 to-blue-400",
+                  "from-violet-600 via-violet-500 to-violet-400",
+                  "from-rose-600 via-rose-500 to-rose-400",
+                  "from-emerald-600 via-emerald-500 to-emerald-400",
+                  "from-amber-600 via-amber-500 to-amber-400",
+                  "from-cyan-600 via-cyan-500 to-cyan-400",
+                  "from-indigo-600 via-indigo-500 to-indigo-400",
+                  "from-pink-600 via-pink-500 to-pink-400",
+                ];
+                const gradient = gradients[index % gradients.length];
+                return (
                 <div
                   key={cartao.id}
-                  className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/30"
+                  className={`group relative aspect-[1.586/1] overflow-hidden rounded-2xl bg-linear-to-br ${gradient} p-5 text-white shadow-md`}
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <CreditCard className="h-4 w-4" />
+                  {/* Decorative circles */}
+                  <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 rounded-full bg-white/10" />
+                  <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-white/8" />
+
+                  {/* Chip — EMV realista */}
+                  <div className="relative h-7 w-10 overflow-hidden rounded-md bg-amber-300/90 shadow-sm">
+                    <div className="absolute inset-x-0 top-[33%] h-px bg-amber-700/40" />
+                    <div className="absolute inset-x-0 top-[66%] h-px bg-amber-700/40" />
+                    <div className="absolute inset-y-0 left-[42%] w-px bg-amber-700/30" />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-foreground">{cartao.nome}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Criado em {new Date(cartao.criadoEm).toLocaleDateString("pt-BR")}
-                    </p>
+
+                  {/* Credit card icon */}
+                  <div className="absolute right-5 top-5 opacity-25">
+                    <CreditCard className="h-7 w-7" />
                   </div>
-                  <div className="flex shrink-0 gap-1.5">
-                    <Button
-                      className="h-8 w-8 rounded-lg px-0"
-                      variant="outline"
+
+                  {/* Actions — visible on hover */}
+                  <div className="absolute right-3 top-3 flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                    <button
+                      className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/20 text-white transition-colors hover:bg-white/35"
                       title="Editar"
+                      type="button"
                       onClick={() => iniciarEdicao(cartao)}
                     >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      className="h-8 w-8 rounded-lg px-0 text-destructive hover:text-destructive"
-                      variant="outline"
+                      <Pencil className="h-3 w-3" />
+                    </button>
+                    <button
+                      className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/20 text-white transition-colors hover:bg-red-500/70 disabled:opacity-50"
                       title="Excluir"
+                      type="button"
                       disabled={busyId === cartao.id}
                       onClick={() => excluirCartao(cartao)}
                     >
                       {busyId === cartao.id
-                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        : <Trash2 className="h-3.5 w-3.5" />}
-                    </Button>
+                        ? <Loader2 className="h-3 w-3 animate-spin" />
+                        : <Trash2 className="h-3 w-3" />}
+                    </button>
+                  </div>
+
+                  {/* Número do cartão (pontos) */}
+                  <div className="absolute left-5 right-5 top-[42%] flex items-center gap-2">
+                    {[0, 1, 2, 3].map((g) => (
+                      <div key={g} className="flex gap-0.75">
+                        {[0, 1, 2, 3].map((d) => (
+                          <span key={d} className="block h-1.25 w-1.25 rounded-full bg-white/55" />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Card name and date */}
+                  <div className="absolute bottom-5 left-5 right-5">
+                    <p className="truncate text-sm font-bold tracking-widest">{cartao.nome}</p>
+                    <p className="mt-0.5 text-[10px] font-medium opacity-55">
+                      desde {new Date(cartao.criadoEm).toLocaleDateString("pt-BR")}
+                    </p>
                   </div>
                 </div>
-              ))}
+              );
+              })}
             </div>
           )}
         </div>

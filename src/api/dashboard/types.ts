@@ -4,6 +4,7 @@ export type MovimentoMensal = {
   despesas: number;
   saldoInicial: number;
   saldoFinal: number;
+  projecao: boolean;
 };
 
 export type CategoriaDespesaResumo = {
@@ -27,7 +28,14 @@ export type ResumoFinanceiroResponse = {
     totalDespesasPagas: number;
     totalDespesasPendentes: number;
     saldoFinal: number;
+    saldoProjetado: number;
     contasVencidas: number;
+  };
+  previsao: {
+    descricao: string;
+    saldoPrevisto: number;
+    totalReceitasPrevistas: number;
+    totalDespesasPrevistas: number;
   };
   graficos: {
     pizzaDespesasPorCategoria: CategoriaDespesaResumo[];
@@ -36,6 +44,7 @@ export type ResumoFinanceiroResponse = {
     linhaEvolucaoGastos: Array<{
       mes: string;
       totalDespesas: number;
+      projecao: boolean;
     }>;
   };
 };

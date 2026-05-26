@@ -99,9 +99,11 @@ function excelChart(rows: MovimentoMensal[]) {
   const body = rows.map((item) => {
     const receita = "█".repeat(Math.max(1, Math.round((item.receitas / max) * 24)));
     const despesa = "█".repeat(Math.max(1, Math.round((item.despesas / max) * 24)));
-    return `<tr><td>${excelValue(formatMonth(item.mes))}</td><td style="color:#2563eb;font-weight:700;">${excelValue(item.receitas)}</td><td style="color:#dc2626;font-weight:700;">${excelValue(item.despesas)}</td><td style="color:#2563eb;font-weight:700;">${receita}</td><td style="color:#dc2626;font-weight:700;">${despesa}</td></tr>`;
+    const tipo = item.projecao ? "Estimativa" : "Real";
+    const tipoStyle = item.projecao ? "color:#d97706;font-weight:700;" : "color:#16a34a;font-weight:700;";
+    return `<tr><td>${excelValue(formatMonth(item.mes))}</td><td style="${tipoStyle}">${tipo}</td><td style="color:#2563eb;font-weight:700;">${excelValue(item.receitas)}</td><td style="color:#dc2626;font-weight:700;">${excelValue(item.despesas)}</td><td style="color:#2563eb;font-weight:700;">${receita}</td><td style="color:#dc2626;font-weight:700;">${despesa}</td></tr>`;
   }).join("");
-  return `<h2>Gráfico receitas x despesas</h2><table><thead><tr><th>Mês</th><th>Receitas</th><th>Despesas</th><th>Receitas</th><th>Despesas</th></tr></thead><tbody>${body}</tbody></table>`;
+  return `<h2>Gráfico receitas x despesas</h2><table><thead><tr><th>Mês</th><th>Tipo</th><th>Receitas</th><th>Despesas</th><th>Receitas</th><th>Despesas</th></tr></thead><tbody>${body}</tbody></table>`;
 }
 
 export function RelatoriosPage() {
@@ -134,9 +136,15 @@ export function RelatoriosPage() {
 
   const movimentos = data?.graficos.linhaEvolucaoFinanceira ?? [];
   const categorias = data?.graficos.pizzaDespesasPorCategoria ?? [];
-  const totalReceitas = movimentos.reduce((sum, item) => sum + item.receitas, 0);
-  const totalDespesas = movimentos.reduce((sum, item) => sum + item.despesas, 0);
+  // Separa meses com dados reais dos meses futuros (estimativa).
+  const movimentosReais = movimentos.filter((m) => !m.projecao);
+  const totalReceitas = movimentosReais.reduce((sum, item) => sum + item.receitas, 0);
+  const totalDespesas = movimentosReais.reduce((sum, item) => sum + item.despesas, 0);
   const saldo = totalReceitas - totalDespesas;
+  const totalReceitasPrevistas = movimentos.reduce((sum, item) => sum + item.receitas, 0);
+  const totalDespesasPrevistas = movimentos.reduce((sum, item) => sum + item.despesas, 0);
+  const saldoPrevisto = totalReceitasPrevistas - totalDespesasPrevistas;
+  const temProjecao = movimentos.some((m) => m.projecao);
   const maiorDespesa = data?.graficos.barrasMaioresGastos[0] ?? null;
   const chartData = movimentos.map((item) => ({ ...item, label: formatMonth(item.mes, false) }));
   const categoriaData = categorias.map((item) => ({ name: item.categoria, value: item.total }));
@@ -146,13 +154,13 @@ export function RelatoriosPage() {
     [exportMode, exportYear, selectedMonths],
   );
 
-  // Insights calculados
+  // Insights calculados apenas sobre meses com dados reais (sem projecao).
   const melhorMes = useMemo(() => {
-    if (!movimentos.length) return null;
-    return movimentos.reduce((best, item) => item.saldoFinal > best.saldoFinal ? item : best, movimentos[0]);
-  }, [movimentos]);
+    if (!movimentosReais.length) return null;
+    return movimentosReais.reduce((best, item) => item.saldoFinal > best.saldoFinal ? item : best, movimentosReais[0]);
+  }, [movimentosReais]);
 
-  const mesesPositivos = movimentos.filter((m) => m.saldoFinal >= 0).length;
+  const mesesPositivos = movimentosReais.filter((m) => m.saldoFinal >= 0).length;
   const taxaEconomia = totalReceitas > 0 ? ((saldo / totalReceitas) * 100) : 0;
   const maiorCategoria = categoriaData.length > 0
     ? categoriaData.reduce((a, b) => b.value > a.value ? b : a, categoriaData[0])
@@ -295,9 +303,9 @@ export function RelatoriosPage() {
       {/* ── Metrics ── */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: "Receitas", value: formatCurrency(totalReceitas), icon: ArrowUpRight, color: "text-blue-500", bg: "bg-blue-500/10" },
-          { label: "Despesas", value: formatCurrency(totalDespesas), icon: ArrowDownRight, color: "text-red-500", bg: "bg-red-500/10" },
-          { label: "Saldo", value: formatCurrency(saldo), icon: WalletCards, color: saldo >= 0 ? "text-emerald-500" : "text-red-500", bg: saldo >= 0 ? "bg-emerald-500/10" : "bg-red-500/10" },
+          { label: "Receitas reais", value: formatCurrency(totalReceitas), icon: ArrowUpRight, color: "text-blue-500", bg: "bg-blue-500/10" },
+          { label: "Despesas reais", value: formatCurrency(totalDespesas), icon: ArrowDownRight, color: "text-red-500", bg: "bg-red-500/10" },
+          { label: "Saldo real", value: formatCurrency(saldo), icon: WalletCards, color: saldo >= 0 ? "text-emerald-500" : "text-red-500", bg: saldo >= 0 ? "bg-emerald-500/10" : "bg-red-500/10" },
           { label: "Maior gasto único", value: maiorDespesa ? formatCurrency(maiorDespesa.valor) : "R$ 0,00", icon: TrendingUp, color: "text-amber-500", bg: "bg-amber-500/10" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="rounded-2xl border border-border bg-card p-5">
@@ -311,6 +319,36 @@ export function RelatoriosPage() {
           </div>
         ))}
       </div>
+
+      {/* ── Previsão (apenas quando há meses futuros no período) ── */}
+      {temProjecao && (
+        <div className="rounded-2xl border border-amber-500/40 bg-amber-500/5 p-5">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span className="rounded-md bg-amber-500/15 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-amber-600">
+              Projeção financeira
+            </span>
+            <p className="text-xs text-muted-foreground">
+              Estimativa considerando todos os lançamentos agendados
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <p className="text-xs text-muted-foreground">Receitas previstas</p>
+              <p className="mt-0.5 text-lg font-bold text-blue-500">{formatCurrency(totalReceitasPrevistas)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Despesas previstas</p>
+              <p className="mt-0.5 text-lg font-bold text-red-500">{formatCurrency(totalDespesasPrevistas)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Saldo previsto</p>
+              <p className={cn("mt-0.5 text-lg font-bold", saldoPrevisto >= 0 ? "text-emerald-500" : "text-red-500")}>
+                {formatCurrency(saldoPrevisto)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Insights ── */}
       {movimentos.length > 1 && (
@@ -456,8 +494,21 @@ export function RelatoriosPage() {
         </div>
         <div className="divide-y divide-border/60">
           {movimentos.map((item) => (
-            <div key={item.mes} className="grid grid-cols-4 items-center gap-2 px-5 py-3 text-sm">
-              <p className="font-medium text-foreground capitalize">{formatMonth(item.mes, false)}</p>
+            <div
+              key={item.mes}
+              className={cn(
+                "grid grid-cols-4 items-center gap-2 px-5 py-3 text-sm",
+                item.projecao && "opacity-60",
+              )}
+            >
+              <p className="flex items-center gap-1.5 font-medium text-foreground capitalize">
+                {formatMonth(item.mes, false)}
+                {item.projecao && (
+                  <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">
+                    Estimativa
+                  </span>
+                )}
+              </p>
               <p className="text-blue-500">{formatCurrency(item.receitas)}</p>
               <p className="text-red-500">{formatCurrency(item.despesas)}</p>
               <p className={cn("font-semibold", item.saldoFinal >= 0 ? "text-emerald-500" : "text-red-500")}>

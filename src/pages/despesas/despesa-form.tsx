@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Tags,
+  Check,
   CreditCard,
   Loader2,
   Plus,
@@ -404,9 +405,9 @@ export function DespesaForm({
             </div>
 
             {formaPagamento === "CARTAO_CREDITO" && (
-              <div className="animate-in fade-in-0 slide-in-from-top-1 space-y-1.5 rounded-lg border border-border bg-card p-2.5 shadow-sm">
+              <div className="animate-in fade-in-0 slide-in-from-top-1 space-y-2 rounded-lg border border-border bg-card p-2.5 shadow-sm">
                 <div className="flex items-center justify-between gap-3">
-                  <Label htmlFor="cartaoCreditoId">Cartão de crédito</Label>
+                  <Label>Cartão de crédito</Label>
                   <Button
                     className="h-8 px-2 text-xs"
                     type="button"
@@ -417,35 +418,64 @@ export function DespesaForm({
                     Novo cartão
                   </Button>
                 </div>
-                <div className="flex gap-2">
-                  <Select
-                    id="cartaoCreditoId"
-                    value={cartaoCreditoId}
-                    onChange={(event) => setCartaoCreditoId(event.target.value)}
-                    required
-                  >
-                    <option value="">Selecione um cartão</option>
-                    {cartoes.map((cartao) => (
-                      <option key={cartao.id} value={cartao.id}>
-                        {cartao.nome}
-                      </option>
-                    ))}
-                  </Select>
-                  {cartoes.length === 0 && (
-                    <Button
-                      aria-label="Cadastrar cartão"
-                      className="h-10 w-10 shrink-0 px-0"
-                      type="button"
-                      onClick={() => setCartaoModalAberto(true)}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                {cartoes.length === 0 && (
+                {cartoes.length === 0 ? (
                   <p className="text-xs text-muted-foreground">
-                    Nenhum cartão cadastrado. Use o botão de + para cadastrar sem sair daqui.
+                    Nenhum cartão cadastrado. Use o botão + para cadastrar sem sair daqui.
                   </p>
+                ) : (
+                  <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-5">
+                    {cartoes.map((cartao, index) => {
+                      const gradients = [
+                        "from-blue-600 via-blue-500 to-blue-400",
+                        "from-violet-600 via-violet-500 to-violet-400",
+                        "from-rose-600 via-rose-500 to-rose-400",
+                        "from-emerald-600 via-emerald-500 to-emerald-400",
+                        "from-amber-600 via-amber-500 to-amber-400",
+                        "from-cyan-600 via-cyan-500 to-cyan-400",
+                        "from-indigo-600 via-indigo-500 to-indigo-400",
+                        "from-pink-600 via-pink-500 to-pink-400",
+                      ];
+                      const gradient = gradients[index % gradients.length];
+                      const selected = cartaoCreditoId === cartao.id;
+                      return (
+                        <button
+                          key={cartao.id}
+                          type="button"
+                          onClick={() => setCartaoCreditoId(cartao.id)}
+                          className={cn(
+                            `group relative aspect-[1.586/1] overflow-hidden rounded-lg bg-linear-to-br ${gradient} text-white shadow-sm transition-all`,
+                            selected
+                              ? "ring-2 ring-white/70 ring-offset-1 ring-offset-background brightness-110 scale-[1.04]"
+                              : "opacity-55 hover:opacity-80 hover:scale-[1.02]",
+                          )}
+                        >
+                          {/* Círculo decorativo */}
+                          <div aria-hidden className="pointer-events-none absolute -right-4 -top-4 h-14 w-14 rounded-full bg-white/12" />
+                          <div aria-hidden className="pointer-events-none absolute -bottom-5 -left-5 h-12 w-12 rounded-full bg-black/10" />
+
+                          {/* Chip EMV */}
+                          <div className="absolute left-2 top-2 h-2.5 w-3.5 overflow-hidden rounded-sm bg-amber-300/90">
+                            <div className="absolute inset-x-0 top-[38%] h-px bg-amber-700/45" />
+                            <div className="absolute inset-y-0 left-[40%] w-px bg-amber-700/30" />
+                          </div>
+
+                          {/* Nome — destaque principal */}
+                          <div className="absolute bottom-0 left-0 right-0 px-2 pb-2">
+                            <p className="truncate text-[9px] font-extrabold leading-tight tracking-tight">
+                              {cartao.nome}
+                            </p>
+                          </div>
+
+                          {/* Check quando selecionado */}
+                          {selected && (
+                            <div className="absolute right-1.5 top-1.5 flex h-3 w-3 items-center justify-center rounded-full bg-white/40">
+                              <Check className="h-2 w-2" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             )}
@@ -595,7 +625,7 @@ export function DespesaForm({
               </Button>
             </div>
           )}
-          <div className="grid max-h-[26vh] gap-1.5 overflow-y-auto rounded-lg border border-border bg-muted/25 p-1.5 sm:grid-cols-4 lg:grid-cols-8 xl:grid-cols-10">
+          <div className="grid max-h-[40vh] grid-cols-2 gap-1.5 overflow-y-auto rounded-lg border border-border bg-muted/25 p-1.5 sm:grid-cols-3">
             {categorias.map((opcao) => {
               const Icon = getCategoryIcon(opcao);
               const selected = categoria === opcao;
@@ -605,22 +635,21 @@ export function DespesaForm({
                   key={opcao}
                   type="button"
                   className={cn(
-                    "group flex min-h-7 items-center gap-1 rounded-md border border-border bg-background px-1 py-0.5 text-left leading-none shadow-sm transition-all hover:border-destructive/35 hover:bg-destructive/5",
+                    "group flex items-center gap-2.5 rounded-lg border border-border bg-background px-2.5 py-2.5 text-left shadow-sm transition-all hover:border-primary/30 hover:bg-primary/5",
                     selected &&
-                      "border-destructive/50 bg-destructive/10 text-destructive ring-2 ring-destructive/10",
+                      "border-primary/50 bg-primary/8 ring-2 ring-primary/15",
                   )}
                   onClick={() => setCategoria(toUppercaseText(opcao))}
                 >
                   <span
                     className={cn(
-                      "flex h-5 w-5 shrink-0 items-center justify-center rounded-md transition-colors",
+                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors",
                       getCategoryColor(opcao),
-                      selected && "ring-2 ring-destructive/20",
                     )}
                   >
-                    <Icon className="h-2.5 w-2.5" />
+                    <Icon className="h-3.5 w-3.5" />
                   </span>
-                  <span className="min-w-0 truncate text-[9px] font-medium uppercase leading-none">
+                  <span className="min-w-0 truncate text-xs font-medium leading-snug">
                     {opcao}
                   </span>
                 </button>

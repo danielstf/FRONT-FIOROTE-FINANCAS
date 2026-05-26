@@ -64,6 +64,8 @@ export function DashboardPage() {
   const totalDespesas = resumoMes?.totalDespesas ?? 0;
   const totalDespesasPendentes = resumoMes?.totalDespesasPendentes ?? 0;
   const saldo = resumoMes?.saldoFinal ?? totalReceitas - totalDespesas;
+  const saldoProjetado = resumoMes?.saldoProjetado;
+  const temPrevisaoDiferente = saldoProjetado !== undefined && saldoProjetado !== saldo;
   const saldoPositivo = saldo >= 0;
 
   async function carregarDashboard(mesSelecionado = mes) {
@@ -151,7 +153,7 @@ export function DashboardPage() {
             )}
           />
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            Saldo final
+            Saldo real
           </p>
           <p
             className={cn(
@@ -161,6 +163,14 @@ export function DashboardPage() {
           >
             {loading ? "—" : formatCurrency(saldo)}
           </p>
+          {!loading && temPrevisaoDiferente && (
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              Previsto:{" "}
+              <span className="font-semibold">
+                {formatCurrency(saldoProjetado!)}
+              </span>
+            </p>
+          )}
           <div className="mt-3 flex items-center gap-1.5">
             {saldoPositivo ? (
               <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
