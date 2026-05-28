@@ -1,6 +1,5 @@
 import {
   BarChart3,
-  ChevronRight,
   CreditCard,
   Crown,
   Home,
@@ -8,6 +7,7 @@ import {
   MessageSquareText,
   ReceiptText,
   Settings,
+  Share2,
   ShieldAlert,
   WalletCards,
 } from "lucide-react";
@@ -46,6 +46,24 @@ type SidebarProps = {
   perfilSelecionado?: PerfilFinanceiro | null;
   onProfileClick?: () => void;
 };
+
+async function compartilharApp() {
+  const url = window.location.origin;
+  const text =
+    "Conheça o Fiorote Controle Financeiro para organizar receitas, despesas e relatórios financeiros";
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: "Fiorote Controle Financeiro", text, url });
+      return;
+    } catch {
+      // fall through to WhatsApp
+    }
+  }
+
+  const encoded = encodeURIComponent(`${text}: ${url}`);
+  window.open(`https://wa.me/?text=${encoded}`, "_blank", "noopener,noreferrer");
+}
 
 export function Sidebar({
   className,
@@ -96,20 +114,20 @@ export function Sidebar({
         onClick={onNavigate}
         className={({ isActive }) =>
           cn(
-            "group relative flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] font-medium text-sidebar-foreground/60 transition-all duration-150 hover:bg-white/[0.06] hover:text-sidebar-foreground",
+            "group relative flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] font-medium text-sidebar-foreground/60 transition-all duration-150 hover:bg-white/6 hover:text-sidebar-foreground",
             isActive &&
-              "bg-primary/[0.12] font-semibold text-primary hover:bg-primary/[0.16] hover:text-primary",
+              "bg-primary/12 font-semibold text-primary hover:bg-primary/16 hover:text-primary",
           )
         }
       >
         {({ isActive }) => (
           <>
             {isActive && (
-              <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-primary" />
+              <span className="absolute left-0 top-1/2 h-4 w-0.75 -translate-y-1/2 rounded-r-full bg-primary" />
             )}
             <item.icon
               className={cn(
-                "h-[15px] w-[15px] flex-shrink-0 transition-colors",
+                "h-3.75 w-3.75 shrink-0 transition-colors",
                 isActive ? "text-primary" : "text-sidebar-foreground/45 group-hover:text-sidebar-foreground/80",
               )}
             />
@@ -151,38 +169,48 @@ export function Sidebar({
       </nav>
 
       {/* User footer */}
-      <div className="shrink-0 border-t border-sidebar-border/50 p-2 space-y-1">
+      <div className="shrink-0 border-t border-sidebar-border/50 p-2">
         {session?.usuario && (
-          <button
-            className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-150 hover:bg-white/[0.06]"
-            type="button"
-            onClick={onProfileClick}
-          >
-            <Avatar
-              className="h-7 w-7 shrink-0 ring-1 ring-sidebar-border"
-              value={perfilSelecionado?.avatar}
-              label={perfilSelecionado?.nome ?? session.usuario.nome}
-            />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[12px] font-semibold text-sidebar-foreground/90 leading-tight">
-                {session.usuario.nome}
-              </p>
-              <p className="truncate text-[10.5px] text-sidebar-foreground/45 leading-tight mt-0.5">
-                {perfilSelecionado?.nome ?? "Perfil principal"}
-              </p>
-            </div>
-            <ChevronRight className="h-3.5 w-3.5 shrink-0 text-sidebar-foreground/30 transition-transform group-hover:translate-x-0.5" />
-          </button>
-        )}
+          <div className="flex items-center gap-1">
+            <button
+              className="group flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-all duration-150 hover:bg-white/6"
+              type="button"
+              onClick={onProfileClick}
+            >
+              <Avatar
+                className="h-7 w-7 shrink-0 ring-1 ring-sidebar-border"
+                value={perfilSelecionado?.avatar}
+                label={perfilSelecionado?.nome ?? session.usuario.nome}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[12px] font-semibold text-sidebar-foreground/90 leading-tight">
+                  {session.usuario.nome}
+                </p>
+                <p className="truncate text-[10.5px] text-sidebar-foreground/45 leading-tight mt-0.5">
+                  {perfilSelecionado?.nome ?? "Perfil principal"}
+                </p>
+              </div>
+            </button>
 
-        <button
-          className="flex h-8 w-full items-center justify-center gap-2 rounded-lg text-[12px] font-medium text-sidebar-foreground/40 transition-all duration-150 hover:bg-destructive/10 hover:text-destructive"
-          type="button"
-          onClick={logout}
-        >
-          <LogOut className="h-3.5 w-3.5" />
-          Sair
-        </button>
+            <button
+              aria-label="Compartilhar app"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sidebar-foreground/35 transition-all duration-150 hover:bg-white/6 hover:text-sidebar-foreground/70"
+              type="button"
+              onClick={compartilharApp}
+            >
+              <Share2 className="h-4 w-4" />
+            </button>
+
+            <button
+              aria-label="Sair"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sidebar-foreground/35 transition-all duration-150 hover:bg-destructive/10 hover:text-destructive"
+              type="button"
+              onClick={logout}
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );

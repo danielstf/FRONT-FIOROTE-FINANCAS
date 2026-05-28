@@ -6,7 +6,6 @@ import { pagamentosApi } from "../api/pagamentos/pagamentos-api";
 import { perfisApi } from "../api/perfis/perfis-api";
 import type { PerfilFinanceiro } from "../api/perfis/types";
 import { AdBanner } from "../components/ad-banner";
-import { FloatingShare } from "../components/floating-share";
 import { Sidebar } from "../components/sidebar";
 import { Avatar } from "../components/ui/avatar";
 import { Button } from "../components/ui/button";
@@ -239,7 +238,6 @@ export function AppLayout() {
         </main>
       </div>
 
-      <FloatingShare />
     </div>
   );
 }
