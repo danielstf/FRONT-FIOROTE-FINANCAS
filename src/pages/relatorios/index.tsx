@@ -83,27 +83,105 @@ function excelValue(value: string | number | boolean | null | undefined) {
   return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
-function excelTable(title: string, headers: string[], rows: Array<Array<string | number | boolean | null | undefined>>, amount?: { index: number; color: string }) {
-  const head = headers.map((item) => `<th>${excelValue(item)}</th>`).join("");
-  const body = rows.map((row) =>
-    `<tr>${row.map((cell, index) => {
-      const style = index === amount?.index ? `color:${amount.color};font-weight:700;` : "";
-      return `<td style="${style}">${excelValue(cell)}</td>`;
-    }).join("")}</tr>`,
-  ).join("");
-  return `<h2>${excelValue(title)}</h2><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+function formatDateBR(value: string | null | undefined): string {
+  if (!value) return "—";
+  const m = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : value;
 }
 
-function excelChart(rows: MovimentoMensal[]) {
-  const max = Math.max(...rows.map((item) => Math.max(item.receitas, item.despesas)), 1);
-  const body = rows.map((item) => {
-    const receita = "█".repeat(Math.max(1, Math.round((item.receitas / max) * 24)));
-    const despesa = "█".repeat(Math.max(1, Math.round((item.despesas / max) * 24)));
-    const tipo = item.projecao ? "Estimativa" : "Real";
-    const tipoStyle = item.projecao ? "color:#d97706;font-weight:700;" : "color:#16a34a;font-weight:700;";
-    return `<tr><td>${excelValue(formatMonth(item.mes))}</td><td style="${tipoStyle}">${tipo}</td><td style="color:#2563eb;font-weight:700;">${excelValue(item.receitas)}</td><td style="color:#dc2626;font-weight:700;">${excelValue(item.despesas)}</td><td style="color:#2563eb;font-weight:700;">${receita}</td><td style="color:#dc2626;font-weight:700;">${despesa}</td></tr>`;
+function excelSummaryTable(linhas: MovimentoMensal[]) {
+  const hasEst = linhas.some((l) => l.projecao);
+  const nota = hasEst
+    ? `<p style="font-size:12px;color:#92400e;background:#fffbeb;border-left:3px solid #d97706;padding:6px 10px;margin:0 0 10px;">⚠ Linhas marcadas como <strong>Estimativa</strong> são projeções de meses futuros baseadas nos lançamentos fixos cadastrados.</p>`
+    : "";
+  const head = `<tr><th>Mês</th><th>Tipo</th><th>Receitas (R$)</th><th>Despesas (R$)</th><th>Saldo Final (R$)</th></tr>`;
+  const body = linhas.map((item) => {
+    const est = item.projecao;
+    const rowBg = est ? "background:#fffbeb;" : "";
+    const tipoStyle = est ? "color:#d97706;font-weight:700;" : "color:#16a34a;font-weight:700;";
+    const saldoColor = item.saldoFinal >= 0 ? "#16a34a" : "#dc2626";
+    return `<tr style="${rowBg}">
+      <td>${excelValue(formatMonth(item.mes))}</td>
+      <td style="${tipoStyle}">${est ? "Estimativa" : "Real"}</td>
+      <td style="color:#1d4ed8;font-weight:700;">${excelValue(item.receitas)}</td>
+      <td style="color:#dc2626;font-weight:700;">${excelValue(item.despesas)}</td>
+      <td style="color:${saldoColor};font-weight:700;">${excelValue(item.saldoFinal)}</td>
+    </tr>`;
   }).join("");
-  return `<h2>Gráfico receitas x despesas</h2><table><thead><tr><th>Mês</th><th>Tipo</th><th>Receitas</th><th>Despesas</th><th>Receitas</th><th>Despesas</th></tr></thead><tbody>${body}</tbody></table>`;
+  return `<h2>Resumo Financeiro</h2>${nota}<table><thead>${head}</thead><tbody>${body}</tbody></table>`;
+}
+
+function excelChart(linhas: MovimentoMensal[]) {
+  const max = Math.max(...linhas.map((r) => Math.max(r.receitas, r.despesas)), 1);
+  const W = 180;
+  const body = linhas.map((item) => {
+    const rW = Math.max(2, Math.round((item.receitas / max) * W));
+    const dW = Math.max(2, Math.round((item.despesas / max) * W));
+    const est = item.projecao;
+    const tipoStyle = est ? "color:#d97706;font-weight:700;" : "color:#16a34a;font-weight:700;";
+    return `<tr>
+      <td>${excelValue(formatMonth(item.mes))}</td>
+      <td style="${tipoStyle}">${est ? "Estimativa" : "Real"}</td>
+      <td style="color:#1d4ed8;font-weight:700;text-align:right;">${excelValue(item.receitas)}</td>
+      <td style="padding:3px 6px;min-width:200px;"><div style="background:#2563eb;height:16px;width:${rW}px;border-radius:2px;"></div></td>
+      <td style="color:#dc2626;font-weight:700;text-align:right;">${excelValue(item.despesas)}</td>
+      <td style="padding:3px 6px;min-width:200px;"><div style="background:#dc2626;height:16px;width:${dW}px;border-radius:2px;"></div></td>
+    </tr>`;
+  }).join("");
+  const legend = `<p style="font-size:12px;margin:0 0 8px;"><span style="color:#1d4ed8;font-weight:700;">■ Receitas (azul)</span>&nbsp;&nbsp;<span style="color:#dc2626;font-weight:700;">■ Despesas (vermelho)</span>&nbsp;&nbsp;<span style="color:#16a34a;font-weight:700;">● Real</span>&nbsp;<span style="color:#d97706;font-weight:700;">● Estimativa</span></p>`;
+  return `<h2>Gráfico Receitas × Despesas</h2>${legend}<table><thead><tr><th>Mês</th><th>Tipo</th><th style="color:#1d4ed8;">Receitas (R$)</th><th style="color:#1d4ed8;">Barra</th><th style="color:#dc2626;">Despesas (R$)</th><th style="color:#dc2626;">Barra</th></tr></thead><tbody>${body}</tbody></table>`;
+}
+
+type ReceitaExcel = { data?: string | null; nome: string; valor: number; fixa: boolean; parcelaAtual?: number | null; numeroParcelas?: number | null };
+type DespesaExcel = { dataVencimento?: string | null; nome: string; categoria?: string | null; formaPagamento?: string | null; valor: number; paga: boolean; fixa: boolean; parcelaAtual?: number | null; numeroParcelas?: number | null };
+
+function excelReceitasPorMes(grupos: Array<{ mes: string; receitas: ReceitaExcel[] }>) {
+  let body = "";
+  for (const { mes, receitas } of grupos) {
+    const total = receitas.reduce((s, r) => s + r.valor, 0);
+    body += `<tr style="background:#1e40af;"><td colspan="5" style="font-weight:700;color:#fff;padding:7px 10px;font-size:13px;">${excelValue(formatMonth(mes))} — ${receitas.length} lançamento(s)</td></tr>`;
+    if (receitas.length === 0) {
+      body += `<tr><td colspan="5" style="color:#94a3b8;font-style:italic;">Nenhuma receita neste mês.</td></tr>`;
+    } else {
+      for (const r of receitas) {
+        body += `<tr>
+          <td>${formatDateBR(r.data)}</td>
+          <td>${excelValue(r.nome)}</td>
+          <td style="color:#1d4ed8;font-weight:700;">${excelValue(r.valor)}</td>
+          <td>${r.fixa ? "Sim" : "Não"}</td>
+          <td>${r.parcelaAtual && r.numeroParcelas ? `${r.parcelaAtual}/${r.numeroParcelas}` : "—"}</td>
+        </tr>`;
+      }
+      body += `<tr style="background:#dbeafe;"><td colspan="2" style="font-weight:700;text-align:right;color:#1e40af;">Total ${excelValue(formatMonth(mes, false))}:</td><td style="color:#1d4ed8;font-weight:700;" colspan="3">${excelValue(total)}</td></tr>`;
+    }
+  }
+  return `<h2>Receitas por Mês</h2><table><thead><tr><th>Data</th><th>Nome</th><th>Valor</th><th>Fixa</th><th>Parcela</th></tr></thead><tbody>${body}</tbody></table>`;
+}
+
+function excelDespesasPorMes(grupos: Array<{ mes: string; despesas: DespesaExcel[] }>) {
+  let body = "";
+  for (const { mes, despesas } of grupos) {
+    const total = despesas.reduce((s, d) => s + d.valor, 0);
+    body += `<tr style="background:#991b1b;"><td colspan="8" style="font-weight:700;color:#fff;padding:7px 10px;font-size:13px;">${excelValue(formatMonth(mes))} — ${despesas.length} lançamento(s)</td></tr>`;
+    if (despesas.length === 0) {
+      body += `<tr><td colspan="8" style="color:#94a3b8;font-style:italic;">Nenhuma despesa neste mês.</td></tr>`;
+    } else {
+      for (const d of despesas) {
+        body += `<tr>
+          <td>${formatDateBR(d.dataVencimento)}</td>
+          <td>${excelValue(d.nome)}</td>
+          <td>${excelValue(d.categoria)}</td>
+          <td>${excelValue(d.formaPagamento)}</td>
+          <td style="color:#dc2626;font-weight:700;">${excelValue(d.valor)}</td>
+          <td>${d.paga ? "Sim" : "Não"}</td>
+          <td>${d.fixa ? "Sim" : "Não"}</td>
+          <td>${d.parcelaAtual && d.numeroParcelas ? `${d.parcelaAtual}/${d.numeroParcelas}` : "—"}</td>
+        </tr>`;
+      }
+      body += `<tr style="background:#fee2e2;"><td colspan="4" style="font-weight:700;text-align:right;color:#991b1b;">Total ${excelValue(formatMonth(mes, false))}:</td><td style="color:#dc2626;font-weight:700;" colspan="4">${excelValue(total)}</td></tr>`;
+    }
+  }
+  return `<h2>Despesas por Mês</h2><table><thead><tr><th>Vencimento</th><th>Nome</th><th>Categoria</th><th>Forma</th><th>Valor</th><th>Paga</th><th>Fixa</th><th>Parcela</th></tr></thead><tbody>${body}</tbody></table>`;
 }
 
 export function RelatoriosPage() {
@@ -188,10 +266,11 @@ export function RelatoriosPage() {
         Promise.all(exportMonths.map((mes) => despesasApi.listar({ mes, relatorio: true }))),
       ]);
       const linhas = resumos.flatMap((item) => item.graficos.linhaEvolucaoFinanceira);
-      const receitas = receitasPorMes.flatMap((item) => item.receitas);
-      const despesas = despesasPorMes.flatMap((item) => item.despesas);
+      const receitasGrupos = exportMonths.map((mes, i) => ({ mes, receitas: receitasPorMes[i].receitas }));
+      const despesasGrupos = exportMonths.map((mes, i) => ({ mes, despesas: despesasPorMes[i].despesas }));
       const label = exportMode === "ano" ? `Ano ${exportYear}` : `${exportMonths.length} meses selecionados`;
-      const html = `<html><head><meta charset="UTF-8"/><style>body{font-family:Arial,sans-serif;color:#0f172a;}h1{color:#0f172a;margin-bottom:6px;}p{color:#475569;}h2{margin-top:24px;color:#111827;}table{border-collapse:collapse;margin-bottom:18px;width:100%;}th{background:#e0f2fe;color:#0f172a;text-align:left;}th,td{border:1px solid #cbd5e1;padding:7px 9px;}tr:nth-child(even){background:#f8fafc;}</style></head><body><h1>Relatório Fiorote Controle Financeiro - ${excelValue(label)}</h1><p>Resumo gerado com receitas, despesas, saldo final e lançamentos detalhados.</p>${excelTable("Resumo financeiro",["Mês","Receitas","Despesas","Saldo final"],linhas.map((item)=>[formatMonth(item.mes),item.receitas,item.despesas,item.saldoFinal]))}${excelChart(linhas)}${excelTable("Receitas",["Data","Nome","Valor","Fixa","Parcela"],receitas.map((item)=>[item.data,item.nome,item.valor,item.fixa,item.parcelaAtual&&item.numeroParcelas?`${item.parcelaAtual}/${item.numeroParcelas}`:""]),{index:2,color:"#2563eb"})}${excelTable("Despesas",["Vencimento","Nome","Categoria","Forma","Valor","Paga","Fixa","Parcela"],despesas.map((item)=>[item.dataVencimento,item.nome,item.categoria,item.formaPagamento,item.valor,item.paga,item.fixa,item.parcelaAtual&&item.numeroParcelas?`${item.parcelaAtual}/${item.numeroParcelas}`:""]),{index:4,color:"#dc2626"})}</body></html>`;
+      const css = `body{font-family:Calibri,Arial,sans-serif;color:#0f172a;font-size:13px;}h1{color:#1e3a5f;font-size:20px;margin-bottom:4px;}h2{margin-top:28px;margin-bottom:8px;color:#1e293b;font-size:14px;border-bottom:2px solid #e2e8f0;padding-bottom:6px;}p.sub{color:#64748b;font-size:12px;margin:0 0 6px;}table{border-collapse:collapse;margin-bottom:10px;width:100%;}th{background:#1e40af;color:#fff;text-align:left;font-size:12px;padding:8px 10px;border:1px solid #1e3a8a;}td{border:1px solid #e2e8f0;padding:6px 10px;font-size:12px;vertical-align:middle;}tr:nth-child(even) td{background:#f8fafc;}`;
+      const html = `<html><head><meta charset="UTF-8"/><style>${css}</style></head><body><h1>Relatório Fiorote Controle Financeiro</h1><p class="sub">Período: ${excelValue(label)} · Gerado em ${formatDateBR(new Date().toISOString())}</p>${excelSummaryTable(linhas)}${excelChart(linhas)}${excelReceitasPorMes(receitasGrupos)}${excelDespesasPorMes(despesasGrupos)}</body></html>`;
       const blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
