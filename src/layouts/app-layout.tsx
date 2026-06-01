@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, Outlet } from "react-router-dom";
-import { Check, Menu, Settings, UserRound, X } from "lucide-react";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
+import { Check, Menu, Settings, UserRound, X } from "lucide-react";
 import { pagamentosApi } from "../api/pagamentos/pagamentos-api";
 import { perfisApi } from "../api/perfis/perfis-api";
 import type { PerfilFinanceiro } from "../api/perfis/types";
@@ -20,6 +20,7 @@ import { hasPremiumAtivo } from "../lib/premium";
 import { useAuth } from "../providers/auth-provider";
 
 export function AppLayout() {
+  const location = useLocation();
   const { session, perfilFinanceiroId, selecionarPerfilFinanceiro } = useAuth();
   const [showAds, setShowAds] = useState(!hasPremiumAtivo(session?.usuario));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -225,7 +226,12 @@ export function AppLayout() {
       </div>
 
       {/* Main content */}
-      <div className="flex min-h-dvh min-w-0 flex-col lg:min-h-0 lg:overflow-hidden">
+      <div className="relative flex min-h-dvh min-w-0 flex-col lg:min-h-0 lg:overflow-hidden">
+        {/* Blobs decorativos do conteúdo */}
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          <div className="absolute right-1/4 top-0 h-80 w-80 -translate-y-1/2 rounded-full bg-primary/6 blur-3xl animate-float-slow" style={{ animationDelay: "-2s" }} />
+          <div className="absolute bottom-1/4 left-0 h-64 w-64 -translate-x-1/2 rounded-full bg-blue-400/5 blur-3xl animate-drift" style={{ animationDelay: "-5s" }} />
+        </div>
         <main className="flex-1 lg:min-h-0 lg:overflow-y-auto">
           <div className="mx-auto w-full max-w-7xl space-y-5 px-4 pb-6 pt-18 sm:px-6 lg:px-8 lg:py-6">
             {showAds && (
@@ -233,7 +239,17 @@ export function AppLayout() {
                 <AdBanner />
               </div>
             )}
-            <Outlet />
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
           </div>
         </main>
       </div>

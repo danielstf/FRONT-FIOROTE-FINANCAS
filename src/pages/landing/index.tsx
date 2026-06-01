@@ -183,6 +183,16 @@ function AnimatedSection({
 export function LandingPage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
+      {/* ── Camada decorativa global (fixed, atrás de tudo) ─────────────────── */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        {/* Blob superior direito */}
+        <div className="absolute -right-32 -top-32 h-[500px] w-[500px] rounded-full bg-primary/5 blur-3xl animate-float-slow" style={{ animationDelay: "-3s" }} />
+        {/* Blob inferior esquerdo */}
+        <div className="absolute -bottom-40 -left-40 h-[420px] w-[420px] rounded-full bg-blue-400/4 blur-3xl animate-drift" style={{ animationDelay: "-7s" }} />
+        {/* Blob central sutil */}
+        <div className="absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/3 blur-3xl animate-float" style={{ animationDelay: "-1s" }} />
+      </div>
+
       {/* ── HEADER ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:gap-4 lg:h-20 lg:px-8">
@@ -217,7 +227,7 @@ export function LandingPage() {
 
       {/* ── HERO ───────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b border-border">
-        {/* Background grid */}
+        {/* Grid de fundo */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-[0.025]"
@@ -227,10 +237,60 @@ export function LandingPage() {
             backgroundSize: "40px 40px",
           }}
         />
-        {/* Glow */}
+        {/* Linhas diagonais sutis */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.018]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(135deg, currentColor 0px, currentColor 1px, transparent 1px, transparent 32px)",
+          }}
+        />
+        {/* Glow central principal */}
         <div
           aria-hidden
           className="pointer-events-none absolute -top-40 left-1/2 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-primary/6 blur-3xl"
+        />
+        {/* Blob animado superior esquerdo */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-20 top-10 h-64 w-64 rounded-full bg-primary/7 blur-3xl animate-float-slow"
+          style={{ animationDelay: "-4s" }}
+        />
+        {/* Blob animado inferior direito */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-20 right-0 h-80 w-80 rounded-full bg-blue-400/5 blur-3xl animate-drift"
+          style={{ animationDelay: "-6s" }}
+        />
+        {/* Círculo decorativo — anel grande */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-32 top-1/2 h-[500px] w-[500px] -translate-y-1/2 rounded-full border border-primary/8"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-48 top-1/2 h-[640px] w-[640px] -translate-y-1/2 rounded-full border border-primary/4"
+        />
+        {/* Grid de pontos — canto superior direito */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-0 h-52 w-52 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, currentColor 1.5px, transparent 1.5px)",
+            backgroundSize: "14px 14px",
+          }}
+        />
+        {/* Grid de pontos — canto inferior esquerdo */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute bottom-0 left-0 h-40 w-40 opacity-[0.05]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, currentColor 1.5px, transparent 1.5px)",
+            backgroundSize: "14px 14px",
+          }}
         />
 
         <div className="relative mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-7xl items-center gap-16 px-4 py-16 lg:grid-cols-[minmax(0,1fr)_480px] lg:px-8 lg:py-24">
@@ -314,13 +374,24 @@ export function LandingPage() {
 
           {/* Right — mock dashboard */}
           <motion.div
-            className="rounded-2xl border border-border bg-card p-6 shadow-2xl ring-1 ring-white/5"
+            className="relative rounded-2xl border border-border bg-card p-6 shadow-2xl ring-1 ring-primary/8"
             initial={{ opacity: 0, y: 28, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={delay(0.28)}
             whileHover={{ y: -6, transition: { duration: 0.3 } }}
           >
-            <div className="mb-6 flex items-start justify-between gap-4">
+            {/* Linha decorativa no topo do card */}
+            <div
+              aria-hidden
+              className="absolute inset-x-8 -top-px h-0.5 rounded-full bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+            />
+            {/* Glow interno sutil */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/4 via-transparent to-transparent"
+            />
+
+            <div className="relative mb-6 flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   Perfil Família · Mai 2025
@@ -335,7 +406,7 @@ export function LandingPage() {
               </div>
             </div>
 
-            <div className="grid gap-2.5">
+            <div className="relative grid gap-2.5">
               {[
                 { label: "Receitas", value: "R$ 7.200,00", detail: "Entradas do mês", color: "text-emerald-500" },
                 { label: "Despesas", value: "R$ 2.380,00", detail: "Contas e cartões", color: "text-rose-500" },
@@ -354,7 +425,7 @@ export function LandingPage() {
               ))}
             </div>
 
-            <div className="mt-5 rounded-xl border border-border bg-background/60 p-4">
+            <div className="relative mt-5 rounded-xl border border-border bg-background/60 p-4">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Recursos ativos
               </p>
@@ -376,8 +447,28 @@ export function LandingPage() {
       </section>
 
       {/* ── STATS ──────────────────────────────────────────────────────────── */}
-      <section className="border-b border-border bg-muted/20">
-        <div className="mx-auto w-full max-w-7xl px-4 py-10 lg:px-8">
+      <section className="relative overflow-hidden border-b border-border bg-muted/20">
+        {/* Dot grid de fundo */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, currentColor 1.5px, transparent 1.5px)",
+            backgroundSize: "20px 20px",
+          }}
+        />
+        {/* Gradiente de borda */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"
+        />
+
+        <div className="relative mx-auto w-full max-w-7xl px-4 py-10 lg:px-8">
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
             {stats.map(({ value, label }, i) => (
               <motion.div
@@ -398,7 +489,19 @@ export function LandingPage() {
       </section>
 
       {/* ── FEATURES ───────────────────────────────────────────────────────── */}
-      <section className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8" id="funcoes">
+      <section className="relative mx-auto w-full max-w-7xl px-4 py-20 lg:px-8" id="funcoes">
+        {/* Blob decorativo atrás das features */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-10 h-72 w-72 rounded-full bg-primary/5 blur-3xl animate-float-slow"
+          style={{ animationDelay: "-2s" }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-10 bottom-20 h-56 w-56 rounded-full bg-blue-400/4 blur-3xl animate-drift"
+          style={{ animationDelay: "-5s" }}
+        />
+
         <AnimatedSection className="mb-12 space-y-3">
           <SectionLabel>Funcionalidades</SectionLabel>
           <SectionHeading>O que você encontra aqui</SectionHeading>
@@ -408,7 +511,7 @@ export function LandingPage() {
           </SectionDescription>
         </AnimatedSection>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="relative grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {features.map((feature, i) => (
             <motion.div
               key={feature.title}
@@ -424,7 +527,12 @@ export function LandingPage() {
                   aria-hidden
                   className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
                 />
-                <CardHeader className="gap-4">
+                {/* Glow interno no hover */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-br from-primary/4 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+                />
+                <CardHeader className="relative gap-4">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
                     <feature.icon className="h-5 w-5" />
                   </div>
@@ -445,10 +553,45 @@ export function LandingPage() {
 
       {/* ── HOW IT WORKS ───────────────────────────────────────────────────── */}
       <section
-        className="border-y border-border bg-muted/20"
+        className="relative overflow-hidden border-y border-border bg-muted/20"
         id="como-funciona"
       >
-        <div className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
+        {/* Dot grid de fundo */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.035]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, currentColor 1.5px, transparent 1.5px)",
+            backgroundSize: "22px 22px",
+          }}
+        />
+        {/* Linhas diagonais */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(135deg, currentColor 0px, currentColor 1px, transparent 1px, transparent 28px)",
+          }}
+        />
+        {/* Blob central animado */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-3xl animate-float"
+          style={{ animationDelay: "-2.5s" }}
+        />
+        {/* Anéis decorativos */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-24 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full border border-primary/8"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full border border-primary/6"
+        />
+
+        <div className="relative mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
           <AnimatedSection className="mb-14 space-y-3">
             <SectionLabel>Como funciona</SectionLabel>
             <SectionHeading>Comece em menos de 2 minutos</SectionHeading>
@@ -476,6 +619,12 @@ export function LandingPage() {
                 transition={delay(i * 0.1)}
               >
                 <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-primary/25 bg-primary/8 text-primary shadow-sm ring-4 ring-background">
+                  {/* Anel pulsante externo */}
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 rounded-2xl border border-primary/15 animate-pulse-ring"
+                    style={{ animationDelay: `${i * 0.4}s` }}
+                  />
                   <Icon className="h-8 w-8" />
                   <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shadow">
                     {step}
@@ -494,8 +643,25 @@ export function LandingPage() {
       </section>
 
       {/* ── PRICING ────────────────────────────────────────────────────────── */}
-      <section id="precos">
-        <div className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
+      <section id="precos" className="relative overflow-hidden">
+        {/* Blob atrás dos cards */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/4 top-1/2 h-[350px] w-[350px] -translate-y-1/2 rounded-full bg-primary/5 blur-3xl animate-float-slow"
+          style={{ animationDelay: "-1s" }}
+        />
+        {/* Grid de pontos — canto direito */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-0 h-64 w-64 opacity-[0.045]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, currentColor 1.5px, transparent 1.5px)",
+            backgroundSize: "16px 16px",
+          }}
+        />
+
+        <div className="relative mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
           <AnimatedSection className="mb-14 space-y-3">
             <SectionLabel>Planos</SectionLabel>
             <SectionHeading>Comece grátis, evolua quando precisar</SectionHeading>
@@ -559,7 +725,12 @@ export function LandingPage() {
                   aria-hidden
                   className="absolute inset-x-6 -top-px h-0.5 rounded-full bg-gradient-to-r from-transparent via-primary to-transparent"
                 />
-                <CardHeader className="pb-4">
+                {/* Glow interno do card premium */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 rounded-[inherit] bg-gradient-to-br from-primary/6 via-transparent to-transparent"
+                />
+                <CardHeader className="relative pb-4">
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-semibold uppercase tracking-widest text-primary">
                       Premium
@@ -579,7 +750,7 @@ export function LandingPage() {
                     Para quem quer visibilidade total das finanças.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-5">
+                <CardContent className="relative space-y-5">
                   <ul className="space-y-2.5 text-sm text-muted-foreground">
                     {premiumItems.map((item) => (
                       <li key={item} className="flex items-center gap-2.5">
@@ -602,8 +773,29 @@ export function LandingPage() {
       </section>
 
       {/* ── TRUST ──────────────────────────────────────────────────────────── */}
-      <section className="border-y border-border bg-muted/20">
-        <div className="mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
+      <section className="relative overflow-hidden border-y border-border bg-muted/20">
+        {/* Linhas diagonais sutis */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(135deg, currentColor 0px, currentColor 1px, transparent 1px, transparent 24px)",
+          }}
+        />
+        {/* Blob animado */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-1/4 top-0 h-64 w-64 -translate-y-1/2 rounded-full bg-primary/5 blur-3xl animate-float-slow"
+          style={{ animationDelay: "-3.5s" }}
+        />
+        {/* Gradiente de borda superior */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent"
+        />
+
+        <div className="relative mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
           <AnimatedSection className="mb-12 space-y-3">
             <SectionLabel>Segurança e rotina</SectionLabel>
             <SectionHeading>Feito para uso diário</SectionHeading>
@@ -635,11 +827,16 @@ export function LandingPage() {
                   aria-hidden
                   className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
                 />
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                {/* Glow interno */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/4 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+                />
+                <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="mt-4 text-sm font-semibold text-foreground">{title}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{desc}</p>
+                <h3 className="relative mt-4 text-sm font-semibold text-foreground">{title}</h3>
+                <p className="relative mt-1 text-xs leading-relaxed text-muted-foreground">{desc}</p>
               </motion.div>
             ))}
           </div>
@@ -648,14 +845,57 @@ export function LandingPage() {
 
       {/* ── FINAL CTA ──────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b border-border">
+        {/* Fundo com gradiente */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-primary/4"
         />
+        {/* Grid de fundo */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.022]"
+          style={{
+            backgroundImage:
+              "linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px)",
+            backgroundSize: "36px 36px",
+          }}
+        />
+        {/* Glow principal */}
         <div
           aria-hidden
           className="pointer-events-none absolute left-1/2 top-0 h-[300px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-3xl"
         />
+        {/* Blobs laterais animados */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-20 bottom-0 h-56 w-56 rounded-full bg-primary/6 blur-3xl animate-float-slow"
+          style={{ animationDelay: "-2s" }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-20 top-0 h-56 w-56 rounded-full bg-blue-400/5 blur-3xl animate-drift"
+          style={{ animationDelay: "-4s" }}
+        />
+        {/* Anéis decorativos */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/8"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[550px] w-[550px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/5"
+        />
+        {/* Grid de pontos */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, currentColor 1.5px, transparent 1.5px)",
+            backgroundSize: "14px 14px",
+          }}
+        />
+
         <div className="relative mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-4 py-24 text-center lg:px-8">
           <AnimatedSection className="space-y-4">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary">
@@ -703,7 +943,12 @@ export function LandingPage() {
       </section>
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
-      <footer className="bg-background">
+      <footer className="relative bg-background">
+        {/* Gradiente superior sutil */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"
+        />
         <div className="mx-auto w-full max-w-7xl px-4 py-12 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <BrandLogo size="nav" />

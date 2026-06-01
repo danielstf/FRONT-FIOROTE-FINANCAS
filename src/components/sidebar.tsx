@@ -170,17 +170,69 @@ export function Sidebar({
     <>
       <aside
         className={cn(
-          "flex h-screen min-h-0 flex-col bg-sidebar text-sidebar-foreground",
+          "relative flex h-screen min-h-0 flex-col overflow-hidden bg-sidebar text-sidebar-foreground",
           className,
         )}
       >
+        {/* ── Elementos decorativos ── */}
+        {/* Orb superior esquerdo */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-10 -top-10 h-44 w-44 rounded-full bg-primary/18 blur-3xl animate-float-slow"
+        />
+        {/* Orb inferior direito */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-14 -right-8 h-52 w-52 rounded-full bg-primary/10 blur-3xl animate-drift"
+          style={{ animationDelay: "-3s" }}
+        />
+        {/* Orb médio — acento */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/3 h-28 w-28 -translate-x-1/2 rounded-full bg-primary/6 blur-2xl animate-float"
+          style={{ animationDelay: "-1.5s" }}
+        />
+        {/* Grid de pontos — canto superior direito */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-0 h-36 w-36 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, currentColor 1.5px, transparent 1.5px)",
+            backgroundSize: "10px 10px",
+          }}
+        />
+        {/* Grid de pontos — canto inferior esquerdo */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute bottom-0 left-0 h-28 w-28 opacity-[0.05]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, currentColor 1.5px, transparent 1.5px)",
+            backgroundSize: "10px 10px",
+          }}
+        />
+        {/* Linha decorativa diagonal */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(135deg, currentColor 0px, currentColor 1px, transparent 1px, transparent 24px)",
+          }}
+        />
+
         {/* Logo */}
-        <div className="flex shrink-0 items-center border-b border-sidebar-border/50 px-4 py-3">
-          <BrandLogo className="justify-start" size="nav" />
+        <div className="relative flex shrink-0 items-center border-b border-sidebar-border/50 px-4 py-3">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-linear-to-r from-primary/8 via-primary/3 to-transparent"
+          />
+          <BrandLogo className="relative justify-start" size="nav" />
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-2 py-3 scrollbar-thin">
+        <nav className="relative flex-1 overflow-y-auto px-2 py-3 scrollbar-thin">
           {renderedItems}
         </nav>
 
