@@ -9,13 +9,25 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
+import { motion } from "motion/react";
 import { toast } from "sonner";
 import { cartoesApi } from "../../api/cartoes/cartoes-api";
 import type { CartaoCredito } from "../../api/cartoes/types";
 import { getApiErrorMessage } from "../../api/errors";
+import { EmptyState } from "../../components/empty-state";
+import { PageHeader } from "../../components/page-header";
 import { Button } from "../../components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { getCardGradientStyle } from "../../lib/card-colors";
+import { pageVariants, sectionVariants } from "../../lib/motion";
 import { normalizeRequiredText, toUppercaseText } from "../../lib/text";
 import { useAuth } from "../../providers/auth-provider";
 
@@ -24,6 +36,7 @@ export function CartoesPage() {
   const [cartoes, setCartoes] = useState<CartaoCredito[]>([]);
   const [nome, setNome] = useState("");
   const [editando, setEditando] = useState<CartaoCredito | null>(null);
+  const [excluindo, setExcluindo] = useState<CartaoCredito | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -66,14 +79,14 @@ export function CartoesPage() {
     }
   }
 
-  async function excluirCartao(cartao: CartaoCredito) {
-    const confirmed = window.confirm(`Excluir o cartão "${cartao.nome}"?`);
-    if (!confirmed) return;
+  async function confirmarExclusao() {
+    if (!excluindo) return;
     setError("");
-    setBusyId(cartao.id);
+    setBusyId(excluindo.id);
     try {
-      await cartoesApi.excluir(cartao.id);
+      await cartoesApi.excluir(excluindo.id);
       toast.success("Cartão excluído com sucesso.");
+      setExcluindo(null);
       await carregarCartoes();
     } catch (requestError) {
       toast.error(getApiErrorMessage(requestError));
@@ -99,23 +112,32 @@ export function CartoesPage() {
   }, [perfilFinanceiroId]);
 
   return (
-    <div className="space-y-5">
+    <motion.div
+      variants={pageVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-5"
+    >
       {/* ── Page header ── */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <WalletCards className="h-4.5 w-4.5" />
-        </div>
-        <div>
-          <h1 className="text-lg font-semibold text-foreground">Cartões de crédito</h1>
-          <p className="text-xs text-muted-foreground">Cadastre para vincular em despesas</p>
-        </div>
-      </div>
+      <motion.div variants={sectionVariants}>
+        <PageHeader
+          icon={WalletCards}
+          title="Cartões de crédito"
+          subtitle="Cadastre para vincular em despesas"
+        />
+      </motion.div>
 
       {error && (
-        <p className="rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-sm text-destructive">{error}</p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-sm text-destructive"
+        >
+          {error}
+        </motion.p>
       )}
 
-      <div className="grid gap-5 lg:grid-cols-[360px_1fr]">
+      <motion.div variants={sectionVariants} className="grid gap-5 lg:grid-cols-[360px_1fr]">
         {/* ── Form ── */}
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
           <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
@@ -176,100 +198,114 @@ export function CartoesPage() {
           )}
 
           {!loading && cartoes.length === 0 && (
-            <div className="flex flex-col items-center justify-center gap-2.5 py-14 text-center">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted">
-                <CreditCard className="h-5 w-5 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Nenhum cartão cadastrado.</p>
-                <p className="mt-1 text-xs text-muted-foreground">Cadastre seu primeiro cartão para usar em despesas.</p>
-              </div>
-            </div>
+            <EmptyState
+              icon={CreditCard}
+              title="Nenhum cartão cadastrado."
+              description="Cadastre seu primeiro cartão para usar em despesas."
+            />
           )}
 
           {!loading && cartoes.length > 0 && (
-            <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
-              {cartoes.map((cartao, index) => {
-                const gradients = [
-                  "from-blue-600 via-blue-500 to-blue-400",
-                  "from-violet-600 via-violet-500 to-violet-400",
-                  "from-rose-600 via-rose-500 to-rose-400",
-                  "from-emerald-600 via-emerald-500 to-emerald-400",
-                  "from-amber-600 via-amber-500 to-amber-400",
-                  "from-cyan-600 via-cyan-500 to-cyan-400",
-                  "from-indigo-600 via-indigo-500 to-indigo-400",
-                  "from-pink-600 via-pink-500 to-pink-400",
-                ];
-                const gradient = gradients[index % gradients.length];
-                return (
+            <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-4">
+              {cartoes.map((cartao, index) => (
                 <div
                   key={cartao.id}
-                  className={`group relative aspect-[1.586/1] overflow-hidden rounded-2xl bg-linear-to-br ${gradient} p-5 text-white shadow-md`}
+                  className="group relative aspect-[1.586/1] overflow-hidden rounded-xl text-white shadow-md"
+                  style={{ background: getCardGradientStyle(index) }}
                 >
-                  {/* Decorative circles */}
-                  <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 rounded-full bg-white/10" />
-                  <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-white/8" />
+                  {/* Linha brilho topo */}
+                  <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-white/30" />
+                  {/* Círculos decorativos */}
+                  <div aria-hidden className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-white/10" />
+                  <div aria-hidden className="pointer-events-none absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-white/8" />
 
-                  {/* Chip — EMV realista */}
-                  <div className="relative h-7 w-10 overflow-hidden rounded-md bg-amber-300/90 shadow-sm">
+                  {/* Chip EMV */}
+                  <div className="absolute left-3 top-3 h-5 w-7 overflow-hidden rounded-sm bg-amber-300/90 shadow-sm">
                     <div className="absolute inset-x-0 top-[33%] h-px bg-amber-700/40" />
                     <div className="absolute inset-x-0 top-[66%] h-px bg-amber-700/40" />
                     <div className="absolute inset-y-0 left-[42%] w-px bg-amber-700/30" />
                   </div>
 
-                  {/* Credit card icon */}
-                  <div className="absolute right-5 top-5 opacity-25">
-                    <CreditCard className="h-7 w-7" />
+                  {/* Ícone cartão */}
+                  <div className="absolute right-3 top-3 opacity-20">
+                    <CreditCard className="h-5 w-5" />
                   </div>
 
-                  {/* Actions — visible on hover */}
-                  <div className="absolute right-3 top-3 flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                  {/* Ações hover/mobile */}
+                  <div className="absolute right-2 top-2 flex gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
                     <button
-                      className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/20 text-white transition-colors hover:bg-white/35"
-                      title="Editar"
+                      aria-label="Editar cartão"
+                      className="flex h-6 w-6 items-center justify-center rounded-md bg-white/20 text-white transition-colors hover:bg-white/35"
                       type="button"
                       onClick={() => iniciarEdicao(cartao)}
                     >
-                      <Pencil className="h-3 w-3" />
+                      <Pencil className="h-2.5 w-2.5" />
                     </button>
                     <button
-                      className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/20 text-white transition-colors hover:bg-red-500/70 disabled:opacity-50"
-                      title="Excluir"
+                      aria-label="Excluir cartão"
+                      className="flex h-6 w-6 items-center justify-center rounded-md bg-white/20 text-white transition-colors hover:bg-red-500/70 disabled:opacity-50"
                       type="button"
                       disabled={busyId === cartao.id}
-                      onClick={() => excluirCartao(cartao)}
+                      onClick={() => setExcluindo(cartao)}
                     >
                       {busyId === cartao.id
-                        ? <Loader2 className="h-3 w-3 animate-spin" />
-                        : <Trash2 className="h-3 w-3" />}
+                        ? <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                        : <Trash2 className="h-2.5 w-2.5" />}
                     </button>
                   </div>
 
-                  {/* Número do cartão (pontos) */}
-                  <div className="absolute left-5 right-5 top-[42%] flex items-center gap-2">
+                  {/* Pontos do número */}
+                  <div className="absolute left-3 right-3 top-[44%] flex items-center gap-1.5">
                     {[0, 1, 2, 3].map((g) => (
-                      <div key={g} className="flex gap-0.75">
+                      <div key={g} className="flex gap-0.5">
                         {[0, 1, 2, 3].map((d) => (
-                          <span key={d} className="block h-1.25 w-1.25 rounded-full bg-white/55" />
+                          <span key={d} className="block h-1 w-1 rounded-full bg-white/55" />
                         ))}
                       </div>
                     ))}
                   </div>
 
-                  {/* Card name and date */}
-                  <div className="absolute bottom-5 left-5 right-5">
-                    <p className="truncate text-sm font-bold tracking-widest">{cartao.nome}</p>
-                    <p className="mt-0.5 text-[10px] font-medium opacity-55">
+                  {/* Nome e data */}
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <p className="truncate text-[11px] font-bold tracking-widest">{cartao.nome}</p>
+                    <p className="mt-0.5 text-[9px] font-medium opacity-55">
                       desde {new Date(cartao.criadoEm).toLocaleDateString("pt-BR")}
                     </p>
                   </div>
                 </div>
-              );
-              })}
+              ))}
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+
+      {/* ── Dialog: exclusão ── */}
+      <Dialog open={Boolean(excluindo)} onOpenChange={(open) => { if (!open) setExcluindo(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Excluir cartão</DialogTitle>
+            <DialogDescription>
+              Esta ação remove o cartão definitivamente. Despesas vinculadas a ele não serão afetadas.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-xl border border-border bg-muted/30 px-4 py-3">
+            <p className="text-sm font-semibold text-foreground">{excluindo?.nome}</p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button variant="outline" onClick={() => setExcluindo(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={busyId === excluindo?.id}
+              onClick={confirmarExclusao}
+            >
+              {busyId === excluindo?.id && <Loader2 className="h-4 w-4 animate-spin" />}
+              Excluir
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </motion.div>
   );
 }

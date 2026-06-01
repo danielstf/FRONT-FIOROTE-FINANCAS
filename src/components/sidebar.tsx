@@ -108,13 +108,14 @@ export function Sidebar({
       renderedItems.push(
         <div
           key={`section-${item.section}`}
-          className="mt-5 mb-1.5 flex items-center gap-2 px-3"
+          className="mt-5 mb-1 px-3"
         >
-          <span className="h-px flex-1 bg-sidebar-border/60" />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/35">
-            {item.section}
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2 py-0.5">
+            <span className="h-1 w-1 rounded-full bg-primary/60" />
+            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-primary/70">
+              {item.section}
+            </span>
           </span>
-          <span className="h-px flex-1 bg-sidebar-border/60" />
         </div>,
       );
     }
@@ -127,9 +128,9 @@ export function Sidebar({
         onClick={onNavigate}
         className={({ isActive }) =>
           cn(
-            "group relative flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] font-medium text-sidebar-foreground/60 transition-all duration-150 hover:bg-white/6 hover:text-sidebar-foreground",
+            "group relative flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] font-medium text-sidebar-foreground/60 transition-all duration-150 hover:bg-sidebar-foreground/6 hover:text-sidebar-foreground",
             isActive &&
-              "bg-primary/12 font-semibold text-primary hover:bg-primary/16 hover:text-primary",
+              "bg-primary/15 font-semibold text-primary hover:bg-primary/20 hover:text-primary dark:bg-primary/12 dark:hover:bg-primary/16",
           )
         }
       >
@@ -170,63 +171,34 @@ export function Sidebar({
     <>
       <aside
         className={cn(
-          "relative flex h-screen min-h-0 flex-col overflow-hidden bg-sidebar text-sidebar-foreground",
+          "sidebar-bg relative flex h-screen min-h-0 flex-col overflow-hidden bg-sidebar text-sidebar-foreground",
           className,
         )}
       >
-        {/* ── Elementos decorativos ── */}
+        {/* ── Orbs animados ── */}
         {/* Orb superior esquerdo */}
         <div
           aria-hidden
-          className="pointer-events-none absolute -left-10 -top-10 h-44 w-44 rounded-full bg-primary/18 blur-3xl animate-float-slow"
+          className="pointer-events-none absolute -left-10 -top-10 h-44 w-44 rounded-full bg-primary/25 blur-3xl animate-float-slow dark:bg-primary/18"
         />
         {/* Orb inferior direito */}
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-14 -right-8 h-52 w-52 rounded-full bg-primary/10 blur-3xl animate-drift"
+          className="pointer-events-none absolute -bottom-14 -right-8 h-52 w-52 rounded-full bg-primary/15 blur-3xl animate-drift dark:bg-primary/10"
           style={{ animationDelay: "-3s" }}
         />
         {/* Orb médio — acento */}
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/3 h-28 w-28 -translate-x-1/2 rounded-full bg-primary/6 blur-2xl animate-float"
+          className="pointer-events-none absolute left-1/2 top-1/3 h-28 w-28 -translate-x-1/2 rounded-full bg-primary/10 blur-2xl animate-float dark:bg-primary/6"
           style={{ animationDelay: "-1.5s" }}
-        />
-        {/* Grid de pontos — canto superior direito */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute right-0 top-0 h-36 w-36 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, currentColor 1.5px, transparent 1.5px)",
-            backgroundSize: "10px 10px",
-          }}
-        />
-        {/* Grid de pontos — canto inferior esquerdo */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute bottom-0 left-0 h-28 w-28 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, currentColor 1.5px, transparent 1.5px)",
-            backgroundSize: "10px 10px",
-          }}
-        />
-        {/* Linha decorativa diagonal */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(135deg, currentColor 0px, currentColor 1px, transparent 1px, transparent 24px)",
-          }}
         />
 
         {/* Logo */}
-        <div className="relative flex shrink-0 items-center border-b border-sidebar-border/50 px-4 py-3">
+        <div className="relative flex shrink-0 items-center border-b-0 px-4 py-3">
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-linear-to-r from-primary/8 via-primary/3 to-transparent"
+            className="pointer-events-none absolute inset-0 bg-linear-to-r from-primary/12 via-primary/5 to-transparent dark:from-primary/8 dark:via-primary/3"
           />
           <BrandLogo className="relative justify-start" size="nav" />
         </div>
@@ -237,11 +209,11 @@ export function Sidebar({
         </nav>
 
         {/* User footer */}
-        <div className="shrink-0 border-t border-sidebar-border/50 p-2">
+        <div className="shrink-0 border-t-0 p-2">
           {session?.usuario && (
             <div className="flex items-center gap-1">
               <button
-                className="group flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-all duration-150 hover:bg-white/6"
+                className="group flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-all duration-150 hover:bg-sidebar-foreground/6"
                 type="button"
                 onClick={onProfileClick}
               >
@@ -262,7 +234,7 @@ export function Sidebar({
 
               <button
                 aria-label="Compartilhar app"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sidebar-foreground/35 transition-all duration-150 hover:bg-white/6 hover:text-sidebar-foreground/70"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sidebar-foreground/35 transition-all duration-150 hover:bg-sidebar-foreground/6 hover:text-sidebar-foreground/70"
                 type="button"
                 onClick={() => setShareOpen(true)}
               >

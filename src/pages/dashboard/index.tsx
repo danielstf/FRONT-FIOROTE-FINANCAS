@@ -21,31 +21,10 @@ import type { Despesa } from "../../api/despesas/types";
 import { getApiErrorMessage } from "../../api/errors";
 import { receitasApi } from "../../api/receitas/receitas-api";
 import type { Receita } from "../../api/receitas/types";
+import { formatCurrency, formatDate, formatMonthName, getCurrentMonth } from "../../lib/format";
 import { MonthPicker } from "../../components/month-picker";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../providers/auth-provider";
-
-function getCurrentMonth() {
-  return new Date().toISOString().slice(0, 7);
-}
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-}
-
-function formatMonthName(value: string) {
-  const [year, month] = value.split("-");
-  const date = new Date(Number(year), Number(month) - 1, 1);
-  return new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(date);
-}
-
-function formatDate(value: string | null) {
-  if (!value) return "Sem vencimento";
-  const [datePart] = value.split("T");
-  const [year, month, day] = datePart.split("-").map(Number);
-  if (!year || !month || !day) return "Data inválida";
-  return new Intl.DateTimeFormat("pt-BR").format(new Date(year, month - 1, day));
-}
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -119,9 +98,9 @@ export function DashboardPage() {
   const totalReceitas = resumoMes?.totalReceitas ?? 0;
   const totalDespesas = resumoMes?.totalDespesas ?? 0;
   const totalDespesasPendentes = resumoMes?.totalDespesasPendentes ?? 0;
-  const saldo = resumoMes?.saldoFinal ?? totalReceitas - totalDespesas;
+  const saldo = totalReceitas - totalDespesas;
   const saldoProjetado = resumoMes?.saldoProjetado;
-  const temPrevisaoDiferente = saldoProjetado !== undefined && saldoProjetado !== saldo;
+  const temPrevisaoDiferente = saldoProjetado !== undefined && Math.abs(saldoProjetado - saldo) > 0.01;
   const saldoPositivo = saldo >= 0;
   const ratio = totalReceitas > 0 ? Math.min((totalDespesas / totalReceitas) * 100, 100) : 0;
 
@@ -413,7 +392,7 @@ export function DashboardPage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-foreground">{receita.nome}</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(receita.criadoEm).toLocaleDateString("pt-BR")}
+                      {formatDate(receita.criadoEm)}
                     </p>
                   </div>
                   <span className="shrink-0 text-sm font-semibold text-blue-500">

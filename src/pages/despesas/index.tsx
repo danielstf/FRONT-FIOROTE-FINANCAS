@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   CalendarDays,
   CreditCard,
+  Filter,
   Loader2,
   PencilLine,
   Plus,
@@ -11,12 +12,20 @@ import {
   ThumbsDown,
   ThumbsUp,
   Trash2,
+  X,
 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
+import { cartoesApi } from "../../api/cartoes/cartoes-api";
+import type { CartaoCredito } from "../../api/cartoes/types";
+import { getCardGradientStyle } from "../../lib/card-colors";
 import { despesasApi } from "../../api/despesas/despesas-api";
 import type { Despesa, FormaPagamentoDespesa } from "../../api/despesas/types";
 import { getApiErrorMessage } from "../../api/errors";
 import { MonthPicker } from "../../components/month-picker";
+import { EmptyState } from "../../components/empty-state";
+import { PageHeader } from "../../components/page-header";
+import { StatCard, statsContainerVariant } from "../../components/stat-card";
 import { Button } from "../../components/ui/button";
 import { Select } from "../../components/ui/select";
 import {
@@ -27,6 +36,7 @@ import {
   DialogTitle,
 } from "../../components/ui/dialog";
 import { cn } from "../../lib/utils";
+import { pageVariants, sectionVariants, listContainerVariants, listItemVariants } from "../../lib/motion";
 import { useAuth } from "../../providers/auth-provider";
 import { DespesaForm } from "./despesa-form";
 import { getCategoryColor, getCategoryIcon } from "./category-icons";
@@ -63,6 +73,8 @@ export function DespesasPage() {
   const [totalPago, setTotalPago] = useState(0);
   const [contasVencidas, setContasVencidas] = useState(0);
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamentoDespesa | "">("");
+  const [cartaoId, setCartaoId] = useState("");
+  const [cartoes, setCartoes] = useState<CartaoCredito[]>([]);
   const [status, setStatus] = useState<StatusFilter>("todas");
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -71,6 +83,8 @@ export function DespesasPage() {
   const [despesaExcluindo, setDespesaExcluindo] = useState<Despesa | null>(null);
   const [escopoExclusao, setEscopoExclusao] = useState<"mes" | "todas">("mes");
   const [error, setError] = useState("");
+
+  const filtrosAtivos = [formaPagamento, cartaoId, status !== "todas" ? status : ""].filter(Boolean).length;
 
   const despesaExcluindoParcelada = Boolean(despesaExcluindo?.parcelamentoId);
   const despesaExcluindoRecorrente = Boolean(despesaExcluindo?.fixa);
@@ -81,6 +95,7 @@ export function DespesasPage() {
     mesSelecionado = mes,
     formaSelecionada = formaPagamento,
     statusSelecionado = status,
+    cartaoSelecionado = cartaoId,
   ) {
     setError("");
     setLoading(true);
@@ -89,6 +104,7 @@ export function DespesasPage() {
       const data = await despesasApi.listar({
         mes: mesSelecionado,
         formaPagamento: formaSelecionada || undefined,
+        cartaoCreditoId: cartaoSelecionado || undefined,
         paga:
           statusSelecionado === "pagas"
             ? true
@@ -108,6 +124,13 @@ export function DespesasPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function limparFiltros() {
+    setFormaPagamento("");
+    setCartaoId("");
+    setStatus("todas");
+    void carregarDespesas(mes, "", "todas", "");
   }
 
   async function alternarPagamento(despesa: Despesa) {
@@ -157,101 +180,246 @@ export function DespesasPage() {
 
   useEffect(() => {
     void carregarDespesas();
+    cartoesApi.listar().then((d) => setCartoes(d.cartoes)).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [perfilFinanceiroId]);
 
   return (
-    <div className="space-y-5">
+    <motion.div
+      variants={pageVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-5"
+    >
       {/* ── Page header ── */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
-            <ReceiptText className="h-4.5 w-4.5" />
+      <motion.div variants={sectionVariants}>
+        <PageHeader
+          icon={ReceiptText}
+          iconClassName="bg-red-500/10 text-red-500"
+          title="Despesas"
+          subtitle={formatMonthName(mes)}
+          right={
+            <Button
+              variant="destructive"
+              className="h-10 gap-2"
+              onClick={() => setCadastroAberto(true)}
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Nova despesa</span>
+            </Button>
+          }
+        />
+      </motion.div>
+
+      {/* ── Barra de filtros ── */}
+      <motion.div
+        variants={sectionVariants}
+        className="overflow-hidden rounded-2xl border border-border bg-card"
+      >
+        <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-border/60">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+            <Filter className="h-3.5 w-3.5" />
+            Filtros
+            {filtrosAtivos > 0 && (
+              <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                {filtrosAtivos}
+              </span>
+            )}
           </div>
-          <div>
-            <h1 className="text-lg font-semibold text-foreground">Despesas</h1>
-            <p className="text-xs text-muted-foreground capitalize">{formatMonthName(mes)}</p>
-          </div>
+          <div className="flex-1" />
+          {filtrosAtivos > 0 && (
+            <button
+              type="button"
+              onClick={limparFiltros}
+              className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <X className="h-3 w-3" />
+              Limpar filtros
+            </button>
+          )}
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Select
-            value={formaPagamento}
-            onChange={(event) => {
-              const value = event.target.value as FormaPagamentoDespesa | "";
-              setFormaPagamento(value);
-              void carregarDespesas(mes, value, status);
-            }}
-            className="h-10 text-sm"
-          >
-            <option value="">Forma: Todas</option>
-            {formasPagamentoOptions.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </Select>
-          <Select
-            value={status}
-            onChange={(event) => {
-              const value = event.target.value as StatusFilter;
-              setStatus(value);
-              void carregarDespesas(mes, formaPagamento, value);
-            }}
-            className="h-10 text-sm"
-          >
-            <option value="todas">Status: Todas</option>
-            <option value="pendentes">Pendentes</option>
-            <option value="pagas">Pagas</option>
-            <option value="vencidas">Vencidas</option>
-          </Select>
-          <div className="w-40">
-            <MonthPicker
-              value={mes}
-              onChange={(value) => { setMes(value); void carregarDespesas(value, formaPagamento, status); }}
-            />
+
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3">
+          {/* Mês */}
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Mês</span>
+            <div className="w-40">
+              <MonthPicker
+                value={mes}
+                onChange={(value) => { setMes(value); void carregarDespesas(value, formaPagamento, status, cartaoId); }}
+              />
+            </div>
           </div>
-          <Button
-            variant="destructive"
-            className="h-10 gap-2"
-            onClick={() => setCadastroAberto(true)}
-          >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Nova despesa</span>
-          </Button>
+
+          <div className="h-10 w-px bg-border/60" />
+
+          {/* Status */}
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Status</span>
+            <div className="flex items-center gap-1">
+              {(["todas", "pendentes", "pagas", "vencidas"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => { setStatus(s); void carregarDespesas(mes, formaPagamento, s, cartaoId); }}
+                  className={cn(
+                    "h-8 rounded-lg px-3 text-xs font-semibold capitalize transition-all",
+                    status === s
+                      ? s === "vencidas"
+                        ? "bg-destructive/15 text-destructive"
+                        : s === "pagas"
+                          ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                          : s === "pendentes"
+                            ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                            : "bg-primary/15 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="h-10 w-px bg-border/60" />
+
+          {/* Forma de pagamento */}
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Forma de pagamento</span>
+            <Select
+              value={formaPagamento}
+              onChange={(event) => {
+                const value = event.target.value as FormaPagamentoDespesa | "";
+                setFormaPagamento(value);
+                if (value !== "CARTAO_CREDITO") setCartaoId("");
+                void carregarDespesas(mes, value, status, value !== "CARTAO_CREDITO" ? "" : cartaoId);
+              }}
+              className="h-8 text-xs"
+            >
+              <option value="">Todas as formas</option>
+              {formasPagamentoOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </Select>
+          </div>
+
+          {/* Cartão de crédito — mini-cards com cor correspondente */}
+          {cartoes.length > 0 && (formaPagamento === "CARTAO_CREDITO" || formaPagamento === "") && (
+            <>
+              <div className="h-10 w-px bg-border/60" />
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Cartão de crédito</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Opção Todos */}
+                  <button
+                    type="button"
+                    onClick={() => { setCartaoId(""); void carregarDespesas(mes, formaPagamento, status, ""); }}
+                    className={cn(
+                      "relative overflow-hidden rounded-lg border-2 px-3 py-1.5 text-xs font-semibold transition-all",
+                      cartaoId === ""
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-muted/40 text-muted-foreground hover:border-border/80 hover:text-foreground",
+                    )}
+                  >
+                    Todos
+                  </button>
+
+                  {/* Mini-card por cartão */}
+                  {cartoes.map((cartao, index) => {
+                    const isSelected = cartaoId === cartao.id;
+                    return (
+                      <button
+                        key={cartao.id}
+                        type="button"
+                        onClick={() => {
+                          setCartaoId(cartao.id);
+                          setFormaPagamento("CARTAO_CREDITO");
+                          void carregarDespesas(mes, "CARTAO_CREDITO", status, cartao.id);
+                        }}
+                        className={cn(
+                          "relative overflow-hidden rounded-lg transition-all",
+                          isSelected
+                            ? "ring-2 ring-white/60 ring-offset-1 ring-offset-background scale-105 shadow-lg"
+                            : "opacity-70 hover:opacity-100 hover:scale-102",
+                        )}
+                        style={{ background: getCardGradientStyle(index) }}
+                        title={cartao.nome}
+                      >
+                        {/* Linha brilho topo */}
+                        <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-white/40" />
+                        {/* Círculo decorativo */}
+                        <div aria-hidden className="pointer-events-none absolute -right-3 -top-3 h-10 w-10 rounded-full bg-white/10" />
+
+                        <div className="relative flex items-center gap-2 px-3 py-2 text-white">
+                          {/* Chip mini */}
+                          <div className="h-3.5 w-5 shrink-0 overflow-hidden rounded-[2px] bg-amber-300/90">
+                            <div className="h-px w-full bg-amber-700/40 mt-[45%]" />
+                          </div>
+                          <span className="text-[11px] font-bold tracking-wide truncate max-w-20">
+                            {cartao.nome}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Stats ── */}
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="relative overflow-hidden rounded-2xl border border-red-500/20 bg-red-500/6 p-5">
-          <div aria-hidden className="pointer-events-none absolute right-0 top-0 h-20 w-20 -translate-y-4 translate-x-4 rounded-full bg-red-500/15 blur-2xl" />
-          <p className="text-xs font-medium text-muted-foreground">Total do mês</p>
-          <p className="mt-2 text-2xl font-bold text-red-500">{loading ? "—" : formatCurrency(total)}</p>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <p className="text-xs font-medium text-muted-foreground">Pendentes</p>
-          <p className="mt-2 text-2xl font-bold text-red-500">{loading ? "—" : formatCurrency(totalPendente)}</p>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <p className="text-xs font-medium text-muted-foreground">Pagas</p>
-          <p className="mt-2 text-2xl font-bold text-emerald-500">{loading ? "—" : formatCurrency(totalPago)}</p>
-        </div>
-        <div className={cn("rounded-2xl border bg-card p-5", contasVencidas > 0 ? "border-destructive/30 bg-destructive/5" : "border-border")}>
-          <p className="text-xs font-medium text-muted-foreground">Vencidas</p>
-          <p className={cn("mt-2 text-2xl font-bold", contasVencidas > 0 ? "text-destructive" : "text-foreground")}>
-            {loading ? "—" : contasVencidas}
-          </p>
-        </div>
-      </div>
+      <motion.div
+        variants={statsContainerVariant}
+        className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+      >
+        <StatCard
+          label="Total do mês"
+          value={formatCurrency(total)}
+          loading={loading}
+          valueClassName="text-red-500"
+          className="border-red-500/20 bg-red-500/6"
+          glowClassName="bg-red-500/15"
+        />
+        <StatCard
+          label="Pendentes"
+          value={formatCurrency(totalPendente)}
+          loading={loading}
+          valueClassName="text-red-500"
+        />
+        <StatCard
+          label="Pagas"
+          value={formatCurrency(totalPago)}
+          loading={loading}
+          valueClassName="text-emerald-500"
+        />
+        <StatCard
+          label="Vencidas"
+          value={contasVencidas}
+          loading={loading}
+          valueClassName={contasVencidas > 0 ? "text-destructive" : "text-foreground"}
+          className={contasVencidas > 0 ? "border-destructive/30 bg-destructive/5" : undefined}
+        />
+      </motion.div>
 
       {/* ── ERROR ── */}
-      {error && (
-        <div className="flex items-start gap-3 rounded-xl border border-destructive/25 bg-destructive/8 px-5 py-4 text-sm text-destructive">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex items-start gap-3 rounded-xl border border-destructive/25 bg-destructive/8 px-5 py-4 text-sm text-destructive"
+          >
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── LIST ── */}
-      <div className="rounded-2xl border border-border bg-card overflow-hidden">
+      <motion.div variants={sectionVariants} className="overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
@@ -269,28 +437,32 @@ export function DespesasPage() {
         )}
 
         {!loading && despesas.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-3 py-14 text-center">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted">
-              <ReceiptText className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-foreground">Nenhuma despesa encontrada.</p>
-              <p className="mt-1 text-xs text-muted-foreground">Cadastre uma conta para iniciar o controle.</p>
-            </div>
-            <Button variant="destructive" className="mt-1 h-9 gap-2 text-sm" onClick={() => setCadastroAberto(true)}>
-              <Plus className="h-3.5 w-3.5" /> Cadastrar despesa
-            </Button>
-          </div>
+          <EmptyState
+            icon={ReceiptText}
+            title="Nenhuma despesa encontrada."
+            description="Cadastre uma conta para iniciar o controle."
+            action={
+              <Button variant="destructive" className="h-9 gap-2 text-sm" onClick={() => setCadastroAberto(true)}>
+                <Plus className="h-3.5 w-3.5" /> Cadastrar despesa
+              </Button>
+            }
+          />
         )}
 
         {!loading && despesas.length > 0 && (
-            <div className="divide-y divide-border/60">
-              {despesas.map((despesa) => {
+          <motion.div
+            variants={listContainerVariants}
+            initial="hidden"
+            animate="show"
+            className="divide-y divide-border/60"
+          >
+            {despesas.map((despesa) => {
                 const CategoryIcon = getCategoryIcon(despesa.categoria);
 
                 return (
-                  <div
+                  <motion.div
                     key={despesa.id}
+                    variants={listItemVariants}
                     className={cn(
                       "flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between",
                       despesa.vencida && !despesa.paga && "bg-destructive/4",
@@ -369,7 +541,7 @@ export function DespesasPage() {
 
                     <div className="flex items-center justify-between gap-3 sm:justify-end">
                       <div className="text-right">
-                        <strong className="text-lg font-bold text-red-600 dark:text-red-400">
+                        <strong className="text-lg font-bold text-red-500">
                           {formatCurrency(despesa.valor)}
                         </strong>
                         <p className="text-xs text-muted-foreground">
@@ -440,12 +612,12 @@ export function DespesasPage() {
                         </Button>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
-            </div>
-          )}
-        </div>
+          </motion.div>
+        )}
+      </motion.div>
 
       {/* ── DIALOG: cadastro ── */}
       <Dialog open={cadastroAberto} onOpenChange={setCadastroAberto}>
@@ -607,6 +779,6 @@ export function DespesasPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }

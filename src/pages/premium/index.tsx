@@ -11,13 +11,23 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { getApiErrorMessage } from "../../api/errors";
 import { pagamentosApi } from "../../api/pagamentos/pagamentos-api";
 import type {
   PremiumCheckoutTipo,
   PremiumStatusResponse,
 } from "../../api/pagamentos/types";
+import { PageHeader } from "../../components/page-header";
 import { Button } from "../../components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog";
+import { pageVariants, sectionVariants } from "../../lib/motion";
 import { useAuth } from "../../providers/auth-provider";
 
 function formatDateOnly(value: string) {
@@ -29,36 +39,12 @@ function formatMoney(value: number) {
 }
 
 const BENEFICIOS = [
-  {
-    icon: Ban,
-    label: "Sem anúncios",
-    desc: "Experiência limpa e sem distrações.",
-  },
-  {
-    icon: BarChart3,
-    label: "Relatórios avançados",
-    desc: "Visualize receitas, despesas e tendências.",
-  },
-  {
-    icon: Users,
-    label: "Até 5 perfis financeiros",
-    desc: "Separe finanças pessoais, empresariais e mais.",
-  },
-  {
-    icon: RefreshCw,
-    label: "Lançamentos fixos",
-    desc: "Receitas e despesas recorrentes automáticas.",
-  },
-  {
-    icon: FileDown,
-    label: "Exportação de dados",
-    desc: "Exporte relatórios em Excel com um clique.",
-  },
-  {
-    icon: Zap,
-    label: "Acesso imediato",
-    desc: "Ativado assim que o pagamento é confirmado.",
-  },
+  { icon: Ban, label: "Sem anúncios", desc: "Experiência limpa e sem distrações." },
+  { icon: BarChart3, label: "Relatórios avançados", desc: "Visualize receitas, despesas e tendências." },
+  { icon: Users, label: "Até 5 perfis financeiros", desc: "Separe finanças pessoais, empresariais e mais." },
+  { icon: RefreshCw, label: "Lançamentos fixos", desc: "Receitas e despesas recorrentes automáticas." },
+  { icon: FileDown, label: "Exportação de dados", desc: "Exporte relatórios em Excel com um clique." },
+  { icon: Zap, label: "Acesso imediato", desc: "Ativado assim que o pagamento é confirmado." },
 ];
 
 export function PremiumPage() {
@@ -67,6 +53,7 @@ export function PremiumPage() {
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [loadingCheckout, setLoadingCheckout] = useState<PremiumCheckoutTipo | null>(null);
   const [loadingCancel, setLoadingCancel] = useState(false);
+  const [cancelarOpen, setCancelarOpen] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
@@ -107,11 +94,7 @@ export function PremiumPage() {
     }
   }
 
-  async function cancelarAssinatura() {
-    const confirmed = window.confirm(
-      "Cancelar o Premium? A cobrança recorrente será interrompida e seu acesso continua até acabar a validade paga.",
-    );
-    if (!confirmed) return;
+  async function confirmarCancelamento() {
     setError("");
     setMessage("");
     setLoadingCancel(true);
@@ -119,6 +102,7 @@ export function PremiumPage() {
       const data = await pagamentosApi.cancelarPremium();
       atualizarUsuarioSessao(data.usuario);
       setMessage("Cancelamento confirmado. Seu Premium fica ativo até a validade paga.");
+      setCancelarOpen(false);
       await carregarStatus();
     } catch (requestError) {
       setError(getApiErrorMessage(requestError));
@@ -132,38 +116,51 @@ export function PremiumPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5">
+    <motion.div
+      variants={pageVariants}
+      initial="hidden"
+      animate="show"
+      className="mx-auto max-w-2xl space-y-5"
+    >
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400/15 text-amber-400">
-          <Crown className="h-4.5 w-4.5" />
-        </div>
-        <div>
-          <h1 className="text-lg font-semibold">Plano VIP</h1>
-          <p className="text-xs text-muted-foreground">
-            {isPremium ? "Sua assinatura está ativa" : "Desbloqueie o acesso completo"}
-          </p>
-        </div>
-      </div>
+      <motion.div variants={sectionVariants}>
+        <PageHeader
+          icon={Crown}
+          iconClassName="bg-amber-400/15 text-amber-400"
+          title="Plano VIP"
+          subtitle={isPremium ? "Sua assinatura está ativa" : "Desbloqueie o acesso completo"}
+        />
+      </motion.div>
 
       {error && (
-        <p className="rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-sm text-destructive">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-sm text-destructive"
+        >
           {error}
-        </p>
+        </motion.p>
       )}
       {message && (
-        <p className="rounded-xl border border-emerald-500/25 bg-emerald-500/8 px-4 py-3 text-sm text-emerald-500">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="rounded-xl border border-emerald-500/25 bg-emerald-500/8 px-4 py-3 text-sm text-emerald-500"
+        >
           {message}
-        </p>
+        </motion.p>
       )}
 
       {loadingStatus ? (
-        <div className="flex items-center gap-2.5 rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+        <motion.div
+          variants={sectionVariants}
+          className="flex items-center gap-2.5 rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground"
+        >
           <Loader2 className="h-4 w-4 animate-spin" /> Verificando plano...
-        </div>
+        </motion.div>
       ) : isPremium ? (
         /* ── Premium ativo ─────────────────────────── */
-        <div className="rounded-2xl border border-amber-400/25 bg-card overflow-hidden">
+        <motion.div variants={sectionVariants} className="overflow-hidden rounded-2xl border border-amber-400/25 bg-card">
           <div className="relative overflow-hidden px-6 py-8 bg-linear-to-br from-amber-400/10 via-card to-card">
             <div
               aria-hidden
@@ -204,15 +201,11 @@ export function PremiumPage() {
                 {!isCancelado && (
                   <Button
                     variant="outline"
-                    onClick={cancelarAssinatura}
+                    onClick={() => setCancelarOpen(true)}
                     disabled={loadingCancel}
                     className="h-9 gap-2 text-xs text-muted-foreground hover:text-destructive hover:border-destructive/40"
                   >
-                    {loadingCancel ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <XCircle className="h-3.5 w-3.5" />
-                    )}
+                    <XCircle className="h-3.5 w-3.5" />
                     Cancelar assinatura
                   </Button>
                 )}
@@ -240,12 +233,15 @@ export function PremiumPage() {
               </p>
             </div>
           </div>
-        </div>
+        </motion.div>
       ) : (
         /* ── Tela de compra ────────────────────────── */
         <>
           {/* Hero */}
-          <div className="relative overflow-hidden rounded-2xl border border-amber-400/25 bg-linear-to-br from-amber-400/10 via-card to-card px-6 py-8 text-center">
+          <motion.div
+            variants={sectionVariants}
+            className="relative overflow-hidden rounded-2xl border border-amber-400/25 bg-linear-to-br from-amber-400/10 via-card to-card px-6 py-8 text-center"
+          >
             <div
               aria-hidden
               className="pointer-events-none absolute left-1/2 top-0 h-32 w-64 -translate-x-1/2 -translate-y-8 rounded-full bg-amber-400/15 blur-3xl"
@@ -256,10 +252,10 @@ export function PremiumPage() {
               Acesso completo ao Fiorote — relatórios, múltiplos perfis financeiros
               e experiência sem anúncios.
             </p>
-          </div>
+          </motion.div>
 
           {/* Benefícios */}
-          <div className="rounded-2xl border border-border bg-card p-5">
+          <motion.div variants={sectionVariants} className="rounded-2xl border border-border bg-card p-5">
             <p className="mb-4 text-sm font-semibold text-foreground">
               O que está incluído no VIP
             </p>
@@ -276,10 +272,10 @@ export function PremiumPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Opções de pagamento */}
-          <div className="grid gap-4 sm:grid-cols-2">
+          <motion.div variants={sectionVariants} className="grid gap-4 sm:grid-cols-2">
             {/* Compra avulsa */}
             <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5">
               <div className="flex-1 space-y-1">
@@ -342,11 +338,14 @@ export function PremiumPage() {
                 Assinar agora
               </Button>
             </div>
-          </div>
+          </motion.div>
 
           {/* Pagamento pendente */}
           {checkoutUrl && hasPendingPayment && (
-            <div className="rounded-xl border border-amber-500/25 bg-amber-500/8 p-4">
+            <motion.div
+              variants={sectionVariants}
+              className="rounded-xl border border-amber-500/25 bg-amber-500/8 p-4"
+            >
               <p className="text-sm font-semibold text-amber-500">Pagamento pendente</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Você tem um checkout em aberto. Continue ou inicie um novo acima.
@@ -357,10 +356,39 @@ export function PremiumPage() {
                   Continuar pagamento
                 </a>
               </Button>
-            </div>
+            </motion.div>
           )}
         </>
       )}
-    </div>
+
+      {/* ── Dialog: Cancelar assinatura ── */}
+      <Dialog open={cancelarOpen} onOpenChange={setCancelarOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cancelar assinatura</DialogTitle>
+            <DialogDescription>
+              A cobrança recorrente será interrompida. Seu acesso Premium continua ativo até o fim do período já pago.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-sm text-destructive">
+            Esta ação não pode ser desfeita. Após o cancelamento, você precisará assinar novamente para reativar.
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button variant="outline" onClick={() => setCancelarOpen(false)}>
+              Manter assinatura
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmarCancelamento}
+              disabled={loadingCancel}
+              className="gap-2"
+            >
+              {loadingCancel && <Loader2 className="h-4 w-4 animate-spin" />}
+              Confirmar cancelamento
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </motion.div>
   );
 }

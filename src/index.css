@@ -31,7 +31,7 @@
 }
 
 :root {
-  --background: 210 40% 96%;
+  --background: 214 35% 93%;
   --foreground: 222 47% 9%;
   --card: 0 0% 100%;
   --card-foreground: 222 47% 9%;
@@ -49,13 +49,13 @@
   --border: 214 32% 68%;
   --input: 214 32% 68%;
   --ring: 221 83% 53%;
-  --sidebar: 210 40% 98%;
-  --sidebar-foreground: 222 47% 9%;
+  --sidebar: 214 35% 93%;
+  --sidebar-foreground: 222 47% 12%;
   --sidebar-primary: 221 83% 53%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 214 92% 88%;
+  --sidebar-accent: 214 80% 84%;
   --sidebar-accent-foreground: 221 83% 22%;
-  --sidebar-border: 214 35% 62%;
+  --sidebar-border: 214 30% 78%;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
@@ -84,7 +84,7 @@
   --border: 217 33% 17%;
   --input: 217 33% 17%;
   --ring: 217 91% 60%;
-  --sidebar: 222 47% 9%;
+  --sidebar: 222 47% 7%;
   --sidebar-foreground: 210 40% 98%;
   --sidebar-primary: 217 91% 60%;
   --sidebar-primary-foreground: 222 47% 7%;
@@ -101,13 +101,145 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background-color: hsl(var(--background));
-  background-image:
-    radial-gradient(ellipse 80% 60% at top left, hsl(var(--primary) / 0.12), transparent),
-    radial-gradient(ellipse 60% 50% at bottom right, hsl(var(--primary) / 0.07), transparent),
-    radial-gradient(circle, hsl(var(--primary) / 0.055) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 28px 28px;
   line-height: 1.5;
+  background-color: hsl(var(--background));
+  /* Grid de pontos global — igual ao sidebar, mas mais suave */
+  background-image: radial-gradient(circle, hsl(var(--primary) / 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.dark body {
+  background-image: radial-gradient(circle, hsl(var(--primary) / 0.10) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ── Linha de destaque no topo de todos os cards ─────────────
+   Aplica automaticamente em qualquer elemento com rounded-2xl
+   + bg-card, sem precisar alterar cada página individualmente  */
+.rounded-2xl.bg-card {
+  position: relative;
+}
+
+.rounded-2xl.bg-card::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-x: 0;
+  top: 0;
+  height: 1px;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--primary) / 0.50) 50%,
+    transparent 100%
+  );
+  border-radius: inherit;
+}
+
+/* Cards coloridos — efeito de topo com a cor correspondente */
+.rounded-2xl[class*="bg-red-"]::before,
+.rounded-2xl[class*="border-red-"]::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-x: 0; top: 0;
+  height: 1px; z-index: 1;
+  background: linear-gradient(90deg, transparent, hsl(0 84% 60% / 0.65), transparent);
+}
+
+.rounded-2xl[class*="bg-blue-"]::before,
+.rounded-2xl[class*="border-blue-"]::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-x: 0; top: 0;
+  height: 1px; z-index: 1;
+  background: linear-gradient(90deg, transparent, hsl(217 91% 60% / 0.65), transparent);
+}
+
+.rounded-2xl[class*="bg-emerald-"]::before,
+.rounded-2xl[class*="border-emerald-"]::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-x: 0; top: 0;
+  height: 1px; z-index: 1;
+  background: linear-gradient(90deg, transparent, hsl(160 84% 39% / 0.65), transparent);
+}
+
+.rounded-2xl[class*="bg-amber-"]::before,
+.rounded-2xl[class*="border-amber-"]::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-x: 0; top: 0;
+  height: 1px; z-index: 1;
+  background: linear-gradient(90deg, transparent, hsl(38 92% 50% / 0.65), transparent);
+}
+
+.rounded-2xl[class*="bg-destructive"]::before,
+.rounded-2xl[class*="border-destructive"]::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-x: 0; top: 0;
+  height: 1px; z-index: 1;
+  background: linear-gradient(90deg, transparent, hsl(var(--destructive) / 0.65), transparent);
+}
+
+/* ── Decoração do sidebar ────────────────────────────────────── */
+.sidebar-bg {
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      hsl(var(--sidebar-foreground) / 0.035) 0px,
+      hsl(var(--sidebar-foreground) / 0.035) 1px,
+      transparent 1px,
+      transparent 24px
+    ),
+    radial-gradient(circle, hsl(var(--sidebar-foreground) / 0.12) 1.5px, transparent 1.5px);
+  background-size: 100% 100%, 10px 10px;
+}
+
+.dark .sidebar-bg {
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      hsl(var(--sidebar-foreground) / 0.025) 0px,
+      hsl(var(--sidebar-foreground) / 0.025) 1px,
+      transparent 1px,
+      transparent 24px
+    ),
+    radial-gradient(circle, hsl(var(--sidebar-foreground) / 0.07) 1.5px, transparent 1.5px);
+  background-size: 100% 100%, 10px 10px;
+}
+
+/* ── Decoração da área de conteúdo — mesma linguagem do sidebar ── */
+.content-area {
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      hsl(var(--foreground) / 0.035) 0px,
+      hsl(var(--foreground) / 0.035) 1px,
+      transparent 1px,
+      transparent 24px
+    ),
+    radial-gradient(circle, hsl(var(--foreground) / 0.12) 1.5px, transparent 1.5px);
+  background-size: 100% 100%, 10px 10px;
+}
+
+.dark .content-area {
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      hsl(var(--foreground) / 0.025) 0px,
+      hsl(var(--foreground) / 0.025) 1px,
+      transparent 1px,
+      transparent 24px
+    ),
+    radial-gradient(circle, hsl(var(--foreground) / 0.07) 1.5px, transparent 1.5px);
+  background-size: 100% 100%, 10px 10px;
 }
 
 button,

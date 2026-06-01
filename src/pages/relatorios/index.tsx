@@ -27,6 +27,8 @@ import { despesasApi } from "../../api/despesas/despesas-api";
 import { getApiErrorMessage } from "../../api/errors";
 import { receitasApi } from "../../api/receitas/receitas-api";
 import { MonthPicker } from "../../components/month-picker";
+import { PageHeader } from "../../components/page-header";
+import { StatCard, statsContainerVariant } from "../../components/stat-card";
 import { Button } from "../../components/ui/button";
 import {
   ChartContainer,
@@ -44,7 +46,9 @@ import {
 import { Label } from "../../components/ui/label";
 import { Select } from "../../components/ui/select";
 import { formatCurrency } from "../../lib/money";
+import { pageVariants, sectionVariants } from "../../lib/motion";
 import { cn } from "../../lib/utils";
+import { motion } from "motion/react";
 
 type ExportMode = "ano" | "meses";
 type ViewMode = "ano" | "mes";
@@ -288,15 +292,7 @@ export function RelatoriosPage() {
   if (loading) {
     return (
       <div className="space-y-5">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <BarChart3 className="h-4.5 w-4.5" />
-          </div>
-          <div>
-            <h1 className="text-lg font-semibold">Relatórios</h1>
-            <p className="text-xs text-muted-foreground">Carregando indicadores...</p>
-          </div>
-        </div>
+        <PageHeader icon={BarChart3} title="Relatórios" subtitle="Carregando indicadores..." />
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-24 animate-pulse rounded-2xl border border-border bg-muted" />
@@ -318,86 +314,90 @@ export function RelatoriosPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <motion.div
+      variants={pageVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-5"
+    >
       {/* ── Page header ── */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <BarChart3 className="h-4.5 w-4.5" />
-          </div>
-          <div>
-            <h1 className="text-lg font-semibold">Relatórios</h1>
-            <p className="text-xs text-muted-foreground">
-              {viewMode === "ano" ? `Visão anual de ${ano}` : `Visão de ${formatMonth(viewMonth)}`}
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex overflow-hidden rounded-lg border border-border bg-background text-sm">
-            {(["ano", "mes"] as const).map((mode) => (
-              <button
-                key={mode}
-                className={cn(
-                  "px-4 py-2 font-semibold text-muted-foreground transition-colors hover:bg-accent capitalize",
-                  viewMode === mode && "bg-primary text-primary-foreground hover:bg-primary",
-                )}
-                type="button"
-                onClick={() => alternarVisualizacao(mode)}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-
-          {viewMode === "ano" ? (
-            <Select
-              className="h-10 w-24 text-sm"
-              value={ano}
-              onChange={(e) => { const y = e.target.value; setAno(y); void carregarResumo(`${y}-12`, 12); }}
-            >
-              {Array.from({ length: 7 }, (_, i) => String(new Date().getFullYear() - 3 + i)).map((y) => (
-                <option key={y} value={y}>{y}</option>
+      <motion.div variants={sectionVariants}>
+        <PageHeader
+          icon={BarChart3}
+          title="Relatórios"
+          subtitle={viewMode === "ano" ? `Visão anual de ${ano}` : `Visão de ${formatMonth(viewMonth)}`}
+          right={<>
+            <div className="flex overflow-hidden rounded-lg border border-border bg-background text-sm">
+              {(["ano", "mes"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  className={cn(
+                    "px-4 py-2 font-semibold text-muted-foreground transition-colors hover:bg-accent capitalize",
+                    viewMode === mode && "bg-primary text-primary-foreground hover:bg-primary",
+                  )}
+                  type="button"
+                  onClick={() => alternarVisualizacao(mode)}
+                >
+                  {mode}
+                </button>
               ))}
-            </Select>
-          ) : (
-            <div className="w-44">
-              <MonthPicker
-                value={viewMonth}
-                onChange={(m) => { setViewMonth(m); setAno(m.slice(0, 4)); void carregarResumo(m, 1); }}
-              />
             </div>
-          )}
 
-          <Button onClick={() => setExportOpen(true)} className="h-10 gap-2">
-            <FileSpreadsheet className="h-4 w-4" />
-            <span className="hidden sm:inline">Exportar Excel</span>
-          </Button>
-        </div>
-      </div>
+            {viewMode === "ano" ? (
+              <Select
+                className="h-10 w-24 text-sm"
+                value={ano}
+                onChange={(e) => { const y = e.target.value; setAno(y); void carregarResumo(`${y}-12`, 12); }}
+              >
+                {Array.from({ length: 7 }, (_, i) => String(new Date().getFullYear() - 3 + i)).map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </Select>
+            ) : (
+              <div className="w-44">
+                <MonthPicker
+                  value={viewMonth}
+                  onChange={(m) => { setViewMonth(m); setAno(m.slice(0, 4)); void carregarResumo(m, 1); }}
+                />
+              </div>
+            )}
+
+            <Button onClick={() => setExportOpen(true)} className="h-10 gap-2">
+              <FileSpreadsheet className="h-4 w-4" />
+              <span className="hidden sm:inline">Exportar Excel</span>
+            </Button>
+          </>}
+        />
+      </motion.div>
 
       {error && (
-        <p className="rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-sm text-destructive">{error}</p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-sm text-destructive"
+        >
+          {error}
+        </motion.p>
       )}
 
       {/* ── Metrics ── */}
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <motion.div variants={statsContainerVariant} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
           { label: "Receitas reais", value: formatCurrency(totalReceitas), icon: ArrowUpRight, color: "text-blue-500", bg: "bg-blue-500/10" },
           { label: "Despesas reais", value: formatCurrency(totalDespesas), icon: ArrowDownRight, color: "text-red-500", bg: "bg-red-500/10" },
           { label: "Saldo real", value: formatCurrency(saldo), icon: WalletCards, color: saldo >= 0 ? "text-emerald-500" : "text-red-500", bg: saldo >= 0 ? "bg-emerald-500/10" : "bg-red-500/10" },
           { label: "Maior gasto único", value: maiorDespesa ? formatCurrency(maiorDespesa.valor) : "R$ 0,00", icon: TrendingUp, color: "text-amber-500", bg: "bg-amber-500/10" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex items-start justify-between gap-3">
-              <p className="text-xs font-medium text-muted-foreground">{label}</p>
-              <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg", bg, color)}>
-                <Icon className="h-3.5 w-3.5" />
-              </div>
-            </div>
-            <p className={cn("mt-2 text-xl font-bold", color)}>{value}</p>
-          </div>
+          <StatCard
+            key={label}
+            label={label}
+            value={value}
+            icon={Icon}
+            iconClassName={cn("h-7 w-7", bg, color)}
+            valueClassName={cn("text-xl", color)}
+          />
         ))}
-      </div>
+      </motion.div>
 
       {/* ── Previsão (apenas quando há meses futuros no período) ── */}
       {temProjecao && (
@@ -567,16 +567,23 @@ export function RelatoriosPage() {
       </div>
 
       {/* ── Resumo mês a mês ── */}
-      <div className="rounded-2xl border border-border bg-card overflow-hidden">
+      <motion.div variants={sectionVariants} className="overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
           <p className="text-sm font-semibold">Resumo {viewMode === "ano" ? "mês a mês" : "do mês"}</p>
+        </div>
+        {/* Cabeçalho da tabela */}
+        <div className="grid grid-cols-4 items-center gap-2 border-b border-border/60 bg-muted/30 px-5 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <span>Mês</span>
+          <span>Receitas</span>
+          <span>Despesas</span>
+          <span>Saldo</span>
         </div>
         <div className="divide-y divide-border/60">
           {movimentos.map((item) => (
             <div
               key={item.mes}
               className={cn(
-                "grid grid-cols-4 items-center gap-2 px-5 py-3 text-sm",
+                "grid grid-cols-4 items-center gap-2 px-5 py-3 text-sm transition-colors hover:bg-muted/20",
                 item.projecao && "opacity-60",
               )}
             >
@@ -584,7 +591,7 @@ export function RelatoriosPage() {
                 {formatMonth(item.mes, false)}
                 {item.projecao && (
                   <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">
-                    Estimativa
+                    Est.
                   </span>
                 )}
               </p>
@@ -596,10 +603,11 @@ export function RelatoriosPage() {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Export dialog ── */}
       <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Exportar relatório Excel</DialogTitle>
@@ -648,6 +656,6 @@ export function RelatoriosPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }

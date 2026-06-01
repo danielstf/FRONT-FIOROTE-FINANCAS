@@ -12,6 +12,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
+import { motion } from "motion/react";
 import { toast } from "sonner";
 import { authApi } from "../../api/auth/auth-api";
 import { getApiErrorMessage } from "../../api/errors";
@@ -33,6 +34,8 @@ import {
 } from "../../components/ui/dialog";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { PageHeader } from "../../components/page-header";
+import { pageVariants, sectionVariants } from "../../lib/motion";
 import { useAuth } from "../../providers/auth-provider";
 
 export function ConfiguracoesPage() {
@@ -173,20 +176,23 @@ export function ConfiguracoesPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <motion.div
+      variants={pageVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-5"
+    >
       {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <Settings className="h-4.5 w-4.5" />
-        </div>
-        <div>
-          <h1 className="text-lg font-semibold text-foreground">Configurações</h1>
-          <p className="text-xs text-muted-foreground">{session?.usuario.email}</p>
-        </div>
-      </div>
+      <motion.div variants={sectionVariants}>
+        <PageHeader
+          icon={Settings}
+          title="Configurações"
+          subtitle={session?.usuario.email}
+        />
+      </motion.div>
 
       {/* Grid: dados + segurança */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <motion.div variants={sectionVariants} className="grid gap-4 lg:grid-cols-2">
         {/* Dados do usuário */}
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
           <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
@@ -262,10 +268,10 @@ export function ConfiguracoesPage() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Perfis VIP */}
-      <div className="rounded-2xl border border-amber-400/20 bg-card overflow-hidden">
+      <motion.div variants={sectionVariants} className="rounded-2xl border border-amber-400/20 bg-card overflow-hidden">
         <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4 bg-linear-to-r from-amber-400/8 to-transparent">
           <div className="flex items-center gap-2.5">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400/15 text-amber-400">
@@ -339,7 +345,7 @@ export function ConfiguracoesPage() {
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Dialog: Trocar senha */}
       <Dialog open={senhaModalAberto} onOpenChange={setSenhaModalAberto}>
@@ -489,6 +495,6 @@ export function ConfiguracoesPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }

@@ -39,7 +39,6 @@ export function AppLayout() {
         setShowAds(!isPremium);
       }
     }
-
     void carregarAnuncios();
   }, [isPremium]);
 
@@ -50,11 +49,9 @@ export function AppLayout() {
         selecionarPerfilFinanceiro(null);
         return;
       }
-
       try {
         const data = await perfisApi.listar();
         setPerfis(data.perfis);
-
         if (
           perfilFinanceiroId &&
           !data.perfis.some((perfil) => perfil.id === perfilFinanceiroId)
@@ -65,7 +62,6 @@ export function AppLayout() {
         setPerfis([]);
       }
     }
-
     void carregarPerfis();
   }, [isPremium, perfilFinanceiroId, selecionarPerfilFinanceiro]);
 
@@ -76,15 +72,15 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-dvh overflow-x-hidden bg-background text-foreground lg:grid lg:h-dvh lg:grid-cols-[240px_1fr] lg:overflow-hidden">
-      {/* Sidebar desktop */}
+    <div className="min-h-dvh overflow-x-hidden text-foreground lg:grid lg:h-dvh lg:grid-cols-[240px_1fr] lg:overflow-hidden">
+      {/* ── Sidebar desktop ─────────────────────────── */}
       <Sidebar
-        className="hidden lg:flex lg:flex-col border-r border-sidebar-border/50"
+        className="hidden lg:flex lg:flex-col border-r-0"
         perfilSelecionado={perfilSelecionado}
         onProfileClick={() => setProfileMenuOpen(true)}
       />
 
-      {/* Mobile sidebar overlay */}
+      {/* ── Mobile sidebar overlay ──────────────────── */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
@@ -106,7 +102,7 @@ export function AppLayout() {
               transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
             >
               <Sidebar
-                className="flex h-full flex-col border-r border-sidebar-border/50"
+                className="flex h-full flex-col border-r-0"
                 perfilSelecionado={perfilSelecionado}
                 onProfileClick={() => {
                   setMobileMenuOpen(false);
@@ -119,14 +115,11 @@ export function AppLayout() {
         )}
       </AnimatePresence>
 
-      {/* Profile dialog */}
+      {/* ── Dialog: perfil ──────────────────────────── */}
       <Dialog open={profileMenuOpen} onOpenChange={setProfileMenuOpen}>
         <DialogContent className="overflow-hidden p-0 sm:max-w-md">
           <div className="relative border-b border-border bg-linear-to-br from-primary/10 via-background to-background p-6">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent"
-            />
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" />
             <DialogHeader className="flex-row items-center gap-4 space-y-0 text-left">
               <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
                 <UserRound className="h-5 w-5" />
@@ -139,7 +132,6 @@ export function AppLayout() {
               </div>
             </DialogHeader>
           </div>
-
           <div className="grid gap-2 p-4">
             <button
               className="group flex w-full items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3.5 text-left transition-all duration-150 hover:border-primary/35 hover:bg-primary/10"
@@ -149,9 +141,7 @@ export function AppLayout() {
               <Avatar value="user" label="Perfil principal" className="h-8 w-8" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">Perfil principal</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {session?.usuario.email}
-                </p>
+                <p className="truncate text-xs text-muted-foreground">{session?.usuario.email}</p>
               </div>
               {!perfilFinanceiroId && (
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -159,7 +149,6 @@ export function AppLayout() {
                 </span>
               )}
             </button>
-
             {perfis.map((perfil) => (
               <button
                 className="group flex w-full items-center gap-3 rounded-xl border border-border bg-background p-3.5 text-left transition-all duration-150 hover:border-border/80 hover:bg-accent"
@@ -179,14 +168,12 @@ export function AppLayout() {
                 )}
               </button>
             ))}
-
             {!isPremium && (
               <p className="rounded-lg border border-primary/20 bg-primary/8 px-3.5 py-2.5 text-xs text-primary">
                 Perfis extras ficam disponíveis no plano VIP.
               </p>
             )}
           </div>
-
           <div className="border-t border-border p-4">
             <Button asChild className="w-full" variant="outline">
               <Link to="/app/configuracoes" onClick={() => setProfileMenuOpen(false)}>
@@ -198,21 +185,19 @@ export function AppLayout() {
         </DialogContent>
       </Dialog>
 
-      {/* Mobile top bar */}
-      <div className="fixed left-0 right-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-border/50 bg-background/90 px-4 backdrop-blur-md lg:hidden">
+      {/* ── Mobile top bar ──────────────────────────── */}
+      <div className="fixed left-0 right-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-border/50 bg-background/80 px-4 backdrop-blur-xl lg:hidden">
         <button
           aria-label="Abrir menu"
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-border/80 hover:bg-accent hover:text-foreground"
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/70 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           onClick={() => setMobileMenuOpen((v) => !v)}
         >
           {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
         </button>
-
         <div className="flex-1" />
-
         {session?.usuario && (
           <button
-            className="flex h-8 items-center gap-2 rounded-lg border border-border px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:border-border/80 hover:bg-accent hover:text-foreground"
+            className="flex h-8 items-center gap-2 rounded-lg border border-border/70 px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             onClick={() => setProfileMenuOpen(true)}
           >
             <Avatar
@@ -225,27 +210,44 @@ export function AppLayout() {
         )}
       </div>
 
-      {/* Main content */}
-      <div className="relative flex min-h-dvh min-w-0 flex-col lg:min-h-0 lg:overflow-hidden">
-        {/* Blobs decorativos do conteúdo */}
-        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <div className="absolute right-1/4 top-0 h-80 w-80 -translate-y-1/2 rounded-full bg-primary/6 blur-3xl animate-float-slow" style={{ animationDelay: "-2s" }} />
-          <div className="absolute bottom-1/4 left-0 h-64 w-64 -translate-x-1/2 rounded-full bg-blue-400/5 blur-3xl animate-drift" style={{ animationDelay: "-5s" }} />
+      {/* ══════════════════════════════════════════════
+          ÁREA DE CONTEÚDO PRINCIPAL
+      ══════════════════════════════════════════════ */}
+      {/* content-area: aplica grids + diagonais via CSS puro, sem div filho */}
+      <div className="content-area relative flex min-h-dvh min-w-0 flex-col lg:min-h-0 lg:overflow-hidden">
+
+        {/* ── Orbs animados (mesmos valores do sidebar) ── */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            className="absolute -right-10 -top-10 h-44 w-44 rounded-full blur-3xl animate-float-slow bg-primary/20 dark:bg-primary/18"
+          />
+          <div
+            className="absolute -bottom-14 left-1/3 h-52 w-52 rounded-full blur-3xl animate-drift bg-primary/12 dark:bg-primary/10"
+            style={{ animationDelay: "-3s" }}
+          />
+          <div
+            className="absolute right-1/4 top-1/3 h-28 w-28 rounded-full blur-2xl animate-float bg-primary/8 dark:bg-primary/6"
+            style={{ animationDelay: "-1.5s" }}
+          />
         </div>
-        <main className="flex-1 lg:min-h-0 lg:overflow-y-auto">
-          <div className="mx-auto w-full max-w-7xl space-y-5 px-4 pb-6 pt-18 sm:px-6 lg:px-8 lg:py-6">
-            {showAds && (
+
+        {/* ── Conteúdo scrollável ── */}
+        <main className="relative flex-1 lg:min-h-0 lg:overflow-y-auto">
+          {showAds && (
+            <div className="mx-auto w-full max-w-7xl px-4 pt-20 sm:px-6 lg:px-8 lg:pt-5">
               <div className="overflow-hidden rounded-xl border border-border/50 shadow-sm">
                 <AdBanner />
               </div>
-            )}
+            </div>
+          )}
+          <div className={`mx-auto w-full max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 ${showAds ? "pt-4" : "pt-20 lg:pt-8"}`}>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={location.pathname}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
               >
                 <Outlet />
               </motion.div>
@@ -253,7 +255,6 @@ export function AppLayout() {
           </div>
         </main>
       </div>
-
     </div>
   );
 }

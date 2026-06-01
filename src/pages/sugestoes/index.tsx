@@ -7,13 +7,17 @@ import {
   MessageSquareText,
   Send,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { toast } from "sonner";
 import { sugestoesApi } from "../../api/sugestoes/sugestoes-api";
 import type { SugestaoTipo } from "../../api/sugestoes/types";
 import { getApiErrorMessage } from "../../api/errors";
+import { PageHeader } from "../../components/page-header";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { Textarea } from "../../components/ui/textarea";
+import { pageVariants, sectionVariants } from "../../lib/motion";
 import { cn } from "../../lib/utils";
 import { normalizeRequiredText } from "../../lib/text";
 
@@ -84,20 +88,23 @@ export function SugestoesPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <motion.div
+      variants={pageVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-5"
+    >
       {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <MessageSquareText className="h-4.5 w-4.5" />
-        </div>
-        <div>
-          <h1 className="text-lg font-semibold text-foreground">Atendimento</h1>
-          <p className="text-xs text-muted-foreground">Envie sugestões, reclamações ou elogios</p>
-        </div>
-      </div>
+      <motion.div variants={sectionVariants}>
+        <PageHeader
+          icon={MessageSquareText}
+          title="Atendimento"
+          subtitle="Envie sugestões, reclamações ou elogios"
+        />
+      </motion.div>
 
       {/* Form card */}
-      <div className="rounded-2xl border border-border bg-card overflow-hidden">
+      <motion.div variants={sectionVariants} className="overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Send className="h-3.5 w-3.5" />
@@ -152,12 +159,12 @@ export function SugestoesPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="mensagem" className="text-xs font-medium text-muted-foreground">Mensagem</Label>
-                <textarea
+                <Textarea
                   id="mensagem"
-                  className="min-h-28 w-full resize-none rounded-xl border border-input bg-background px-3 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20"
                   value={mensagem}
                   onChange={(e) => setMensagem(e.target.value)}
                   placeholder="Descreva com detalhes para a equipe entender melhor."
+                  className="min-h-28"
                   required
                 />
               </div>
@@ -171,7 +178,7 @@ export function SugestoesPage() {
             </div>
           </form>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

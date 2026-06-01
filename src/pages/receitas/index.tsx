@@ -10,11 +10,15 @@ import {
   TrendingUp,
   WalletCards,
 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { getApiErrorMessage } from "../../api/errors";
 import { receitasApi } from "../../api/receitas/receitas-api";
 import type { Receita } from "../../api/receitas/types";
 import { MonthPicker } from "../../components/month-picker";
+import { EmptyState } from "../../components/empty-state";
+import { PageHeader } from "../../components/page-header";
+import { StatCard, statsContainerVariant } from "../../components/stat-card";
 import { Button } from "../../components/ui/button";
 import {
   Dialog,
@@ -23,26 +27,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../components/ui/dialog";
+import { formatCurrency, formatMonthName, getCurrentMonth } from "../../lib/format";
+import { pageVariants, sectionVariants, listContainerVariants, listItemVariants } from "../../lib/motion";
 import { useAuth } from "../../providers/auth-provider";
 import { ReceitaForm } from "./receita-form";
-
-function getCurrentMonth() {
-  return new Date().toISOString().slice(0, 7);
-}
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-}
 
 function formatMonth(value: string) {
   const [year, month] = value.split("-");
   return `${month}/${year}`;
-}
-
-function formatMonthName(value: string) {
-  const [year, month] = value.split("-");
-  const date = new Date(Number(year), Number(month) - 1, 1);
-  return new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(date);
 }
 
 export function ReceitasPage() {
@@ -111,59 +103,77 @@ export function ReceitasPage() {
   }, [perfilFinanceiroId]);
 
   return (
-    <div className="space-y-5">
+    <motion.div
+      variants={pageVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-5"
+    >
       {/* ── Page header ── */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-            <TrendingUp className="h-4.5 w-4.5" />
-          </div>
-          <div>
-            <h1 className="text-lg font-semibold text-foreground">Receitas</h1>
-            <p className="text-xs text-muted-foreground capitalize">{formatMonthName(mes)}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-44">
-            <MonthPicker
-              value={mes}
-              onChange={(m) => { setMes(m); void carregarReceitas(m); }}
-            />
-          </div>
-          <Button className="h-10 gap-2" onClick={() => setCadastroAberto(true)}>
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Nova receita</span>
-          </Button>
-        </div>
-      </div>
+      <motion.div variants={sectionVariants}>
+        <PageHeader
+          icon={TrendingUp}
+          iconClassName="bg-blue-500/10 text-blue-500"
+          title="Receitas"
+          subtitle={formatMonthName(mes)}
+          right={
+            <>
+              <div className="w-44">
+                <MonthPicker
+                  value={mes}
+                  onChange={(m) => { setMes(m); void carregarReceitas(m); }}
+                />
+              </div>
+              <Button className="h-10 gap-2" onClick={() => setCadastroAberto(true)}>
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Nova receita</span>
+              </Button>
+            </>
+          }
+        />
+      </motion.div>
 
       {/* ── Stats ── */}
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="relative overflow-hidden rounded-2xl border border-blue-500/20 bg-blue-500/6 p-5">
-          <div aria-hidden className="pointer-events-none absolute right-0 top-0 h-20 w-20 -translate-y-4 translate-x-4 rounded-full bg-blue-500/15 blur-2xl" />
-          <p className="text-xs font-medium text-muted-foreground">Total do mês</p>
-          <p className="mt-2 text-2xl font-bold text-blue-500">{loading ? "—" : formatCurrency(total)}</p>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <p className="text-xs font-medium text-muted-foreground">Lançamentos</p>
-          <p className="mt-2 text-2xl font-bold text-foreground">{loading ? "—" : receitas.length}</p>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <p className="text-xs font-medium text-muted-foreground">Maior receita</p>
-          <p className="mt-2 text-2xl font-bold text-blue-500 truncate">
-            {loading ? "—" : maiorReceita ? formatCurrency(maiorReceita.valor) : "R$ 0,00"}
-          </p>
-        </div>
-      </div>
+      <motion.div
+        variants={statsContainerVariant}
+        className="grid gap-3 sm:grid-cols-3"
+      >
+        <StatCard
+          label="Total do mês"
+          value={formatCurrency(total)}
+          loading={loading}
+          valueClassName="text-blue-500"
+          className="border-blue-500/20 bg-blue-500/6"
+          glowClassName="bg-blue-500/15"
+        />
+        <StatCard
+          label="Lançamentos"
+          value={receitas.length}
+          loading={loading}
+        />
+        <StatCard
+          label="Maior receita"
+          value={maiorReceita ? formatCurrency(maiorReceita.valor) : "R$ 0,00"}
+          loading={loading}
+          valueClassName="text-blue-500 truncate"
+        />
+      </motion.div>
 
-      {error && (
-        <p className="rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-sm text-destructive">
-          {error}
-        </p>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-sm text-destructive"
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
 
       {/* ── List ── */}
-      <div className="rounded-2xl border border-border bg-card overflow-hidden">
+      <motion.div variants={sectionVariants} className="overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
@@ -181,25 +191,29 @@ export function ReceitasPage() {
         )}
 
         {!loading && receitas.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-3 py-14 text-center">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted">
-              <WalletCards className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-foreground">Nenhuma receita neste mês.</p>
-              <p className="mt-1 text-xs text-muted-foreground">Comece cadastrando uma entrada.</p>
-            </div>
-            <Button className="mt-1 h-9 gap-2 text-sm" onClick={() => setCadastroAberto(true)}>
-              <Plus className="h-3.5 w-3.5" /> Cadastrar receita
-            </Button>
-          </div>
+          <EmptyState
+            icon={WalletCards}
+            title="Nenhuma receita neste mês."
+            description="Comece cadastrando uma entrada."
+            action={
+              <Button className="h-9 gap-2 text-sm" onClick={() => setCadastroAberto(true)}>
+                <Plus className="h-3.5 w-3.5" /> Cadastrar receita
+              </Button>
+            }
+          />
         )}
 
         {!loading && receitas.length > 0 && (
-          <div className="divide-y divide-border/60">
+          <motion.div
+            variants={listContainerVariants}
+            initial="hidden"
+            animate="show"
+            className="divide-y divide-border/60"
+          >
             {receitas.map((receita) => (
-              <div
+              <motion.div
                 key={receita.id}
+                variants={listItemVariants}
                 className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/30"
               >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
@@ -224,6 +238,7 @@ export function ReceitasPage() {
                 </span>
                 <div className="flex shrink-0 gap-1.5">
                   <Button
+                    aria-label="Editar receita"
                     className="h-8 w-8 rounded-lg px-0"
                     variant="outline"
                     title="Editar"
@@ -232,6 +247,7 @@ export function ReceitasPage() {
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
                   <Button
+                    aria-label="Excluir receita"
                     className="h-8 w-8 rounded-lg px-0 text-destructive hover:text-destructive"
                     variant="outline"
                     title="Excluir"
@@ -243,11 +259,11 @@ export function ReceitasPage() {
                       : <Trash2 className="h-3.5 w-3.5" />}
                   </Button>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
 
       {/* ── Dialog: Cadastro ── */}
       <Dialog open={cadastroAberto} onOpenChange={setCadastroAberto}>
@@ -352,6 +368,6 @@ export function ReceitasPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }
