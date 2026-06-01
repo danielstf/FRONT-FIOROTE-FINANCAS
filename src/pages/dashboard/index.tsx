@@ -118,11 +118,11 @@ export function DashboardPage() {
       const [resumoResult, receitasResult, despesasResult] = await Promise.all([
         dashboardApi.resumoFinanceiro({ mes: mesSelecionado, meses: 6 }),
         receitasApi.listar({ mes: mesSelecionado }),
-        despesasApi.listar({ mes: mesSelecionado, paga: false }),
+        despesasApi.listar({ mes: mesSelecionado }),
       ]);
       setResumo(resumoResult);
       setReceitas(receitasResult.receitas);
-      setDespesasPendentes(despesasResult.despesas);
+      setDespesasPendentes(despesasResult.despesas.filter((d) => !d.paga));
     } catch (requestError) {
       setError(getApiErrorMessage(requestError));
     } finally {
