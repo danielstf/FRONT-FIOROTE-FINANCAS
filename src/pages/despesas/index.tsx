@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   CalendarDays,
   CreditCard,
+  Crown,
   FileUp,
   Filter,
   Loader2,
@@ -16,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { cartoesApi } from "../../api/cartoes/cartoes-api";
 import type { CartaoCredito } from "../../api/cartoes/types";
@@ -36,6 +38,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../components/ui/dialog";
+import { hasPremiumAtivo } from "../../lib/premium";
 import { cn } from "../../lib/utils";
 import { pageVariants, sectionVariants, listContainerVariants, listItemVariants } from "../../lib/motion";
 import { useAuth } from "../../providers/auth-provider";
@@ -67,7 +70,8 @@ function ajustarDataParaMes(dataIso: string | null, mesDestino: string) {
 }
 
 export function DespesasPage() {
-  const { perfilFinanceiroId } = useAuth();
+  const { perfilFinanceiroId, session } = useAuth();
+  const isPremium = hasPremiumAtivo(session?.usuario);
   const [mes, setMes] = useState(getCurrentMonth);
   const [despesas, setDespesas] = useState<Despesa[]>([]);
   const [total, setTotal] = useState(0);
@@ -90,6 +94,7 @@ export function DespesasPage() {
   const [escopoExclusao, setEscopoExclusao] = useState<"mes" | "todas">("mes");
   const [error, setError] = useState("");
   const [importarFaturaAberto, setImportarFaturaAberto] = useState(false);
+  const [premiumGateAberto, setPremiumGateAberto] = useState(false);
 
   const filtrosAtivos = [formaPagamento, cartaoId, status !== "todas" ? status : ""].filter(Boolean).length;
 
@@ -249,9 +254,13 @@ export function DespesasPage() {
               <Button
                 variant="outline"
                 className="h-10 gap-2"
-                onClick={() => setImportarFaturaAberto(true)}
+                onClick={() => isPremium ? setImportarFaturaAberto(true) : setPremiumGateAberto(true)}
               >
-                <FileUp className="h-4 w-4" />
+                {isPremium ? (
+                  <FileUp className="h-4 w-4" />
+                ) : (
+                  <Crown className="h-4 w-4 text-amber-400" />
+                )}
                 <span className="hidden sm:inline">Importar fatura</span>
               </Button>
               <Button
@@ -801,6 +810,34 @@ export function DespesasPage() {
         defaultMes={mes}
         onSuccess={() => void carregarDespesas()}
       />
+
+      {/* ── DIALOG: premium gate ── */}
+      <Dialog open={premiumGateAberto} onOpenChange={setPremiumGateAberto}>
+        <DialogContent className="max-w-sm text-center">
+          <div className="flex flex-col items-center gap-4 py-2">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-400/15">
+              <Crown className="h-7 w-7 text-amber-400" />
+            </div>
+            <div>
+              <DialogTitle className="text-lg">Recurso exclusivo VIP</DialogTitle>
+              <DialogDescription className="mt-1.5 text-sm leading-relaxed">
+                A importação de faturas em PDF está disponível apenas para assinantes do plano VIP. Faça upgrade e automatize o lançamento das suas despesas.
+              </DialogDescription>
+            </div>
+            <div className="flex w-full flex-col gap-2">
+              <Button asChild variant="outline" className="h-10 w-full gap-2 border-amber-400/40 bg-amber-400/8 font-semibold text-amber-500 hover:bg-amber-400/15 hover:text-amber-500">
+                <Link to="/app/premium">
+                  <Crown className="h-4 w-4" />
+                  Ver plano VIP
+                </Link>
+              </Button>
+              <Button variant="ghost" className="h-9 w-full text-xs text-muted-foreground" onClick={() => setPremiumGateAberto(false)}>
+                Agora não
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* ── DIALOG: exclusão em massa ── */}
       <Dialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>

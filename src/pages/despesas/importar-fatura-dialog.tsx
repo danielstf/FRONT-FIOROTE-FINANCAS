@@ -188,6 +188,7 @@ export function ImportarFaturaDialog({
   const [selecionados, setSelecionados] = useState<Set<number>>(new Set());
   const [criando, setCriando] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [cartaoError, setCartaoError] = useState(false);
   const [categoryPickerOpen, setCategoryPickerOpen] = useState(false);
   const [categoryPickerIndex, setCategoryPickerIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -199,6 +200,7 @@ export function ImportarFaturaDialog({
     setMes(defaultMes);
     setLoading(false);
     setError("");
+    setCartaoError(false);
     setItens([]);
     setSelecionados(new Set());
     setCriando(false);
@@ -237,6 +239,11 @@ export function ImportarFaturaDialog({
 
   async function analisar() {
     if (!file) return;
+    if (!cartaoId) {
+      setCartaoError(true);
+      return;
+    }
+    setCartaoError(false);
     setLoading(true);
     setError("");
 
@@ -463,15 +470,18 @@ export function ImportarFaturaDialog({
 
                 {/* Cartão — mini-cards */}
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold text-muted-foreground">Cartão de crédito</p>
-                  <div className="flex flex-wrap gap-2">
+                  <p className={cn("text-xs font-semibold", cartaoError ? "text-destructive" : "text-muted-foreground")}>
+                    Cartão de crédito
+                    {cartaoError && <span className="ml-1 font-normal">— obrigatório</span>}
+                  </p>
+                  <div className={cn("flex flex-wrap gap-2 rounded-xl p-1 transition-all", cartaoError && "outline-2 outline-destructive/50 bg-destructive/4")}>
                     {cartoes.map((cartao, index) => {
                       const isSelected = cartaoId === cartao.id;
                       return (
                         <button
                           key={cartao.id}
                           type="button"
-                          onClick={() => setCartaoId(cartao.id)}
+                          onClick={() => { setCartaoId(cartao.id); setCartaoError(false); }}
                           className={cn(
                             "relative overflow-hidden rounded-lg transition-all",
                             isSelected
