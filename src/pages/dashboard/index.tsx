@@ -85,12 +85,13 @@ function SkeletonCard({ wide = false }: { wide?: boolean }) {
 }
 
 export function DashboardPage() {
-  const { session, perfilFinanceiroId } = useAuth();
+  const { session, perfilFinanceiroId, authLoading } = useAuth();
   const [mes, setMes] = useState(getCurrentMonth);
   const [receitas, setReceitas] = useState<Receita[]>([]);
   const [despesasPendentes, setDespesasPendentes] = useState<Despesa[]>([]);
   const [resumo, setResumo] = useState<ResumoFinanceiroResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [despesasPendentesLoading, setDespesasPendentesLoading] = useState(true);
   const [payingId, setPayingId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
@@ -110,23 +111,42 @@ export function DashboardPage() {
   const pendentesAnim = useCountUp(totalDespesasPendentes, !loading);
 
   const greeting = getGreeting();
+  const loadVersionRef = useRef(0);
+  const pendingLoadVersionRef = useRef(0);
 
   async function carregarDashboard(mesSelecionado = mes) {
+    const version = ++loadVersionRef.current;
     setError("");
     setLoading(true);
     try {
-      const [resumoResult, receitasResult, despesasResult] = await Promise.all([
+      const [resumoResult, receitasResult] = await Promise.all([
         dashboardApi.resumoFinanceiro({ mes: mesSelecionado, meses: 6 }),
         receitasApi.listar({ mes: mesSelecionado }),
-        despesasApi.listar({ mes: mesSelecionado }),
       ]);
+      if (version !== loadVersionRef.current) return;
       setResumo(resumoResult);
       setReceitas(receitasResult.receitas);
-      setDespesasPendentes(despesasResult.despesas.filter((d) => !d.paga));
     } catch (requestError) {
+      if (version !== loadVersionRef.current) return;
       setError(getApiErrorMessage(requestError));
     } finally {
-      setLoading(false);
+      if (version === loadVersionRef.current) setLoading(false);
+    }
+  }
+
+  async function carregarDespesasPendentes(mesSelecionado = mes) {
+    const version = ++pendingLoadVersionRef.current;
+    setDespesasPendentesLoading(true);
+
+    try {
+      const data = await despesasApi.listar({ mes: mesSelecionado });
+      if (version !== pendingLoadVersionRef.current) return;
+      setDespesasPendentes(data.despesas.filter((despesa) => !despesa.paga));
+    } catch (requestError) {
+      if (version !== pendingLoadVersionRef.current) return;
+      setError(getApiErrorMessage(requestError));
+    } finally {
+      if (version === pendingLoadVersionRef.current) setDespesasPendentesLoading(false);
     }
   }
 
@@ -135,7 +155,10 @@ export function DashboardPage() {
     try {
       await despesasApi.alterarPagamento(despesa.id, true, mes);
       toast.success("Despesa marcada como paga.");
-      await carregarDashboard(mes);
+      await Promise.all([
+        carregarDashboard(mes),
+        carregarDespesasPendentes(mes),
+      ]);
     } catch (requestError) {
       toast.error(getApiErrorMessage(requestError));
     } finally {
@@ -143,10 +166,17 @@ export function DashboardPage() {
     }
   }
 
+  // setTimeout(0) + cleanup: StrictMode cancels the first timer before it fires,
+  // so only the second mount's timer runs. Also debounces rapid dep changes from AppLayout.
   useEffect(() => {
-    void carregarDashboard(mes);
+    if (authLoading) return;
+    const timer = setTimeout(() => {
+      void carregarDashboard(mes);
+      void carregarDespesasPendentes(mes);
+    }, 0);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [perfilFinanceiroId]);
+  }, [authLoading, perfilFinanceiroId, mes]);
 
   return (
     <div className="space-y-5">
@@ -175,7 +205,6 @@ export function DashboardPage() {
             value={mes}
             onChange={(selectedMonth) => {
               setMes(selectedMonth);
-              void carregarDashboard(selectedMonth);
             }}
           />
         </div>
@@ -428,13 +457,13 @@ export function DashboardPage() {
             </div>
           </div>
 
-          {loading && (
+          {despesasPendentesLoading && (
             <div className="flex items-center gap-2.5 p-5 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> Carregando...
             </div>
           )}
 
-          {!loading && despesasPendentes.length === 0 && (
+          {!despesasPendentesLoading && despesasPendentes.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -451,65 +480,64 @@ export function DashboardPage() {
             </motion.div>
           )}
 
-          {!loading && despesasPendentes.length > 0 && (
+          {!despesasPendentesLoading && despesasPendentes.length > 0 && (
             <motion.div
               variants={listVar}
               initial="hidden"
               animate="show"
               className="divide-y divide-border/60 max-h-130 overflow-y-auto"
             >
-              <AnimatePresence>
-                {despesasPendentes.map((despesa) => (
-                  <motion.div
-                    key={despesa.id}
-                    variants={itemVar}
-                    exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
+              {despesasPendentes.map((despesa) => (
+                <motion.div
+                  key={despesa.id}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.28 }}
+                  className={cn(
+                    "flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/30",
+                    despesa.vencida && "bg-destructive/4 hover:bg-destructive/7",
+                  )}
+                >
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.92 }}
                     className={cn(
-                      "flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/30",
-                      despesa.vencida && "bg-destructive/4 hover:bg-destructive/7",
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all",
+                      despesa.vencida
+                        ? "border-destructive/30 bg-destructive/10 text-destructive hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-500"
+                        : "border-red-500/20 bg-red-500/10 text-red-500 hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-500",
                     )}
+                    title="Marcar como paga"
+                    type="button"
+                    onClick={() => marcarComoPaga(despesa)}
+                    disabled={payingId === despesa.id}
                   >
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.92 }}
-                      className={cn(
-                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all",
-                        despesa.vencida
-                          ? "border-destructive/30 bg-destructive/10 text-destructive hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-500"
-                          : "border-red-500/20 bg-red-500/10 text-red-500 hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-500",
-                      )}
-                      title="Marcar como paga"
-                      type="button"
-                      onClick={() => marcarComoPaga(despesa)}
-                      disabled={payingId === despesa.id}
-                    >
-                      {payingId === despesa.id
-                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        : <ThumbsUp className="h-3.5 w-3.5" />}
-                    </motion.button>
+                    {payingId === despesa.id
+                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      : <ThumbsUp className="h-3.5 w-3.5" />}
+                  </motion.button>
 
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">{despesa.nome}</p>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                          <CalendarDays className="h-3 w-3" />
-                          {formatDate(despesa.dataVencimento)}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">{despesa.nome}</p>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                        <CalendarDays className="h-3 w-3" />
+                        {formatDate(despesa.dataVencimento)}
+                      </span>
+                      {despesa.vencida && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
+                          <AlertTriangle className="h-2.5 w-2.5" />
+                          Vencida
                         </span>
-                        {despesa.vencida && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
-                            <AlertTriangle className="h-2.5 w-2.5" />
-                            Vencida
-                          </span>
-                        )}
-                      </div>
+                      )}
                     </div>
+                  </div>
 
-                    <span className="shrink-0 text-sm font-semibold text-red-500">
-                      {formatCurrency(despesa.valor)}
-                    </span>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                  <span className="shrink-0 text-sm font-semibold text-red-500">
+                    {formatCurrency(despesa.valor)}
+                  </span>
+                </motion.div>
+              ))}
             </motion.div>
           )}
         </motion.div>

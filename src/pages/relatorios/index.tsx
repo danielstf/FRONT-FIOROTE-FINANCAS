@@ -21,6 +21,7 @@ import {
   PieChart as RechartsPieChart,
   XAxis,
 } from "recharts";
+import { defaultExpenseCategories, getCategoryColor, getCategoryIcon } from "../despesas/category-icons";
 import { dashboardApi } from "../../api/dashboard/dashboard-api";
 import type { MovimentoMensal } from "../../api/dashboard/types";
 import { despesasApi } from "../../api/despesas/despesas-api";
@@ -200,6 +201,8 @@ export function RelatoriosPage() {
   const [exportMode, setExportMode] = useState<ExportMode>("ano");
   const [exportYear, setExportYear] = useState(anoAtual);
   const [selectedMonths, setSelectedMonths] = useState<string[]>([mesAtual()]);
+  const [categoryFilterOpen, setCategoryFilterOpen] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   async function carregarResumo(nextMes = `${ano}-12`, meses = 12) {
     try {
@@ -260,6 +263,12 @@ export function RelatoriosPage() {
     setSelectedMonths(next.length ? next : [month]);
   }
 
+  function toggleCategory(cat: string) {
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
+    );
+  }
+
   async function exportarExcel() {
     try {
       setExporting(true);
@@ -271,7 +280,14 @@ export function RelatoriosPage() {
       ]);
       const linhas = resumos.flatMap((item) => item.graficos.linhaEvolucaoFinanceira);
       const receitasGrupos = exportMonths.map((mes, i) => ({ mes, receitas: receitasPorMes[i].receitas }));
-      const despesasGrupos = exportMonths.map((mes, i) => ({ mes, despesas: despesasPorMes[i].despesas }));
+      const despesasGrupos = exportMonths.map((mes, i) => ({
+        mes,
+        despesas: despesasPorMes[i].despesas.filter((d) => {
+          if (selectedCategories.length === 0) return true;
+          const cat = (d.categoria ?? "Outros").toLowerCase();
+          return selectedCategories.some((sc) => sc.toLowerCase() === cat);
+        }),
+      }));
       const label = exportMode === "ano" ? `Ano ${exportYear}` : `${exportMonths.length} meses selecionados`;
       const css = `body{font-family:Calibri,Arial,sans-serif;color:#0f172a;font-size:13px;}h1{color:#1e3a5f;font-size:20px;margin-bottom:4px;}h2{margin-top:28px;margin-bottom:8px;color:#1e293b;font-size:14px;border-bottom:2px solid #e2e8f0;padding-bottom:6px;}p.sub{color:#64748b;font-size:12px;margin:0 0 6px;}table{border-collapse:collapse;margin-bottom:10px;width:100%;}th{background:#1e40af;color:#fff;text-align:left;font-size:12px;padding:8px 10px;border:1px solid #1e3a8a;}td{border:1px solid #e2e8f0;padding:6px 10px;font-size:12px;vertical-align:middle;}tr:nth-child(even) td{background:#f8fafc;}`;
       const html = `<html><head><meta charset="UTF-8"/><style>${css}</style></head><body><h1>Relatório Fiorote Controle Financeiro</h1><p class="sub">Período: ${excelValue(label)} · Gerado em ${formatDateBR(new Date().toISOString())}</p>${excelSummaryTable(linhas)}${excelChart(linhas)}${excelReceitasPorMes(receitasGrupos)}${excelDespesasPorMes(despesasGrupos)}</body></html>`;
@@ -646,6 +662,30 @@ export function RelatoriosPage() {
                 ))}
               </div>
             )}
+
+            {/* Filtro por categoria */}
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Categorias de despesa</Label>
+              <button
+                type="button"
+                onClick={() => setCategoryFilterOpen(true)}
+                className="flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm transition-colors hover:bg-accent"
+              >
+                <span className={cn("truncate", selectedCategories.length === 0 ? "text-muted-foreground" : "font-medium text-foreground")}>
+                  {selectedCategories.length === 0
+                    ? "Todas as categorias"
+                    : selectedCategories.length === 1
+                      ? selectedCategories[0]
+                      : `${selectedCategories.length} categorias selecionadas`}
+                </span>
+                {selectedCategories.length > 0 && (
+                  <span className="shrink-0 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                    {selectedCategories.length}
+                  </span>
+                )}
+              </button>
+            </div>
+
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setExportOpen(false)}>Cancelar</Button>
               <Button disabled={exporting} onClick={exportarExcel}>
@@ -653,6 +693,55 @@ export function RelatoriosPage() {
                 Gerar Excel
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Dialog: seletor de categorias ── */}
+      <Dialog open={categoryFilterOpen} onOpenChange={setCategoryFilterOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Filtrar por categoria</DialogTitle>
+            <DialogDescription>
+              Selecione as categorias a incluir no relatório. Sem seleção = todas.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-4 gap-2 py-1 max-h-80 overflow-y-auto pr-1">
+            {defaultExpenseCategories.map((cat) => {
+              const Icon = getCategoryIcon(cat);
+              const color = getCategoryColor(cat);
+              const selected = selectedCategories.includes(cat);
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => toggleCategory(cat)}
+                  className={cn(
+                    "flex flex-col items-center gap-1.5 rounded-xl border p-2.5 text-center text-[11px] font-medium transition-all",
+                    selected
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border hover:border-border/80 hover:bg-muted/50 text-muted-foreground",
+                  )}
+                >
+                  <span className={cn("flex h-9 w-9 items-center justify-center rounded-lg", selected ? "bg-primary/15" : color)}>
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="leading-tight line-clamp-2">{cat}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex items-center justify-between border-t border-border pt-3">
+            <button
+              type="button"
+              onClick={() => setSelectedCategories([])}
+              className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+            >
+              Limpar seleção
+            </button>
+            <Button onClick={() => setCategoryFilterOpen(false)}>
+              Confirmar
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

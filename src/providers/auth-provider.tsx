@@ -1,4 +1,5 @@
 import {
+  useCallback,
   createContext,
   useContext,
   useEffect,
@@ -20,6 +21,7 @@ const perfilStorageKey = "fiorote-financas-perfil-id";
 
 type AuthContextValue = {
   session: LoginResponse | null;
+  authLoading: boolean;
   login: (payload: LoginPayload) => Promise<void>;
   loginGoogle: (payload: LoginGooglePayload) => Promise<void>;
   cadastrar: (payload: CadastroUsuarioPayload) => Promise<void>;
@@ -50,11 +52,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [perfilFinanceiroId, setPerfilFinanceiroId] = useState<string | null>(() => {
     return localStorage.getItem(perfilStorageKey);
   });
+  // true enquanto buscarPerfil está em andamento; garante que componentes só
+  // carreguem dados após o perfilFinanceiroId estar estabilizado pelo AppLayout
+  const [authLoading, setAuthLoading] = useState(() => !!getStoredSession());
 
   useEffect(() => {
-    if (!session) return;
+    if (!session) {
+      setAuthLoading(false);
+      return;
+    }
 
     let ignore = false;
+    setAuthLoading(true);
 
     authApi
       .buscarPerfil()
@@ -76,6 +85,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .catch(() => {
         // Mantem a sessao atual se o refresh do perfil falhar momentaneamente.
+      })
+      .finally(() => {
+        if (!ignore) setAuthLoading(false);
       });
 
     return () => {
@@ -83,15 +95,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [session?.token]);
 
+  const selecionarPerfilFinanceiro = useCallback((perfilId: string | null) => {
+    setPerfilFinanceiroId(perfilId);
+
+    if (perfilId) {
+      localStorage.setItem(perfilStorageKey, perfilId);
+    } else {
+      localStorage.removeItem(perfilStorageKey);
+    }
+  }, []);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem(storageKey);
+    localStorage.removeItem(perfilStorageKey);
+    setPerfilFinanceiroId(null);
+    setSession(null);
+  }, []);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       session,
+      authLoading,
       async login(payload) {
+        setAuthLoading(true);
         const data = await authApi.login(payload);
         localStorage.setItem(storageKey, JSON.stringify(data));
         setSession(data);
       },
       async loginGoogle(payload) {
+        setAuthLoading(true);
         const data = await authApi.loginGoogle(payload);
         localStorage.setItem(storageKey, JSON.stringify(data));
         setSession(data);
@@ -130,23 +162,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       },
       perfilFinanceiroId,
-      selecionarPerfilFinanceiro(perfilId) {
-        setPerfilFinanceiroId(perfilId);
-
-        if (perfilId) {
-          localStorage.setItem(perfilStorageKey, perfilId);
-        } else {
-          localStorage.removeItem(perfilStorageKey);
-        }
-      },
-      logout() {
-        localStorage.removeItem(storageKey);
-        localStorage.removeItem(perfilStorageKey);
-        setPerfilFinanceiroId(null);
-        setSession(null);
-      },
+      selecionarPerfilFinanceiro,
+      logout,
     }),
-    [perfilFinanceiroId, session],
+    [perfilFinanceiroId, session, authLoading, selecionarPerfilFinanceiro, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -40,8 +40,23 @@ export type CriarDespesaPayload = {
   cartaoCreditoId?: string | null;
   mes?: string | null;
   dataVencimento?: string | null;
+  paga?: boolean;
   fixa?: boolean;
   numeroParcelas?: number;
+};
+
+export type FaturaItemExtraido = {
+  nome: string;
+  valor: number;
+  categoria?: string | null;
+};
+
+export type AnalisarFaturaPayload = {
+  texto: string;
+};
+
+export type AnalisarFaturaResponse = {
+  itens: FaturaItemExtraido[];
 };
 
 export type EditarDespesaPayload = Partial<CriarDespesaPayload>;

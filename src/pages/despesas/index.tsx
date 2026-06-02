@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   CalendarDays,
   CreditCard,
+  FileUp,
   Filter,
   Loader2,
   PencilLine,
@@ -39,6 +40,7 @@ import { cn } from "../../lib/utils";
 import { pageVariants, sectionVariants, listContainerVariants, listItemVariants } from "../../lib/motion";
 import { useAuth } from "../../providers/auth-provider";
 import { DespesaForm } from "./despesa-form";
+import { ImportarFaturaDialog } from "./importar-fatura-dialog";
 import { getCategoryColor, getCategoryIcon } from "./category-icons";
 import {
   formaPagamentoLabel,
@@ -78,11 +80,16 @@ export function DespesasPage() {
   const [status, setStatus] = useState<StatusFilter>("todas");
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const [cadastroAberto, setCadastroAberto] = useState(false);
   const [despesaEditando, setDespesaEditando] = useState<Despesa | null>(null);
   const [despesaExcluindo, setDespesaExcluindo] = useState<Despesa | null>(null);
   const [escopoExclusao, setEscopoExclusao] = useState<"mes" | "todas">("mes");
   const [error, setError] = useState("");
+  const [importarFaturaAberto, setImportarFaturaAberto] = useState(false);
 
   const filtrosAtivos = [formaPagamento, cartaoId, status !== "todas" ? status : ""].filter(Boolean).length;
 
@@ -178,6 +185,45 @@ export function DespesasPage() {
     }
   }
 
+  function toggleSelectionMode() {
+    setSelectionMode((v) => !v);
+    setSelectedIds(new Set());
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function excluirSelecionadas() {
+    setBulkDeleting(true);
+    try {
+      await Promise.all(
+        [...selectedIds].map((id) => {
+          const d = despesas.find((x) => x.id === id);
+          return despesasApi.excluir(id, {
+            escopo: d?.parcelamentoId || d?.fixa ? "mes" : undefined,
+            mes,
+          });
+        }),
+      );
+      const count = selectedIds.size;
+      toast.success(`${count} ${count === 1 ? "despesa excluída" : "despesas excluídas"} com sucesso.`);
+      setBulkDeleteOpen(false);
+      setSelectionMode(false);
+      setSelectedIds(new Set());
+      await carregarDespesas();
+    } catch (requestError) {
+      toast.error(getApiErrorMessage(requestError));
+    } finally {
+      setBulkDeleting(false);
+    }
+  }
+
   useEffect(() => {
     void carregarDespesas();
     cartoesApi.listar().then((d) => setCartoes(d.cartoes)).catch(() => {});
@@ -199,14 +245,24 @@ export function DespesasPage() {
           title="Despesas"
           subtitle={formatMonthName(mes)}
           right={
-            <Button
-              variant="destructive"
-              className="h-10 gap-2"
-              onClick={() => setCadastroAberto(true)}
-            >
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Nova despesa</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="h-10 gap-2"
+                onClick={() => setImportarFaturaAberto(true)}
+              >
+                <FileUp className="h-4 w-4" />
+                <span className="hidden sm:inline">Importar fatura</span>
+              </Button>
+              <Button
+                variant="destructive"
+                className="h-10 gap-2"
+                onClick={() => setCadastroAberto(true)}
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Nova despesa</span>
+              </Button>
+            </div>
           }
         />
       </motion.div>
@@ -352,7 +408,7 @@ export function DespesasPage() {
 
                         <div className="relative flex items-center gap-2 px-3 py-2 text-white">
                           {/* Chip mini */}
-                          <div className="h-3.5 w-5 shrink-0 overflow-hidden rounded-[2px] bg-amber-300/90">
+                          <div className="h-3.5 w-5 shrink-0 overflow-hidden rounded-xs bg-amber-300/90">
                             <div className="h-px w-full bg-amber-700/40 mt-[45%]" />
                           </div>
                           <span className="text-[11px] font-bold tracking-wide truncate max-w-20">
@@ -421,13 +477,66 @@ export function DespesasPage() {
       {/* ── LIST ── */}
       <motion.div variants={sectionVariants} className="overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
-              <ReceiptText className="h-3.5 w-3.5" />
-            </div>
-            <p className="text-sm font-semibold">Contas cadastradas</p>
-          </div>
-          <p className="text-xs text-muted-foreground">{despesas.length} {despesas.length === 1 ? "item" : "itens"}</p>
+          {selectionMode ? (
+            <>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 cursor-pointer accent-primary"
+                  checked={selectedIds.size === despesas.length && despesas.length > 0}
+                  ref={(el) => { if (el) el.indeterminate = selectedIds.size > 0 && selectedIds.size < despesas.length; }}
+                  onChange={() =>
+                    selectedIds.size === despesas.length
+                      ? setSelectedIds(new Set())
+                      : setSelectedIds(new Set(despesas.map((d) => d.id)))
+                  }
+                />
+                <p className="text-sm font-semibold">
+                  {selectedIds.size > 0
+                    ? `${selectedIds.size} selecionada${selectedIds.size !== 1 ? "s" : ""}`
+                    : "Selecionar itens"}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {selectedIds.size > 0 && (
+                  <Button
+                    variant="destructive"
+                    className="h-8 gap-1.5 px-3 text-xs"
+                    onClick={() => setBulkDeleteOpen(true)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Excluir {selectedIds.size}
+                  </Button>
+                )}
+                <Button variant="outline" className="h-8 px-3 text-xs" onClick={toggleSelectionMode}>
+                  Cancelar
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
+                  <ReceiptText className="h-3.5 w-3.5" />
+                </div>
+                <p className="text-sm font-semibold">Contas cadastradas</p>
+              </div>
+              <div className="flex items-center gap-3">
+                {despesas.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={toggleSelectionMode}
+                    className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Selecionar
+                  </button>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  {despesas.length} {despesas.length === 1 ? "item" : "itens"}
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         {loading && (
@@ -463,12 +572,25 @@ export function DespesasPage() {
                   <motion.div
                     key={despesa.id}
                     variants={listItemVariants}
+                    role={selectionMode ? "button" : undefined}
+                    onClick={selectionMode ? () => toggleSelect(despesa.id) : undefined}
                     className={cn(
                       "flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between",
                       despesa.vencida && !despesa.paga && "bg-destructive/4",
+                      selectionMode && "cursor-pointer select-none",
+                      selectionMode && selectedIds.has(despesa.id) && "bg-primary/5 hover:bg-primary/8",
                     )}
                   >
-                    <div className="flex gap-3">
+                    <div className="flex items-center gap-3">
+                      {selectionMode && (
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 shrink-0 cursor-pointer accent-primary"
+                          checked={selectedIds.has(despesa.id)}
+                          onChange={() => toggleSelect(despesa.id)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      )}
                       <div
                         className={cn(
                           "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
@@ -549,68 +671,70 @@ export function DespesasPage() {
                         </p>
                       </div>
 
-                      <div className="flex gap-1.5">
-                        <Button
-                          aria-label={despesa.paga ? "Despesa paga" : "Marcar despesa como paga"}
-                          className={cn(
-                            "h-9 w-9 rounded-lg px-0",
-                            despesa.paga
-                              ? "border-emerald-500/35 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-400"
-                              : "border-rose-500/25 bg-rose-500/10 text-rose-700 hover:bg-rose-500/15 dark:text-rose-400",
-                          )}
-                          title={
-                            despesa.paga
-                              ? "Despesa paga"
-                              : "Despesa pendente. Clique para marcar como paga"
-                          }
-                          variant="outline"
-                          onClick={() => alternarPagamento(despesa)}
-                          disabled={busyId === despesa.id}
-                        >
-                          {busyId === despesa.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : despesa.paga ? (
-                            <ThumbsUp className="h-4 w-4 fill-current" />
-                          ) : (
-                            <ThumbsDown className="h-4 w-4 fill-current" />
-                          )}
-                        </Button>
-                        <Button
-                          aria-label="Editar despesa"
-                          className="h-9 w-9 rounded-lg border-blue-500/25 px-0 text-blue-700 hover:bg-blue-500/10 dark:text-blue-400"
-                          title="Editar"
-                          variant="outline"
-                          onClick={() =>
-                            setDespesaEditando(
-                              despesa.fixa
-                                ? {
-                                    ...despesa,
-                                    mesReferencia: `${mes}-01T00:00:00.000Z`,
-                                    dataVencimento: ajustarDataParaMes(
-                                      despesa.dataVencimento,
-                                      mes,
-                                    ),
-                                  }
-                                : despesa,
-                            )
-                          }
-                        >
-                          <PencilLine className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          aria-label="Excluir despesa"
-                          className="h-9 w-9 rounded-lg border-destructive/25 bg-destructive/5 px-0 text-destructive hover:bg-destructive/10"
-                          title="Excluir"
-                          variant="outline"
-                          onClick={() => {
-                            setEscopoExclusao("mes");
-                            setDespesaExcluindo(despesa);
-                          }}
-                          disabled={busyId === despesa.id}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      {!selectionMode && (
+                        <div className="flex gap-1.5">
+                          <Button
+                            aria-label={despesa.paga ? "Despesa paga" : "Marcar despesa como paga"}
+                            className={cn(
+                              "h-9 w-9 rounded-lg px-0",
+                              despesa.paga
+                                ? "border-emerald-500/35 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-400"
+                                : "border-rose-500/25 bg-rose-500/10 text-rose-700 hover:bg-rose-500/15 dark:text-rose-400",
+                            )}
+                            title={
+                              despesa.paga
+                                ? "Despesa paga"
+                                : "Despesa pendente. Clique para marcar como paga"
+                            }
+                            variant="outline"
+                            onClick={() => alternarPagamento(despesa)}
+                            disabled={busyId === despesa.id}
+                          >
+                            {busyId === despesa.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : despesa.paga ? (
+                              <ThumbsUp className="h-4 w-4 fill-current" />
+                            ) : (
+                              <ThumbsDown className="h-4 w-4 fill-current" />
+                            )}
+                          </Button>
+                          <Button
+                            aria-label="Editar despesa"
+                            className="h-9 w-9 rounded-lg border-blue-500/25 px-0 text-blue-700 hover:bg-blue-500/10 dark:text-blue-400"
+                            title="Editar"
+                            variant="outline"
+                            onClick={() =>
+                              setDespesaEditando(
+                                despesa.fixa
+                                  ? {
+                                      ...despesa,
+                                      mesReferencia: `${mes}-01T00:00:00.000Z`,
+                                      dataVencimento: ajustarDataParaMes(
+                                        despesa.dataVencimento,
+                                        mes,
+                                      ),
+                                    }
+                                  : despesa,
+                              )
+                            }
+                          >
+                            <PencilLine className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            aria-label="Excluir despesa"
+                            className="h-9 w-9 rounded-lg border-destructive/25 bg-destructive/5 px-0 text-destructive hover:bg-destructive/10"
+                            title="Excluir"
+                            variant="outline"
+                            onClick={() => {
+                              setEscopoExclusao("mes");
+                              setDespesaExcluindo(despesa);
+                            }}
+                            disabled={busyId === despesa.id}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 );
@@ -666,6 +790,75 @@ export function DespesasPage() {
               }}
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── DIALOG: importar fatura ── */}
+      <ImportarFaturaDialog
+        open={importarFaturaAberto}
+        onOpenChange={setImportarFaturaAberto}
+        cartoes={cartoes}
+        defaultMes={mes}
+        onSuccess={() => void carregarDespesas()}
+      />
+
+      {/* ── DIALOG: exclusão em massa ── */}
+      <Dialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Excluir despesas selecionadas</DialogTitle>
+            <DialogDescription>
+              Esta ação é irreversível. Despesas fixas e parceladas terão apenas a ocorrência deste mês removida.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Itens selecionados</span>
+              <span className="font-semibold">{selectedIds.size}</span>
+            </div>
+            <div className="mt-1 flex items-center justify-between">
+              <span className="text-muted-foreground">Total</span>
+              <strong className="text-base font-bold text-red-500">
+                {formatCurrency(
+                  despesas
+                    .filter((d) => selectedIds.has(d.id))
+                    .reduce((sum, d) => sum + d.valor, 0),
+                )}
+              </strong>
+            </div>
+
+            {despesas.some(
+              (d) => selectedIds.has(d.id) && (d.fixa || d.parcelamentoId),
+            ) && (
+              <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-500/25 bg-amber-500/8 p-3 text-amber-700 dark:text-amber-400">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <p className="text-xs leading-relaxed">
+                  A seleção contém despesas fixas ou parceladas. Apenas a ocorrência deste mês será removida — as demais permanecerão.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setBulkDeleteOpen(false)}
+              disabled={bulkDeleting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={excluirSelecionadas}
+              disabled={bulkDeleting}
+            >
+              {bulkDeleting && <Loader2 className="h-4 w-4 animate-spin" />}
+              Excluir {selectedIds.size} {selectedIds.size === 1 ? "despesa" : "despesas"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
