@@ -11,6 +11,7 @@ import {
   Plus,
   ReceiptText,
   Repeat2,
+  Search,
   ThumbsDown,
   ThumbsUp,
   Trash2,
@@ -95,8 +96,13 @@ export function DespesasPage() {
   const [error, setError] = useState("");
   const [importarFaturaAberto, setImportarFaturaAberto] = useState(false);
   const [premiumGateAberto, setPremiumGateAberto] = useState(false);
+  const [busca, setBusca] = useState("");
 
-  const filtrosAtivos = [formaPagamento, cartaoId, status !== "todas" ? status : ""].filter(Boolean).length;
+  const despesasFiltradas = busca.trim()
+    ? despesas.filter((d) => d.nome.toLowerCase().includes(busca.trim().toLowerCase()))
+    : despesas;
+
+  const filtrosAtivos = [formaPagamento, cartaoId, status !== "todas" ? status : "", busca.trim()].filter(Boolean).length;
 
   const despesaExcluindoParcelada = Boolean(despesaExcluindo?.parcelamentoId);
   const despesaExcluindoRecorrente = Boolean(despesaExcluindo?.fixa);
@@ -142,6 +148,7 @@ export function DespesasPage() {
     setFormaPagamento("");
     setCartaoId("");
     setStatus("todas");
+    setBusca("");
     void carregarDespesas(mes, "", "todas", "");
   }
 
@@ -368,6 +375,32 @@ export function DespesasPage() {
             </Select>
           </div>
 
+          <div className="h-10 w-px bg-border/60" />
+
+          {/* Busca por nome */}
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Buscar despesa</span>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Nome da despesa..."
+                className="h-8 w-52 rounded-lg border border-input bg-background pl-8 pr-3 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50"
+              />
+              {busca && (
+                <button
+                  type="button"
+                  onClick={() => setBusca("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Cartão de crédito — mini-cards com cor correspondente */}
           {cartoes.length > 0 && formaPagamento === "CARTAO_CREDITO" && (
             <>
@@ -492,12 +525,12 @@ export function DespesasPage() {
                 <input
                   type="checkbox"
                   className="h-4 w-4 cursor-pointer accent-primary"
-                  checked={selectedIds.size === despesas.length && despesas.length > 0}
-                  ref={(el) => { if (el) el.indeterminate = selectedIds.size > 0 && selectedIds.size < despesas.length; }}
+                  checked={selectedIds.size === despesasFiltradas.length && despesasFiltradas.length > 0}
+                  ref={(el) => { if (el) el.indeterminate = selectedIds.size > 0 && selectedIds.size < despesasFiltradas.length; }}
                   onChange={() =>
-                    selectedIds.size === despesas.length
+                    selectedIds.size === despesasFiltradas.length
                       ? setSelectedIds(new Set())
-                      : setSelectedIds(new Set(despesas.map((d) => d.id)))
+                      : setSelectedIds(new Set(despesasFiltradas.map((d) => d.id)))
                   }
                 />
                 <p className="text-sm font-semibold">
@@ -541,7 +574,9 @@ export function DespesasPage() {
                   </button>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  {despesas.length} {despesas.length === 1 ? "item" : "itens"}
+                  {busca.trim() && despesasFiltradas.length !== despesas.length
+                    ? `${despesasFiltradas.length} de ${despesas.length} ${despesas.length === 1 ? "item" : "itens"}`
+                    : `${despesas.length} ${despesas.length === 1 ? "item" : "itens"}`}
                 </p>
               </div>
             </>
@@ -567,14 +602,31 @@ export function DespesasPage() {
           />
         )}
 
-        {!loading && despesas.length > 0 && (
+        {!loading && despesas.length > 0 && despesasFiltradas.length === 0 && (
+          <EmptyState
+            icon={Search}
+            title="Nenhuma despesa encontrada."
+            description={`Nenhuma despesa com o nome "${busca}".`}
+            action={
+              <button
+                type="button"
+                onClick={() => setBusca("")}
+                className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+              >
+                Limpar busca
+              </button>
+            }
+          />
+        )}
+
+        {!loading && despesasFiltradas.length > 0 && (
           <motion.div
             variants={listContainerVariants}
             initial="hidden"
             animate="show"
             className="divide-y divide-border/60"
           >
-            {despesas.map((despesa) => {
+            {despesasFiltradas.map((despesa) => {
                 const CategoryIcon = getCategoryIcon(despesa.categoria);
 
                 return (
