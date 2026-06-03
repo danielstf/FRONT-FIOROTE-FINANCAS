@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import {
   HeartHandshake,
   Lightbulb,
   Loader2,
+  Mail,
   MessageCircleWarning,
   MessageSquareText,
   Send,
@@ -64,7 +65,7 @@ export function SugestoesPage() {
   const [mensagem, setMensagem] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function enviarSugestao(event: FormEvent<HTMLFormElement>) {
+  async function enviarSugestao(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const tituloNormalizado = normalizeRequiredText(titulo);
@@ -98,9 +99,31 @@ export function SugestoesPage() {
       <motion.div variants={sectionVariants}>
         <PageHeader
           icon={MessageSquareText}
-          title="Atendimento"
+          title="Suporte"
           subtitle="Envie sugestões, reclamações ou elogios"
         />
+      </motion.div>
+
+      {/* Contato por e-mail */}
+      <motion.div variants={sectionVariants} className="overflow-hidden rounded-2xl border border-border bg-card">
+        <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+            <Mail className="h-3.5 w-3.5" />
+          </div>
+          <p className="text-sm font-semibold">Contato por e-mail</p>
+        </div>
+        <div className="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            Prefere enviar um e-mail diretamente? Entre em contato com nossa equipe.
+          </p>
+          <a
+            href="mailto:fioroteaplicativos@gmail.com"
+            className="mt-3 inline-flex shrink-0 items-center gap-2 rounded-xl border border-blue-500/25 bg-blue-500/8 px-4 py-2.5 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-500/15 dark:text-blue-400 sm:mt-0"
+          >
+            <Mail className="h-4 w-4" />
+            fioroteaplicativos@gmail.com
+          </a>
+        </div>
       </motion.div>
 
       {/* Form card */}

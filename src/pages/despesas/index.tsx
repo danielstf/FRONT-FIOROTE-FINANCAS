@@ -369,7 +369,7 @@ export function DespesasPage() {
           </div>
 
           {/* Cartão de crédito — mini-cards com cor correspondente */}
-          {cartoes.length > 0 && (formaPagamento === "CARTAO_CREDITO" || formaPagamento === "") && (
+          {cartoes.length > 0 && formaPagamento === "CARTAO_CREDITO" && (
             <>
               <div className="h-10 w-px bg-border/60" />
               <div className="flex flex-col gap-1.5">

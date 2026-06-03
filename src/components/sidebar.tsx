@@ -32,7 +32,7 @@ const menuItems = [
     section: "Conta",
     badge: "plan",
   },
-  { title: "Atendimento", href: "/app/sugestoes", icon: MessageSquareText },
+  { title: "Suporte", href: "/app/sugestoes", icon: MessageSquareText },
   { title: "Configurações", href: "/app/configuracoes", icon: Settings },
 ];
 
@@ -107,24 +107,22 @@ export function Sidebar({
             <item.icon
               className={cn(
                 "h-3.75 w-3.75 shrink-0 transition-colors",
-                isActive
-                  ? "text-primary"
-                  : "text-sidebar-foreground/45 group-hover:text-sidebar-foreground/80",
+                item.badge === "plan" && isVip
+                  ? "text-amber-400"
+                  : isActive
+                    ? "text-primary"
+                    : "text-sidebar-foreground/45 group-hover:text-sidebar-foreground/80",
               )}
             />
             <span className="flex-1 leading-none">{item.title}</span>
             {item.badge === "plan" && (
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[9px] font-black leading-none tracking-wide",
-                  isVip
-                    ? "bg-amber-400/15 text-amber-400"
-                    : "bg-sidebar-accent text-sidebar-foreground/50",
-                )}
-              >
-                <Crown className="h-2.5 w-2.5" />
-                {planBadge}
-              </span>
+              isVip ? (
+                <Crown className="h-3.5 w-3.5 fill-amber-400/30 text-amber-400" />
+              ) : (
+                <span className="inline-flex items-center rounded-md bg-sidebar-foreground/8 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-sidebar-foreground/40">
+                  Free
+                </span>
+              )
             )}
           </>
         )}
