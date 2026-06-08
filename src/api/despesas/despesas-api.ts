@@ -1,7 +1,5 @@
 import { api } from "../client";
 import type {
-  AnalisarFaturaPayload,
-  AnalisarFaturaResponse,
   CriarDespesaPayload,
   CriarDespesaResponse,
   Despesa,
@@ -52,8 +50,4 @@ export const despesasApi = {
     await api.delete(`/despesas/${despesaId}`, { params });
   },
 
-  async analisarFatura(payload: AnalisarFaturaPayload): Promise<AnalisarFaturaResponse> {
-    const { data } = await api.post<AnalisarFaturaResponse>("/despesas/analisar-fatura", payload);
-    return data;
-  },
 };

@@ -45,20 +45,6 @@ export type CriarDespesaPayload = {
   numeroParcelas?: number;
 };
 
-export type FaturaItemExtraido = {
-  nome: string;
-  valor: number;
-  categoria?: string | null;
-};
-
-export type AnalisarFaturaPayload = {
-  texto: string;
-};
-
-export type AnalisarFaturaResponse = {
-  itens: FaturaItemExtraido[];
-};
-
 export type EditarDespesaPayload = Partial<CriarDespesaPayload>;
 
 export type ListarDespesasParams = {

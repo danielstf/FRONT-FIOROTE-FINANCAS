@@ -3,8 +3,6 @@ import {
   AlertTriangle,
   CalendarDays,
   CreditCard,
-  Crown,
-  FileUp,
   Filter,
   Loader2,
   PencilLine,
@@ -39,12 +37,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../components/ui/dialog";
-import { hasPremiumAtivo } from "../../lib/premium";
+
 import { cn } from "../../lib/utils";
 import { pageVariants, sectionVariants, listContainerVariants, listItemVariants } from "../../lib/motion";
 import { useAuth } from "../../providers/auth-provider";
 import { DespesaForm } from "./despesa-form";
-import { ImportarFaturaDialog } from "./importar-fatura-dialog";
 import { getCategoryColor, getCategoryIcon } from "./category-icons";
 import {
   formaPagamentoLabel,
@@ -71,8 +68,7 @@ function ajustarDataParaMes(dataIso: string | null, mesDestino: string) {
 }
 
 export function DespesasPage() {
-  const { perfilFinanceiroId, session } = useAuth();
-  const isPremium = hasPremiumAtivo(session?.usuario);
+  const { perfilFinanceiroId } = useAuth();
   const [mes, setMes] = useState(getCurrentMonth);
   const [despesas, setDespesas] = useState<Despesa[]>([]);
   const [total, setTotal] = useState(0);
@@ -94,8 +90,6 @@ export function DespesasPage() {
   const [despesaExcluindo, setDespesaExcluindo] = useState<Despesa | null>(null);
   const [escopoExclusao, setEscopoExclusao] = useState<"mes" | "todas">("mes");
   const [error, setError] = useState("");
-  const [importarFaturaAberto, setImportarFaturaAberto] = useState(false);
-  const [premiumGateAberto, setPremiumGateAberto] = useState(false);
   const [busca, setBusca] = useState("");
 
   const despesasFiltradas = busca.trim()
@@ -257,28 +251,14 @@ export function DespesasPage() {
           title="Despesas"
           subtitle={formatMonthName(mes)}
           right={
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                className="h-10 gap-2"
-                onClick={() => isPremium ? setImportarFaturaAberto(true) : setPremiumGateAberto(true)}
-              >
-                {isPremium ? (
-                  <FileUp className="h-4 w-4" />
-                ) : (
-                  <Crown className="h-4 w-4 text-amber-400" />
-                )}
-                <span className="hidden sm:inline">Importar fatura</span>
-              </Button>
-              <Button
-                variant="destructive"
-                className="h-10 gap-2"
-                onClick={() => setCadastroAberto(true)}
-              >
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Nova despesa</span>
-              </Button>
-            </div>
+            <Button
+              variant="destructive"
+              className="h-10 gap-2"
+              onClick={() => setCadastroAberto(true)}
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Nova despesa</span>
+            </Button>
           }
         />
       </motion.div>
@@ -851,43 +831,6 @@ export function DespesasPage() {
               }}
             />
           )}
-        </DialogContent>
-      </Dialog>
-
-      {/* ── DIALOG: importar fatura ── */}
-      <ImportarFaturaDialog
-        open={importarFaturaAberto}
-        onOpenChange={setImportarFaturaAberto}
-        cartoes={cartoes}
-        defaultMes={mes}
-        onSuccess={() => void carregarDespesas()}
-      />
-
-      {/* ── DIALOG: premium gate ── */}
-      <Dialog open={premiumGateAberto} onOpenChange={setPremiumGateAberto}>
-        <DialogContent className="max-w-sm text-center">
-          <div className="flex flex-col items-center gap-4 py-2">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-400/15">
-              <Crown className="h-7 w-7 text-amber-400" />
-            </div>
-            <div>
-              <DialogTitle className="text-lg">Recurso exclusivo VIP</DialogTitle>
-              <DialogDescription className="mt-1.5 text-sm leading-relaxed">
-                A importação de faturas em PDF está disponível apenas para assinantes do plano VIP. Faça upgrade e automatize o lançamento das suas despesas.
-              </DialogDescription>
-            </div>
-            <div className="flex w-full flex-col gap-2">
-              <Button asChild variant="outline" className="h-10 w-full gap-2 border-amber-400/40 bg-amber-400/8 font-semibold text-amber-500 hover:bg-amber-400/15 hover:text-amber-500">
-                <Link to="/app/premium">
-                  <Crown className="h-4 w-4" />
-                  Ver plano VIP
-                </Link>
-              </Button>
-              <Button variant="ghost" className="h-9 w-full text-xs text-muted-foreground" onClick={() => setPremiumGateAberto(false)}>
-                Agora não
-              </Button>
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
 
