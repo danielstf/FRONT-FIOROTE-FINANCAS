@@ -1,3 +1,33 @@
+export type AdminUsuarioDetalhe = {
+  id: string;
+  nome: string;
+  email: string;
+  plano: "FREE" | "PREMIUM";
+  role: "ADMIN" | "USER";
+  criadoEm: string;
+  premiumExpiraEm: string | null;
+  exibirAnuncios: boolean;
+  loginGoogle: boolean;
+  contagens: {
+    despesas: number;
+    receitas: number;
+    perfisFinanceiros: number;
+    cartoesCredito: number;
+    pagamentosPremium: number;
+  };
+  pagamentos: Array<{
+    id: string;
+    tipo: string;
+    status: string;
+    valor: number;
+    criadoEm: string;
+  }>;
+};
+
+export type AdminBuscaUsuarioResponse = {
+  usuarios: AdminUsuarioDetalhe[];
+};
+
 export type AdminResumoResponse = {
   usuarios: {
     total: number;
