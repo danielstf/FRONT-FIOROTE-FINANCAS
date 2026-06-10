@@ -84,6 +84,8 @@ export function DespesasPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkPagarOpen, setBulkPagarOpen] = useState(false);
+  const [bulkPagando, setBulkPagando] = useState(false);
   const [cadastroAberto, setCadastroAberto] = useState(false);
   const [despesaEditando, setDespesaEditando] = useState<Despesa | null>(null);
   const [despesaExcluindo, setDespesaExcluindo] = useState<Despesa | null>(null);
@@ -202,6 +204,25 @@ export function DespesasPage() {
       else next.add(id);
       return next;
     });
+  }
+
+  async function marcarSelecionadasComoPagas() {
+    setBulkPagando(true);
+    try {
+      await Promise.all(
+        [...selectedIds].map((id) => despesasApi.alterarPagamento(id, true, mes)),
+      );
+      const count = selectedIds.size;
+      toast.success(`${count} ${count === 1 ? "despesa marcada" : "despesas marcadas"} como pagas.`);
+      setBulkPagarOpen(false);
+      setSelectionMode(false);
+      setSelectedIds(new Set());
+      await carregarDespesas();
+    } catch (requestError) {
+      toast.error(getApiErrorMessage(requestError));
+    } finally {
+      setBulkPagando(false);
+    }
   }
 
   async function excluirSelecionadas() {
@@ -520,14 +541,24 @@ export function DespesasPage() {
               </div>
               <div className="flex items-center gap-2">
                 {selectedIds.size > 0 && (
-                  <Button
-                    variant="destructive"
-                    className="h-8 gap-1.5 px-3 text-xs"
-                    onClick={() => setBulkDeleteOpen(true)}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Excluir {selectedIds.size}
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      className="h-8 gap-1.5 px-3 text-xs border-emerald-500/35 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-400"
+                      onClick={() => setBulkPagarOpen(true)}
+                    >
+                      <ThumbsUp className="h-3.5 w-3.5" />
+                      Pagar {selectedIds.size}
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="h-8 gap-1.5 px-3 text-xs"
+                      onClick={() => setBulkDeleteOpen(true)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Excluir {selectedIds.size}
+                    </Button>
+                  </>
                 )}
                 <Button variant="outline" className="h-8 px-3 text-xs" onClick={toggleSelectionMode}>
                   Cancelar
@@ -830,6 +861,56 @@ export function DespesasPage() {
               }}
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── DIALOG: marcar como pagas em massa ── */}
+      <Dialog open={bulkPagarOpen} onOpenChange={setBulkPagarOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Marcar despesas como pagas</DialogTitle>
+            <DialogDescription>
+              As despesas selecionadas serão marcadas como pagas neste mês.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Itens selecionados</span>
+              <span className="font-semibold">{selectedIds.size}</span>
+            </div>
+            <div className="mt-1 flex items-center justify-between">
+              <span className="text-muted-foreground">Total</span>
+              <strong className="text-base font-bold text-emerald-600 dark:text-emerald-400">
+                {formatCurrency(
+                  despesas
+                    .filter((d) => selectedIds.has(d.id))
+                    .reduce((sum, d) => sum + d.valor, 0),
+                )}
+              </strong>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setBulkPagarOpen(false)}
+              disabled={bulkPagando}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              className="gap-2 bg-emerald-600 text-white hover:bg-emerald-700"
+              onClick={marcarSelecionadasComoPagas}
+              disabled={bulkPagando}
+            >
+              {bulkPagando && <Loader2 className="h-4 w-4 animate-spin" />}
+              <ThumbsUp className="h-4 w-4" />
+              Marcar {selectedIds.size} como {selectedIds.size === 1 ? "paga" : "pagas"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

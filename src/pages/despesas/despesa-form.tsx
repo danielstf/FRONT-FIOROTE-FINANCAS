@@ -17,6 +17,7 @@ import type { CartaoCredito } from "../../api/cartoes/types";
 import type { Despesa, FormaPagamentoDespesa } from "../../api/despesas/types";
 import { despesasApi } from "../../api/despesas/despesas-api";
 import { getApiErrorMessage } from "../../api/errors";
+import { DatePicker } from "../../components/date-picker";
 import { MonthPicker } from "../../components/month-picker";
 import { Button } from "../../components/ui/button";
 import {
@@ -377,11 +378,10 @@ export function DespesaForm({
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="dataVencimento">Vencimento</Label>
-                <Input
+                <DatePicker
                   id="dataVencimento"
-                  type="date"
                   value={dataVencimento}
-                  onChange={(event) => setDataVencimento(event.target.value)}
+                  onChange={setDataVencimento}
                 />
               </div>
               <div className="space-y-1.5">
