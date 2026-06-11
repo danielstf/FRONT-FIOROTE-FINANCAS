@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BookOpen,
   CreditCard,
   Crown,
   Home,
@@ -32,6 +33,7 @@ const menuItems = [
     section: "Conta",
     badge: "plan",
   },
+  { title: "Tutoriais", href: "/app/tutoriais", icon: BookOpen },
   { title: "Suporte", href: "/app/sugestoes", icon: MessageSquareText },
   { title: "Configurações", href: "/app/configuracoes", icon: Settings },
 ];

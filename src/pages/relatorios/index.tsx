@@ -82,111 +82,170 @@ function formatMonth(value: string, withYear = true) {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-function excelValue(value: string | number | boolean | null | undefined) {
-  if (typeof value === "number") return String(value).replace(".", ",");
-  if (typeof value === "boolean") return value ? "Sim" : "Não";
-  return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+// ── SpreadsheetML (multi-aba com cores) ────────────────────────────────────
+
+function xe(s: string | null | undefined): string {
+  return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-function formatDateBR(value: string | null | undefined): string {
-  if (!value) return "—";
-  const m = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  return m ? `${m[3]}/${m[2]}/${m[1]}` : value;
+function brDate(v: string | null | undefined): string {
+  if (!v) return "";
+  const m = v.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : v;
 }
 
-function excelSummaryTable(linhas: MovimentoMensal[]) {
-  const hasEst = linhas.some((l) => l.projecao);
-  const nota = hasEst
-    ? `<p style="font-size:12px;color:#92400e;background:#fffbeb;border-left:3px solid #d97706;padding:6px 10px;margin:0 0 10px;">⚠ Linhas marcadas como <strong>Estimativa</strong> são projeções de meses futuros baseadas nos lançamentos fixos cadastrados.</p>`
-    : "";
-  const head = `<tr><th>Mês</th><th>Tipo</th><th>Receitas (R$)</th><th>Despesas (R$)</th><th>Saldo Final (R$)</th></tr>`;
-  const body = linhas.map((item) => {
-    const est = item.projecao;
-    const rowBg = est ? "background:#fffbeb;" : "";
-    const tipoStyle = est ? "color:#d97706;font-weight:700;" : "color:#16a34a;font-weight:700;";
-    const saldoColor = item.saldoFinal >= 0 ? "#16a34a" : "#dc2626";
-    return `<tr style="${rowBg}">
-      <td>${excelValue(formatMonth(item.mes))}</td>
-      <td style="${tipoStyle}">${est ? "Estimativa" : "Real"}</td>
-      <td style="color:#1d4ed8;font-weight:700;">${excelValue(item.receitas)}</td>
-      <td style="color:#dc2626;font-weight:700;">${excelValue(item.despesas)}</td>
-      <td style="color:${saldoColor};font-weight:700;">${excelValue(item.saldoFinal)}</td>
-    </tr>`;
-  }).join("");
-  return `<h2>Resumo Financeiro</h2>${nota}<table><thead>${head}</thead><tbody>${body}</tbody></table>`;
+type XCell = { v: string | number; t?: "s" | "n"; s?: string; span?: number };
+
+function xc(c: XCell): string {
+  const sa = c.s ? ` ss:StyleID="${c.s}"` : "";
+  const ma = c.span && c.span > 1 ? ` ss:MergeAcross="${c.span - 1}"` : "";
+  const type = c.t === "n" ? "Number" : "String";
+  const val = c.t === "n" ? c.v : xe(String(c.v));
+  return `<Cell${sa}${ma}><Data ss:Type="${type}">${val}</Data></Cell>`;
 }
 
-function excelChart(linhas: MovimentoMensal[]) {
-  const max = Math.max(...linhas.map((r) => Math.max(r.receitas, r.despesas)), 1);
-  const W = 180;
-  const body = linhas.map((item) => {
-    const rW = Math.max(2, Math.round((item.receitas / max) * W));
-    const dW = Math.max(2, Math.round((item.despesas / max) * W));
-    const est = item.projecao;
-    const tipoStyle = est ? "color:#d97706;font-weight:700;" : "color:#16a34a;font-weight:700;";
-    return `<tr>
-      <td>${excelValue(formatMonth(item.mes))}</td>
-      <td style="${tipoStyle}">${est ? "Estimativa" : "Real"}</td>
-      <td style="color:#1d4ed8;font-weight:700;text-align:right;">${excelValue(item.receitas)}</td>
-      <td style="padding:3px 6px;min-width:200px;"><div style="background:#2563eb;height:16px;width:${rW}px;border-radius:2px;"></div></td>
-      <td style="color:#dc2626;font-weight:700;text-align:right;">${excelValue(item.despesas)}</td>
-      <td style="padding:3px 6px;min-width:200px;"><div style="background:#dc2626;height:16px;width:${dW}px;border-radius:2px;"></div></td>
-    </tr>`;
-  }).join("");
-  const legend = `<p style="font-size:12px;margin:0 0 8px;"><span style="color:#1d4ed8;font-weight:700;">■ Receitas (azul)</span>&nbsp;&nbsp;<span style="color:#dc2626;font-weight:700;">■ Despesas (vermelho)</span>&nbsp;&nbsp;<span style="color:#16a34a;font-weight:700;">● Real</span>&nbsp;<span style="color:#d97706;font-weight:700;">● Estimativa</span></p>`;
-  return `<h2>Gráfico Receitas × Despesas</h2>${legend}<table><thead><tr><th>Mês</th><th>Tipo</th><th style="color:#1d4ed8;">Receitas (R$)</th><th style="color:#1d4ed8;">Barra</th><th style="color:#dc2626;">Despesas (R$)</th><th style="color:#dc2626;">Barra</th></tr></thead><tbody>${body}</tbody></table>`;
+function xrow(...cells: XCell[]): string {
+  return `<Row>${cells.map(xc).join("")}</Row>`;
 }
 
-type ReceitaExcel = { data?: string | null; nome: string; valor: number; fixa: boolean; parcelaAtual?: number | null; numeroParcelas?: number | null };
-type DespesaExcel = { dataVencimento?: string | null; nome: string; categoria?: string | null; formaPagamento?: string | null; valor: number; paga: boolean; fixa: boolean; parcelaAtual?: number | null; numeroParcelas?: number | null };
+function xgap(): string { return `<Row ss:Height="5"/>`; }
 
-function excelReceitasPorMes(grupos: Array<{ mes: string; receitas: ReceitaExcel[] }>) {
-  let body = "";
+function xws(name: string, rows: string[], cols?: number[]): string {
+  const colDefs = (cols ?? []).map((w) => `<Column ss:Width="${w}"/>`).join("");
+  return `<Worksheet ss:Name="${xe(name)}"><Table>${colDefs}${rows.join("")}</Table></Worksheet>`;
+}
+
+const XML_STYLES = `<Styles>
+<Style ss:ID="Default"><Alignment ss:Vertical="Center"/></Style>
+<Style ss:ID="sh"><Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="11"/><Interior ss:Color="#1e40af" ss:Pattern="Solid"/></Style>
+<Style ss:ID="sh_r"><Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="11"/><Interior ss:Color="#991b1b" ss:Pattern="Solid"/></Style>
+<Style ss:ID="sh_c"><Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="11"/><Interior ss:Color="#374151" ss:Pattern="Solid"/></Style>
+<Style ss:ID="sm_r"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#1e40af" ss:Pattern="Solid"/></Style>
+<Style ss:ID="sm_d"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#991b1b" ss:Pattern="Solid"/></Style>
+<Style ss:ID="sm_c"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#374151" ss:Pattern="Solid"/></Style>
+<Style ss:ID="st_r"><Font ss:Bold="1" ss:Color="#1e40af"/><Interior ss:Color="#dbeafe" ss:Pattern="Solid"/></Style>
+<Style ss:ID="st_d"><Font ss:Bold="1" ss:Color="#991b1b"/><Interior ss:Color="#fee2e2" ss:Pattern="Solid"/></Style>
+<Style ss:ID="st_c"><Font ss:Bold="1" ss:Color="#1e293b"/><Interior ss:Color="#f1f5f9" ss:Pattern="Solid"/></Style>
+<Style ss:ID="vr"><Font ss:Bold="1" ss:Color="#1d4ed8"/></Style>
+<Style ss:ID="vd"><Font ss:Bold="1" ss:Color="#dc2626"/></Style>
+<Style ss:ID="vp"><Font ss:Bold="1" ss:Color="#16a34a"/></Style>
+<Style ss:ID="vo"><Font ss:Bold="1" ss:Color="#d97706"/></Style>
+<Style ss:ID="alt"><Interior ss:Color="#f8fafc" ss:Pattern="Solid"/></Style>
+<Style ss:ID="it"><Font ss:Italic="1" ss:Color="#94a3b8"/></Style>
+<Style ss:ID="bd"><Font ss:Bold="1"/></Style>
+</Styles>`;
+
+function s(v: string | null | undefined, style?: string, span?: number): XCell {
+  return { v: String(v ?? ""), t: "s", s: style, span };
+}
+function n(v: number, style?: string, span?: number): XCell {
+  return { v: Math.round(v * 100) / 100, t: "n", s: style, span };
+}
+
+// ── Aba Resumo ─────────────────────────────────────────────────────────────
+
+function wsResumo(linhas: MovimentoMensal[]): string {
+  const rows: string[] = [];
+  rows.push(xrow(s("Mês", "sh"), s("Tipo", "sh"), s("Receitas (R$)", "sh"), s("Despesas (R$)", "sh"), s("Saldo Final (R$)", "sh")));
+  linhas.forEach((item, i) => {
+    const alt = i % 2 === 1 ? "alt" : undefined;
+    rows.push(xrow(s(formatMonth(item.mes), alt), s(item.projecao ? "Estimativa" : "Real", item.projecao ? "vo" : "vp"), n(item.receitas, "vr"), n(item.despesas, "vd"), n(item.saldoFinal, item.saldoFinal >= 0 ? "vp" : "vd")));
+  });
+  const tR = linhas.reduce((a, i) => a + i.receitas, 0);
+  const tD = linhas.reduce((a, i) => a + i.despesas, 0);
+  const tS = tR - tD;
+  rows.push(xrow(s("TOTAL", "st_r", 2), n(tR, "st_r"), n(tD, "st_d"), n(tS, tS >= 0 ? "vp" : "vd")));
+  return xws("Resumo", rows, [130, 90, 120, 120, 120]);
+}
+
+// ── Aba Receitas ───────────────────────────────────────────────────────────
+
+function wsReceitas(grupos: Array<{ mes: string; receitas: Array<{ data?: string | null; nome: string; valor: number; fixa: boolean }> }>): string {
+  const rows: string[] = [];
+  rows.push(xrow(s("Mês", "sh"), s("Data", "sh"), s("Nome", "sh"), s("Valor (R$)", "sh"), s("Fixa", "sh")));
   for (const { mes, receitas } of grupos) {
-    const total = receitas.reduce((s, r) => s + r.valor, 0);
-    body += `<tr style="background:#1e40af;"><td colspan="5" style="font-weight:700;color:#fff;padding:7px 10px;font-size:13px;">${excelValue(formatMonth(mes))} — ${receitas.length} lançamento(s)</td></tr>`;
+    rows.push(xrow(s(`${formatMonth(mes)} — ${receitas.length} lançamento(s)`, "sm_r", 5)));
     if (receitas.length === 0) {
-      body += `<tr><td colspan="5" style="color:#94a3b8;font-style:italic;">Nenhuma receita neste mês.</td></tr>`;
+      rows.push(xrow(s("Nenhuma receita neste mês.", "it", 5)));
     } else {
-      for (const r of receitas) {
-        body += `<tr>
-          <td>${formatDateBR(r.data)}</td>
-          <td>${excelValue(r.nome)}</td>
-          <td style="color:#1d4ed8;font-weight:700;">${excelValue(r.valor)}</td>
-          <td>${r.fixa ? "Sim" : "Não"}</td>
-          <td>${r.parcelaAtual && r.numeroParcelas ? `${r.parcelaAtual}/${r.numeroParcelas}` : "—"}</td>
-        </tr>`;
-      }
-      body += `<tr style="background:#dbeafe;"><td colspan="2" style="font-weight:700;text-align:right;color:#1e40af;">Total ${excelValue(formatMonth(mes, false))}:</td><td style="color:#1d4ed8;font-weight:700;" colspan="3">${excelValue(total)}</td></tr>`;
+      receitas.forEach((r, i) => {
+        const alt = i % 2 === 1 ? "alt" : undefined;
+        rows.push(xrow(s(formatMonth(mes, false), alt), s(brDate(r.data), alt), s(r.nome, alt), n(r.valor, "vr"), s(r.fixa ? "Sim" : "Não", alt)));
+      });
+      rows.push(xrow(s(`Total ${formatMonth(mes, false)}`, "st_r", 3), n(receitas.reduce((a, r) => a + r.valor, 0), "st_r"), s("", "st_r")));
     }
+    rows.push(xgap());
   }
-  return `<h2>Receitas por Mês</h2><table><thead><tr><th>Data</th><th>Nome</th><th>Valor</th><th>Fixa</th><th>Parcela</th></tr></thead><tbody>${body}</tbody></table>`;
+  return xws("Receitas", rows, [110, 90, 210, 120, 60]);
 }
 
-function excelDespesasPorMes(grupos: Array<{ mes: string; despesas: DespesaExcel[] }>) {
-  let body = "";
+// ── Aba Despesas ───────────────────────────────────────────────────────────
+
+function wsDespesas(grupos: Array<{ mes: string; despesas: Array<{ dataVencimento?: string | null; nome: string; categoria?: string | null; formaPagamento?: string | null; valor: number; paga: boolean; fixa: boolean }> }>): string {
+  const rows: string[] = [];
+  rows.push(xrow(s("Mês", "sh_r"), s("Vencimento", "sh_r"), s("Nome", "sh_r"), s("Categoria", "sh_r"), s("Forma Pagamento", "sh_r"), s("Valor (R$)", "sh_r"), s("Paga", "sh_r"), s("Fixa", "sh_r")));
   for (const { mes, despesas } of grupos) {
-    const total = despesas.reduce((s, d) => s + d.valor, 0);
-    body += `<tr style="background:#991b1b;"><td colspan="8" style="font-weight:700;color:#fff;padding:7px 10px;font-size:13px;">${excelValue(formatMonth(mes))} — ${despesas.length} lançamento(s)</td></tr>`;
+    rows.push(xrow(s(`${formatMonth(mes)} — ${despesas.length} lançamento(s)`, "sm_d", 8)));
     if (despesas.length === 0) {
-      body += `<tr><td colspan="8" style="color:#94a3b8;font-style:italic;">Nenhuma despesa neste mês.</td></tr>`;
+      rows.push(xrow(s("Nenhuma despesa neste mês.", "it", 8)));
     } else {
-      for (const d of despesas) {
-        body += `<tr>
-          <td>${formatDateBR(d.dataVencimento)}</td>
-          <td>${excelValue(d.nome)}</td>
-          <td>${excelValue(d.categoria)}</td>
-          <td>${excelValue(d.formaPagamento)}</td>
-          <td style="color:#dc2626;font-weight:700;">${excelValue(d.valor)}</td>
-          <td>${d.paga ? "Sim" : "Não"}</td>
-          <td>${d.fixa ? "Sim" : "Não"}</td>
-          <td>${d.parcelaAtual && d.numeroParcelas ? `${d.parcelaAtual}/${d.numeroParcelas}` : "—"}</td>
-        </tr>`;
-      }
-      body += `<tr style="background:#fee2e2;"><td colspan="4" style="font-weight:700;text-align:right;color:#991b1b;">Total ${excelValue(formatMonth(mes, false))}:</td><td style="color:#dc2626;font-weight:700;" colspan="4">${excelValue(total)}</td></tr>`;
+      despesas.forEach((d, i) => {
+        const alt = i % 2 === 1 ? "alt" : undefined;
+        rows.push(xrow(s(formatMonth(mes, false), alt), s(brDate(d.dataVencimento), alt), s(d.nome, alt), s(d.categoria ?? "", alt), s(d.formaPagamento ?? "", alt), n(d.valor, "vd"), s(d.paga ? "Sim" : "Não", d.paga ? "vp" : "vo"), s(d.fixa ? "Sim" : "Não", alt)));
+      });
+      rows.push(xrow(s(`Total ${formatMonth(mes, false)}`, "st_d", 5), n(despesas.reduce((a, d) => a + d.valor, 0), "st_d"), s("", "st_d"), s("", "st_d")));
+    }
+    rows.push(xgap());
+  }
+  return xws("Despesas", rows, [110, 90, 210, 130, 140, 120, 60, 60]);
+}
+
+// ── Abas por Cartão ────────────────────────────────────────────────────────
+
+type DespesaCartaoXml = { dataVencimento?: string | null; nome: string; categoria?: string | null; valor: number; paga: boolean; vencida: boolean; fixa: boolean; cartaoCreditoId: string | null; cartaoCredito: { id: string; nome: string } | null };
+
+function wsCartoes(grupos: Array<{ mes: string; despesas: DespesaCartaoXml[] }>): string[] {
+  const byCard = new Map<string, { nome: string; items: Array<{ mes: string } & DespesaCartaoXml> }>();
+  for (const { mes, despesas } of grupos) {
+    for (const d of despesas) {
+      if (!d.cartaoCreditoId || !d.cartaoCredito) continue;
+      const key = d.cartaoCreditoId;
+      if (!byCard.has(key)) byCard.set(key, { nome: d.cartaoCredito.nome, items: [] });
+      byCard.get(key)!.items.push({ mes, ...d });
     }
   }
-  return `<h2>Despesas por Mês</h2><table><thead><tr><th>Vencimento</th><th>Nome</th><th>Categoria</th><th>Forma</th><th>Valor</th><th>Paga</th><th>Fixa</th><th>Parcela</th></tr></thead><tbody>${body}</tbody></table>`;
+  if (byCard.size === 0) return [];
+
+  return [...byCard.values()].map(({ nome, items }) => {
+    const porMes = new Map<string, typeof items>();
+    for (const d of items) {
+      if (!porMes.has(d.mes)) porMes.set(d.mes, []);
+      porMes.get(d.mes)!.push(d);
+    }
+
+    const rows: string[] = [];
+    rows.push(xrow(s("Mês", "sh_c"), s("Vencimento", "sh_c"), s("Nome", "sh_c"), s("Categoria", "sh_c"), s("Valor (R$)", "sh_c"), s("Pago", "sh_c"), s("Vencida", "sh_c"), s("Fixa", "sh_c")));
+
+    let gTotal = 0, gPago = 0, gPendente = 0;
+
+    for (const [mes, despMes] of [...porMes.entries()].sort()) {
+      rows.push(xrow(s(`${formatMonth(mes)} — ${despMes.length} lançamento(s)`, "sm_c", 8)));
+      const sorted = [...despMes].sort((a, b) => (a.dataVencimento ?? "").localeCompare(b.dataVencimento ?? ""));
+      sorted.forEach((d, i) => {
+        const alt = i % 2 === 1 ? "alt" : undefined;
+        const valSt = d.paga ? "vp" : d.vencida ? "vd" : "vo";
+        rows.push(xrow(s(formatMonth(mes, false), alt), s(brDate(d.dataVencimento), alt), s(d.nome, alt), s(d.categoria ?? "", alt), n(d.valor, valSt), s(d.paga ? "Sim" : "Não", d.paga ? "vp" : "vo"), s(d.vencida ? "Sim" : "Não", d.vencida ? "vd" : alt), s(d.fixa ? "Sim" : "Não", alt)));
+      });
+      const mT = sorted.reduce((a, d) => a + d.valor, 0);
+      const mP = sorted.filter((d) => d.paga).reduce((a, d) => a + d.valor, 0);
+      gTotal += mT; gPago += mP; gPendente += mT - mP;
+      rows.push(xrow(s(`Total ${formatMonth(mes, false)}`, "st_c", 4), n(mT, "vd"), n(mP, "vp"), s("", "st_c"), s("", "st_c")));
+      rows.push(xgap());
+    }
+
+    rows.push(xrow(s("TOTAL GERAL", "st_c", 4), n(gTotal, "vd"), n(gPago, "vp"), n(gPendente, gPendente > 0 ? "vo" : "st_c"), s("", "st_c")));
+    return xws(nome.slice(0, 31), rows, [110, 90, 210, 130, 120, 60, 60, 60]);
+  });
 }
 
 export function RelatoriosPage() {
@@ -289,9 +348,9 @@ export function RelatoriosPage() {
         }),
       }));
       const label = exportMode === "ano" ? `Ano ${exportYear}` : `${exportMonths.length} meses selecionados`;
-      const css = `body{font-family:Calibri,Arial,sans-serif;color:#0f172a;font-size:13px;}h1{color:#1e3a5f;font-size:20px;margin-bottom:4px;}h2{margin-top:28px;margin-bottom:8px;color:#1e293b;font-size:14px;border-bottom:2px solid #e2e8f0;padding-bottom:6px;}p.sub{color:#64748b;font-size:12px;margin:0 0 6px;}table{border-collapse:collapse;margin-bottom:10px;width:100%;}th{background:#1e40af;color:#fff;text-align:left;font-size:12px;padding:8px 10px;border:1px solid #1e3a8a;}td{border:1px solid #e2e8f0;padding:6px 10px;font-size:12px;vertical-align:middle;}tr:nth-child(even) td{background:#f8fafc;}`;
-      const html = `<html><head><meta charset="UTF-8"/><style>${css}</style></head><body><h1>Relatório Fiorote Controle Financeiro</h1><p class="sub">Período: ${excelValue(label)} · Gerado em ${formatDateBR(new Date().toISOString())}</p>${excelSummaryTable(linhas)}${excelChart(linhas)}${excelReceitasPorMes(receitasGrupos)}${excelDespesasPorMes(despesasGrupos)}</body></html>`;
-      const blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8;" });
+      const abasCartoes = wsCartoes(despesasGrupos).join("");
+      const xml = `<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel">${XML_STYLES}${wsResumo(linhas)}${wsReceitas(receitasGrupos)}${wsDespesas(despesasGrupos)}${abasCartoes}</Workbook>`;
+      const blob = new Blob([xml], { type: "application/vnd.ms-excel;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = `fiorote-${label.toLowerCase().replaceAll(" ", "-")}.xls`;
@@ -587,37 +646,75 @@ export function RelatoriosPage() {
         <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
           <p className="text-sm font-semibold">Resumo {viewMode === "ano" ? "mês a mês" : "do mês"}</p>
         </div>
-        {/* Cabeçalho da tabela */}
-        <div className="grid grid-cols-4 items-center gap-2 border-b border-border/60 bg-muted/30 px-5 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          <span>Mês</span>
-          <span>Receitas</span>
-          <span>Despesas</span>
-          <span>Saldo</span>
-        </div>
-        <div className="divide-y divide-border/60">
-          {movimentos.map((item) => (
-            <div
-              key={item.mes}
-              className={cn(
-                "grid grid-cols-4 items-center gap-2 px-5 py-3 text-sm transition-colors hover:bg-muted/20",
-                item.projecao && "opacity-60",
-              )}
-            >
-              <p className="flex items-center gap-1.5 font-medium text-foreground capitalize">
-                {formatMonth(item.mes, false)}
-                {item.projecao && (
-                  <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">
-                    Est.
-                  </span>
-                )}
-              </p>
-              <p className="text-blue-500">{formatCurrency(item.receitas)}</p>
-              <p className="text-red-500">{formatCurrency(item.despesas)}</p>
-              <p className={cn("font-semibold", item.saldoFinal >= 0 ? "text-emerald-500" : "text-red-500")}>
-                {formatCurrency(item.saldoFinal)}
-              </p>
-            </div>
-          ))}
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-max text-sm">
+            {/* Cabeçalho: um mês por coluna */}
+            <thead>
+              <tr className="border-b border-border/60 bg-muted/30">
+                <th className="sticky left-0 z-10 bg-muted/30 px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Métrica
+                </th>
+                {movimentos.map((item) => (
+                  <th
+                    key={item.mes}
+                    className={cn(
+                      "px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap",
+                      item.projecao && "opacity-60",
+                    )}
+                  >
+                    <span className="capitalize">{formatMonth(item.mes, false)}</span>
+                    {item.projecao && (
+                      <span className="ml-1 rounded bg-amber-500/15 px-1 py-0.5 text-[9px] font-bold text-amber-600">
+                        Est.
+                      </span>
+                    )}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/60">
+              {/* Receitas */}
+              <tr className="transition-colors hover:bg-muted/20">
+                <td className="sticky left-0 z-10 bg-card px-5 py-3 text-xs font-semibold uppercase tracking-wider text-blue-500">
+                  Receitas
+                </td>
+                {movimentos.map((item) => (
+                  <td key={item.mes} className={cn("px-4 py-3 text-center font-medium text-blue-500 tabular-nums whitespace-nowrap", item.projecao && "opacity-60")}>
+                    {formatCurrency(item.receitas)}
+                  </td>
+                ))}
+              </tr>
+              {/* Despesas */}
+              <tr className="bg-muted/10 transition-colors hover:bg-muted/20">
+                <td className="sticky left-0 z-10 bg-card px-5 py-3 text-xs font-semibold uppercase tracking-wider text-red-500">
+                  Despesas
+                </td>
+                {movimentos.map((item) => (
+                  <td key={item.mes} className={cn("px-4 py-3 text-center font-medium text-red-500 tabular-nums whitespace-nowrap", item.projecao && "opacity-60")}>
+                    {formatCurrency(item.despesas)}
+                  </td>
+                ))}
+              </tr>
+              {/* Saldo */}
+              <tr className="transition-colors hover:bg-muted/20">
+                <td className="sticky left-0 z-10 bg-card px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Saldo
+                </td>
+                {movimentos.map((item) => (
+                  <td
+                    key={item.mes}
+                    className={cn(
+                      "px-4 py-3 text-center font-bold tabular-nums whitespace-nowrap",
+                      item.projecao && "opacity-60",
+                      item.saldoFinal >= 0 ? "text-emerald-500" : "text-red-500",
+                    )}
+                  >
+                    {formatCurrency(item.saldoFinal)}
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
         </div>
       </motion.div>
 

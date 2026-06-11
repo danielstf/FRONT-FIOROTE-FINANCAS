@@ -21,6 +21,7 @@ import { EditarReceitaPage } from "./pages/receitas/editar";
 import { ReceitasPage } from "./pages/receitas";
 import { RelatoriosPage } from "./pages/relatorios";
 import { SugestoesPage } from "./pages/sugestoes";
+import { TutoriaisPage } from "./pages/tutoriais";
 import { RequireAdmin } from "./routes/require-admin";
 import { RequireAuth } from "./routes/require-auth";
 import { RequirePremium } from "./routes/require-premium";
@@ -81,6 +82,7 @@ export function App() {
             </RequireAdmin>
           }
         />
+        <Route path="tutoriais" element={<TutoriaisPage />} />
         <Route path="configuracoes" element={<ConfiguracoesPage />} />
       </Route>
 
