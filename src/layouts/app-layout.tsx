@@ -150,7 +150,7 @@ export function AppLayout() {
         <DialogContent className="overflow-hidden p-0 sm:max-w-md">
           <div className="relative border-b border-border bg-linear-to-br from-primary/10 via-background to-background p-6">
             <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" />
-            <DialogHeader className="flex-row items-center gap-4 space-y-0 text-left">
+            <DialogHeader className="flex flex-row items-center gap-4 space-y-0 text-left">
               <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
                 <UserRound className="h-5 w-5" />
               </span>
@@ -220,7 +220,7 @@ export function AppLayout() {
         <DialogContent className="overflow-hidden p-0 sm:max-w-sm">
           <div className="relative border-b border-border bg-linear-to-br from-primary/10 via-background to-background p-6">
             <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" />
-            <DialogHeader className="flex-row items-center gap-4 space-y-0 text-left">
+            <DialogHeader className="flex flex-row items-center gap-4 space-y-0 text-left">
               <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
                 <Share2 className="h-5 w-5" />
               </span>
