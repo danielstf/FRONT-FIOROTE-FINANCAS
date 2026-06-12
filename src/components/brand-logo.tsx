@@ -29,7 +29,7 @@ export function BrandLogo({
       <img
         alt="FIOROTE controle financeiro"
         className={cn("shrink-0 object-contain dark:hidden", logoSize)}
-        src="/logo-completo.svg"
+        src="/logo-fiorote-controle-financeiro-light-tight.png"
       />
       <img
         alt="FIOROTE controle financeiro"
