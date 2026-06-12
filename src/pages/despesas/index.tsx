@@ -8,6 +8,7 @@ import {
   PencilLine,
   Plus,
   ReceiptText,
+  TrendingDown,
   Repeat2,
   Search,
   ThumbsDown,
@@ -818,7 +819,10 @@ export function DespesasPage() {
       <Dialog open={cadastroAberto} onOpenChange={setCadastroAberto}>
         <DialogContent className="max-h-[calc(100vh-0.75rem)] max-w-[min(1180px,calc(100vw-0.75rem))] gap-2 overflow-y-auto p-3">
           <DialogHeader className="space-y-0.5">
-            <DialogTitle className="text-xl">Nova despesa</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+                <TrendingDown className="h-4.5 w-4.5 text-red-500" />
+                Nova despesa
+              </DialogTitle>
             <DialogDescription className="text-xs">
               Cadastre uma conta sem sair da lista de despesas.
             </DialogDescription>
