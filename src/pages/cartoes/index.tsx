@@ -285,7 +285,7 @@ export function CartoesPage() {
           <DialogHeader>
             <DialogTitle>Excluir cartão</DialogTitle>
             <DialogDescription>
-              Esta ação remove o cartão definitivamente. Despesas vinculadas a ele não serão afetadas.
+              O cartão será desativado e não aparecerá mais nas listagens. Todas as despesas vinculadas a ele permanecem preservadas no histórico.
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-xl border border-border bg-muted/30 px-4 py-3">
