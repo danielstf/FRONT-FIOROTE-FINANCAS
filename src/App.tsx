@@ -15,6 +15,7 @@ import { EditarDespesaPage } from "./pages/despesas/editar";
 import { GestaoPage } from "./pages/gestao";
 import { LandingPage } from "./pages/landing";
 import { PoliticaPrivacidadePage } from "./pages/politica-de-privacidade";
+import { SuportePage } from "./pages/suporte";
 import { PremiumPage } from "./pages/premium";
 import { PremiumRetornoPage } from "./pages/premium/retorno";
 import { CadastroReceitaPage } from "./pages/receitas/cadastro";
@@ -32,6 +33,7 @@ export function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/politica-de-privacidade" element={<PoliticaPrivacidadePage />} />
+      <Route path="/suporte" element={<SuportePage />} />
 
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
