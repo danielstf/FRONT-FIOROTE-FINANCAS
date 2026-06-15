@@ -181,10 +181,10 @@ export function PoliticaPrivacidadePage() {
               Para exercer qualquer um desses direitos, entre em contato pelo
               e-mail:{" "}
               <a
-                href="mailto:privacidade@fiorote.com.br"
+                href="mailto:fioroteaplicativos@gmail.com"
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
-                privacidade@fiorote.com.br
+                fioroteaplicativos@gmail.com
               </a>
             </p>
           </Section>
@@ -230,10 +230,10 @@ export function PoliticaPrivacidadePage() {
               <p className="mt-1">
                 E-mail:{" "}
                 <a
-                  href="mailto:privacidade@fiorote.com.br"
+                  href="mailto:fioroteaplicativos@gmail.com"
                   className="font-medium text-primary underline-offset-4 hover:underline"
                 >
-                  privacidade@fiorote.com.br
+                  fioroteaplicativos@gmail.com
                 </a>
               </p>
             </div>
