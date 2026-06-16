@@ -60,9 +60,7 @@ export function PremiumPage() {
   const isPremium = Boolean(premiumStatus?.premium);
   const checkoutUrl = premiumStatus?.ultimoPagamento?.checkoutUrl ?? null;
   const hasPendingPayment = premiumStatus?.ultimoPagamento?.status === "PENDING";
-  const isAssinatura = premiumStatus?.ultimoPagamento?.tipo === "ASSINATURA";
   const isCancelado = Boolean(premiumStatus?.ultimoPagamento?.canceladoEm);
-  const precoMensal = premiumStatus?.precos.mensal ?? 8;
   const precoRecorrente = premiumStatus?.precos.recorrente ?? 5;
 
   async function carregarStatus() {
@@ -178,9 +176,7 @@ export function PremiumPage() {
                 <p className="text-sm text-muted-foreground">
                   {isCancelado
                     ? "Seu acesso continua válido até o fim do período pago."
-                    : isAssinatura
-                      ? "Renovação automática mensal ativa."
-                      : "Acesso mensal avulso."}
+                    : "Renovação automática mensal ativa."}
                 </p>
               </div>
 
@@ -223,7 +219,7 @@ export function PremiumPage() {
             <div className="px-5 py-4">
               <p className="text-xs text-muted-foreground">Cobrança</p>
               <p className="mt-1 text-sm font-semibold">
-                {isCancelado ? "Cancelada" : isAssinatura ? "Recorrente" : "Avulso"}
+                {isCancelado ? "Cancelada" : "Recorrente"}
               </p>
             </div>
             <div className="px-5 py-4">
@@ -274,50 +270,23 @@ export function PremiumPage() {
             </div>
           </motion.div>
 
-          {/* Opções de pagamento */}
-          <motion.div variants={sectionVariants} className="grid gap-4 sm:grid-cols-2">
-            {/* Compra avulsa */}
-            <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5">
-              <div className="flex-1 space-y-1">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  Compra avulsa
-                </p>
-                <p className="text-3xl font-bold">{formatMoney(precoMensal)}</p>
-                <p className="text-sm text-muted-foreground">
-                  Acesso por 30 dias, pague uma vez.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                className="h-11 w-full gap-2"
-                onClick={() => criarCheckout("MENSAL")}
-                disabled={Boolean(loadingCheckout)}
-              >
-                {loadingCheckout === "MENSAL" ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <CreditCard className="h-4 w-4" />
-                )}
-                Comprar acesso
-              </Button>
-            </div>
-
-            {/* Assinatura recorrente — destaque */}
-            <div className="relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-amber-400/40 bg-linear-to-b from-amber-400/10 to-card p-5">
+          {/* Assinatura recorrente */}
+          <motion.div variants={sectionVariants}>
+            <div className="relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-amber-400/40 bg-linear-to-b from-amber-400/10 to-card p-6">
               <div
                 aria-hidden
-                className="pointer-events-none absolute right-0 top-0 h-24 w-24 -translate-y-6 translate-x-6 rounded-full bg-amber-400/20 blur-2xl"
+                className="pointer-events-none absolute right-0 top-0 h-32 w-32 -translate-y-8 translate-x-8 rounded-full bg-amber-400/20 blur-3xl"
               />
-              <div className="absolute right-4 top-4">
+              <div className="absolute right-5 top-5">
                 <span className="rounded-full bg-amber-400/15 px-2.5 py-0.5 text-[10px] font-black tracking-wider text-amber-400">
-                  RECOMENDADO
+                  ASSINATURA
                 </span>
               </div>
-              <div className="flex-1 space-y-1 pr-24">
+              <div className="flex-1 space-y-1 pr-28">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-amber-400">
-                  Compra assinatura
+                  Plano VIP mensal
                 </p>
-                <p className="text-3xl font-bold">
+                <p className="text-4xl font-bold">
                   {formatMoney(precoRecorrente)}
                   <span className="text-base font-medium text-muted-foreground">/mês</span>
                 </p>
@@ -326,7 +295,7 @@ export function PremiumPage() {
                 </p>
               </div>
               <Button
-                className="h-11 w-full gap-2 bg-amber-400 text-slate-900 hover:bg-amber-300"
+                className="h-12 w-full gap-2 bg-amber-400 text-slate-900 hover:bg-amber-300 text-base font-semibold"
                 onClick={() => criarCheckout("RECORRENTE")}
                 disabled={Boolean(loadingCheckout)}
               >
