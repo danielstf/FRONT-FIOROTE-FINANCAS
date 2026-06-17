@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { ArrowUpRight, BadgeCheck, BarChart3, Globe, LifeBuoy, LockKeyhole, WalletCards } from "lucide-react";
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { BrandLogo } from "../components/brand-logo";
 
 const bars = [34, 52, 44, 68, 60, 84, 72];
@@ -72,13 +72,13 @@ export function AuthLayout() {
             <Globe className="h-4 w-4" />
             <span className="hidden sm:inline">Voltar ao site</span>
           </a>
-          <a
-            href="mailto:suporte@fiorotecontrolefinanceiro.com.br"
+          <Link
+            to="/suporte"
             className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/4 px-3 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white/8 hover:text-white"
           >
             <LifeBuoy className="h-4 w-4" />
             <span className="hidden sm:inline">Suporte</span>
-          </a>
+          </Link>
         </div>
       </header>
 
