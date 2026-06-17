@@ -64,7 +64,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
 
   const isLogin = mode === "login";
-  const title = isLogin ? "Entrar no sistema" : "Criar cadastro";
+  const title = isLogin ? "Bem-vindo de volta" : "Criar conta";
   const description = isLogin
     ? "Acesse sua conta para continuar controlando suas finanças."
     : "Informe seus dados para criar uma nova conta.";
@@ -151,33 +151,33 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   }
 
   return (
-    <Card className="w-full overflow-hidden rounded-2xl border-white/10 bg-[#080f1d]/95 shadow-2xl shadow-black/35 before:hidden hover:shadow-2xl">
-      <div className="h-0.75 bg-linear-to-r from-cyan-300 via-blue-500 to-emerald-300" />
+    <Card className="w-full overflow-hidden rounded-2xl border-white/10 bg-[#080f1d]/95 shadow-2xl shadow-black/40">
+      <div className="h-px bg-linear-to-r from-cyan-400/60 via-blue-500/80 to-emerald-400/60" />
       <CardHeader className="space-y-6 p-5 pb-4 sm:p-7 sm:pb-4">
-        <div className="grid grid-cols-2 rounded-xl border border-white/10 bg-slate-950/80 p-1">
+        <div className="grid grid-cols-2 rounded-xl border border-white/8 bg-black/30 p-1">
           <Button
             asChild
             variant="ghost"
             className={cn(
-              "h-10 rounded-lg text-slate-400 hover:text-white",
-              isLogin && "bg-white text-slate-950 shadow-sm shadow-black/25 hover:text-slate-950",
+              "h-10 rounded-lg text-slate-500 transition-all hover:bg-white/5 hover:text-slate-300",
+              isLogin && "bg-white/10 text-white shadow-sm shadow-black/30 hover:bg-white/10 hover:text-white border border-white/12",
             )}
           >
-            <Link to="/login">Login</Link>
+            <Link to="/login">Entrar</Link>
           </Button>
           <Button
             asChild
             variant="ghost"
             className={cn(
-              "h-10 rounded-lg text-slate-400 hover:text-white",
-              !isLogin && "bg-white text-slate-950 shadow-sm shadow-black/25 hover:text-slate-950",
+              "h-10 rounded-lg text-slate-500 transition-all hover:bg-white/5 hover:text-slate-300",
+              !isLogin && "bg-white/10 text-white shadow-sm shadow-black/30 hover:bg-white/10 hover:text-white border border-white/12",
             )}
           >
             <Link to="/cadastro">Cadastro</Link>
           </Button>
         </div>
         <div className="space-y-2">
-          <CardTitle className="text-3xl text-white">{title}</CardTitle>
+          <CardTitle className="text-[1.75rem] font-semibold text-white">{title}</CardTitle>
           <CardDescription className="text-sm leading-6 text-slate-400">
             {description}
           </CardDescription>
