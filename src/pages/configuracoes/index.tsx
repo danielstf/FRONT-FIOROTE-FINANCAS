@@ -10,6 +10,7 @@ import {
   SunMoon,
   Trash2,
   UserRound,
+  X,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { motion } from "motion/react";
@@ -34,8 +35,8 @@ import {
 } from "../../components/ui/dialog";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
-import { PageHeader } from "../../components/page-header";
 import { pageVariants, sectionVariants } from "../../lib/motion";
+import { cn } from "../../lib/utils";
 import { useAuth } from "../../providers/auth-provider";
 
 export function ConfiguracoesPage() {
@@ -46,9 +47,12 @@ export function ConfiguracoesPage() {
     perfilFinanceiroId,
     selecionarPerfilFinanceiro,
   } = useAuth();
+
   const usuarioTemSenha = session?.usuario.temSenha ?? true;
   const isPremium = session?.usuario.plano === "PREMIUM";
+
   const [nome, setNome] = useState(session?.usuario.nome ?? "");
+  const [editandoNome, setEditandoNome] = useState(false);
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
@@ -71,8 +75,8 @@ export function ConfiguracoesPage() {
     try {
       const data = await perfisApi.listar();
       setPerfis(data.perfis);
-    } catch (requestError) {
-      toast.error(getApiErrorMessage(requestError));
+    } catch (err) {
+      toast.error(getApiErrorMessage(err));
     } finally {
       setLoadingPerfis(false);
     }
@@ -88,9 +92,10 @@ export function ConfiguracoesPage() {
     setSavingProfile(true);
     try {
       await atualizarPerfil({ nome });
+      setEditandoNome(false);
       toast.success("Nome atualizado com sucesso.");
-    } catch (requestError) {
-      toast.error(getApiErrorMessage(requestError));
+    } catch (err) {
+      toast.error(getApiErrorMessage(err));
     } finally {
       setSavingProfile(false);
     }
@@ -98,7 +103,10 @@ export function ConfiguracoesPage() {
 
   async function salvarSenha(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (novaSenha !== confirmarSenha) { toast.error("A confirmação da senha não confere."); return; }
+    if (novaSenha !== confirmarSenha) {
+      toast.error("A confirmação da senha não confere.");
+      return;
+    }
     setSavingPassword(true);
     try {
       const response = await authApi.trocarSenha({
@@ -111,8 +119,8 @@ export function ConfiguracoesPage() {
       setConfirmarSenha("");
       setSenhaModalAberto(false);
       toast.success("Senha alterada com sucesso.");
-    } catch (requestError) {
-      toast.error(getApiErrorMessage(requestError));
+    } catch (err) {
+      toast.error(getApiErrorMessage(err));
     } finally {
       setSavingPassword(false);
     }
@@ -138,7 +146,10 @@ export function ConfiguracoesPage() {
 
   async function salvarPerfilFinanceiro(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!isPremium) { toast.error("Perfis financeiros são exclusivos para usuários VIP."); return; }
+    if (!isPremium) {
+      toast.error("Perfis financeiros são exclusivos para usuários VIP.");
+      return;
+    }
     setSavingPerfil(true);
     try {
       if (perfilEditando) {
@@ -151,8 +162,8 @@ export function ConfiguracoesPage() {
       limparPerfil();
       setPerfilModalAberto(false);
       await carregarPerfis();
-    } catch (requestError) {
-      toast.error(getApiErrorMessage(requestError));
+    } catch (err) {
+      toast.error(getApiErrorMessage(err));
     } finally {
       setSavingPerfil(false);
     }
@@ -168,186 +179,265 @@ export function ConfiguracoesPage() {
       setPerfilExcluindo(null);
       toast.success("Perfil excluído com sucesso.");
       await carregarPerfis();
-    } catch (requestError) {
-      toast.error(getApiErrorMessage(requestError));
+    } catch (err) {
+      toast.error(getApiErrorMessage(err));
     } finally {
       setDeletingPerfil(false);
     }
   }
+
+  const iniciais = (session?.usuario.nome ?? "U")
+    .split(" ")
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join("")
+    .toUpperCase();
 
   return (
     <motion.div
       variants={pageVariants}
       initial="hidden"
       animate="show"
-      className="space-y-5"
+      className="mx-auto max-w-3xl space-y-5"
     >
-      {/* Page header */}
+      {/* ── Page title ── */}
       <motion.div variants={sectionVariants}>
-        <PageHeader
-          icon={Settings}
-          title="Configurações"
-          subtitle={session?.usuario.email}
-        />
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-500/10">
+            <Settings className="h-4 w-4 text-slate-400" />
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold leading-tight">Configurações</h1>
+            <p className="text-xs text-muted-foreground">Gerencie sua conta e preferências</p>
+          </div>
+        </div>
       </motion.div>
 
-      {/* Grid: dados + segurança */}
-      <motion.div variants={sectionVariants} className="grid gap-4 lg:grid-cols-2">
-        {/* Dados do usuário */}
-        <div className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <UserRound className="h-3.5 w-3.5" />
+      {/* ── Profile card ── */}
+      <motion.div variants={sectionVariants}>
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          {/* Gradient accent */}
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-primary/6 via-transparent to-transparent" />
+
+          <div className="relative flex flex-col gap-5 p-6 sm:flex-row sm:items-center">
+            {/* Avatar */}
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-linear-to-br from-primary/25 to-primary/8 shadow-inner">
+              <span className="text-2xl font-bold text-primary">{iniciais}</span>
             </div>
-            <div>
-              <p className="text-sm font-semibold">Dados do usuário</p>
-              <p className="text-xs text-muted-foreground">Altere o nome exibido no sistema.</p>
+
+            {/* Info */}
+            <div className="min-w-0 flex-1">
+              {editandoNome ? (
+                <form onSubmit={salvarDados} className="flex items-center gap-2">
+                  <Input
+                    autoFocus
+                    className="h-9 max-w-xs text-base font-semibold"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    required
+                  />
+                  <Button type="submit" disabled={savingProfile} className="h-9 gap-1.5 px-3 text-sm">
+                    {savingProfile ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                    Salvar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-9 w-9 p-0"
+                    onClick={() => { setEditandoNome(false); setNome(session?.usuario.nome ?? ""); }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </form>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <h2 className="truncate text-xl font-semibold leading-tight">
+                    {session?.usuario.nome}
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => setEditandoNome(true)}
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-muted hover:text-foreground"
+                    aria-label="Editar nome"
+                  >
+                    <PencilLine className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+
+              <p className="mt-0.5 text-sm text-muted-foreground">{session?.usuario.email}</p>
+
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {isPremium ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/12 px-2.5 py-0.5 text-xs font-semibold text-amber-500">
+                    <Crown className="h-3 w-3" />
+                    VIP Premium
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                    <UserRound className="h-3 w-3" />
+                    Plano Free
+                  </span>
+                )}
+                {!usuarioTemSenha && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-400/30 bg-blue-400/10 px-2.5 py-0.5 text-xs font-medium text-blue-500">
+                    <BadgeCheck className="h-3 w-3" />
+                    Login Google
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-          <div className="p-5">
-            <form className="grid gap-4" onSubmit={salvarDados}>
-              <div className="space-y-2">
-                <Label htmlFor="nome" className="text-xs font-medium text-muted-foreground">Nome</Label>
-                <Input
-                  id="nome"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  className="h-10"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Email</Label>
-                <Input value={session?.usuario.email ?? ""} className="h-10" disabled />
-              </div>
-              <Button type="submit" disabled={savingProfile} className="h-10 w-fit gap-2">
-                {savingProfile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                Salvar nome
-              </Button>
-            </form>
+        </div>
+      </motion.div>
+
+      {/* ── Segurança + Preferências ── */}
+      <motion.div variants={sectionVariants} className="grid gap-4 sm:grid-cols-2">
+        {/* Segurança */}
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          <div className="flex items-center gap-2.5 border-b border-border px-5 py-3.5">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-500/10">
+              <KeyRound className="h-3.5 w-3.5 text-blue-500" />
+            </div>
+            <p className="text-sm font-semibold">Segurança</p>
+          </div>
+
+          <div className="divide-y divide-border/50">
+            <SettingRow
+              icon={<KeyRound className="h-4 w-4 text-blue-400" />}
+              iconBg="bg-blue-500/10"
+              label={usuarioTemSenha ? "Senha cadastrada" : "Definir senha"}
+              description={usuarioTemSenha ? "Última senha definida pelo usuário" : "Conta sem senha — crie uma agora"}
+              action={
+                <Button variant="outline" className="h-8 text-xs" onClick={() => setSenhaModalAberto(true)}>
+                  {usuarioTemSenha ? "Alterar" : "Cadastrar"}
+                </Button>
+              }
+            />
           </div>
         </div>
 
-        {/* Segurança e tema */}
-        <div className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <KeyRound className="h-3.5 w-3.5" />
+        {/* Preferências */}
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          <div className="flex items-center gap-2.5 border-b border-border px-5 py-3.5">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/10">
+              <SunMoon className="h-3.5 w-3.5 text-amber-500" />
             </div>
-            <div>
-              <p className="text-sm font-semibold">Segurança e tema</p>
-              <p className="text-xs text-muted-foreground">A senha fica escondida até você abrir a alteração.</p>
-            </div>
+            <p className="text-sm font-semibold">Preferências</p>
           </div>
-          <div className="divide-y divide-border/60">
-            <div className="flex items-center justify-between gap-3 px-5 py-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-                  {usuarioTemSenha ? <KeyRound className="h-4 w-4" /> : <BadgeCheck className="h-4 w-4" />}
-                </div>
+
+          <div className="divide-y divide-border/50">
+            <SettingRow
+              icon={<SunMoon className="h-4 w-4 text-amber-400" />}
+              iconBg="bg-amber-500/10"
+              label="Tema do sistema"
+              description="Alterne entre modo claro e escuro"
+              action={<ThemeToggle />}
+            />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ── Perfis VIP ── */}
+      <motion.div variants={sectionVariants}>
+        <div className="overflow-hidden rounded-2xl border border-amber-400/25 bg-card shadow-sm">
+          {/* Header */}
+          <div className="flex items-center justify-between gap-3 border-b border-border bg-linear-to-r from-amber-400/8 to-transparent px-5 py-4">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400/15">
+                <Crown className="h-3.5 w-3.5 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold">Perfis financeiros</p>
+                <p className="text-xs text-muted-foreground">
+                  {isPremium ? `${perfis.length} perfil${perfis.length !== 1 ? "s" : ""} criado${perfis.length !== 1 ? "s" : ""}` : "Exclusivo para usuários VIP"}
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={abrirNovoPerfil}
+              disabled={!isPremium}
+              className="h-8 gap-1.5 text-xs"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Novo perfil
+            </Button>
+          </div>
+
+          <div className="p-4">
+            {/* Free user lock */}
+            {!isPremium && (
+              <div className="flex items-start gap-3 rounded-xl border border-amber-400/20 bg-amber-400/6 p-4">
+                <Crown className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
                 <div>
-                  <p className="text-sm font-semibold">{usuarioTemSenha ? "Senha cadastrada" : "Senha pendente"}</p>
-                  <p className="text-xs text-muted-foreground">Atualize em uma janela segura.</p>
+                  <p className="text-sm font-semibold text-amber-500">Recurso exclusivo VIP</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Separe suas finanças em múltiplos perfis — pessoal, família ou empresa. Disponível no plano VIP.
+                  </p>
                 </div>
               </div>
-              <Button variant="outline" className="h-9" onClick={() => setSenhaModalAberto(true)}>
-                {usuarioTemSenha ? "Trocar" : "Cadastrar"}
-              </Button>
-            </div>
-            <div className="flex items-center justify-between gap-3 px-5 py-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
-                  <SunMoon className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">Tema do sistema</p>
-                  <p className="text-xs text-muted-foreground">Alterne entre claro e escuro.</p>
-                </div>
+            )}
+
+            {/* Loading */}
+            {loadingPerfis && (
+              <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Carregando perfis...
               </div>
-              <ThemeToggle />
-            </div>
+            )}
+
+            {/* Empty */}
+            {!loadingPerfis && perfis.length === 0 && isPremium && (
+              <div className="rounded-xl border border-dashed border-border bg-muted/25 p-8 text-center">
+                <Crown className="mx-auto mb-2 h-6 w-6 text-amber-400/60" />
+                <p className="text-sm font-medium text-foreground">Nenhum perfil criado</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">Clique em "Novo perfil" para começar.</p>
+              </div>
+            )}
+
+            {/* Profile list */}
+            {perfis.length > 0 && (
+              <div className="overflow-hidden rounded-xl border border-border">
+                {perfis.map((perfil, i) => (
+                  <div
+                    key={perfil.id}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/30",
+                      i !== 0 && "border-t border-border/60",
+                    )}
+                  >
+                    <Avatar value={perfil.avatar} label={perfil.nome} className="h-9 w-9 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold">{perfil.nome}</p>
+                      <p className="text-xs text-muted-foreground">{getAvatarOption(perfil.avatar).label}</p>
+                    </div>
+                    <div className="flex gap-1.5">
+                      <Button
+                        aria-label="Editar perfil"
+                        className="h-8 w-8 rounded-lg px-0"
+                        variant="outline"
+                        onClick={() => editarPerfil(perfil)}
+                      >
+                        <PencilLine className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        aria-label="Excluir perfil"
+                        className="h-8 w-8 rounded-lg px-0 text-destructive hover:text-destructive"
+                        variant="outline"
+                        onClick={() => setPerfilExcluindo(perfil)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
 
-      {/* Perfis VIP */}
-      <motion.div variants={sectionVariants} className="rounded-2xl border border-amber-400/20 bg-card overflow-hidden">
-        <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4 bg-linear-to-r from-amber-400/8 to-transparent">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400/15 text-amber-400">
-              <Crown className="h-3.5 w-3.5" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold">Perfis VIP</p>
-              <p className="text-xs text-muted-foreground">Usuários VIP criam até 5 perfis com dados separados.</p>
-            </div>
-          </div>
-          <Button onClick={abrirNovoPerfil} disabled={!isPremium} className="h-9 gap-2">
-            <Plus className="h-3.5 w-3.5" />
-            Novo perfil
-          </Button>
-        </div>
-
-        <div className="p-5 space-y-3">
-          {!isPremium && (
-            <div className="rounded-xl border border-amber-400/25 bg-amber-400/8 p-4">
-              <p className="text-sm font-semibold text-amber-500">Recurso exclusivo VIP</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Use o plano VIP para separar finanças pessoais, família ou empresa.
-              </p>
-            </div>
-          )}
-
-          {loadingPerfis && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Carregando perfis...
-            </div>
-          )}
-
-          {!loadingPerfis && perfis.length === 0 && isPremium && (
-            <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-              Nenhum perfil financeiro cadastrado.
-            </div>
-          )}
-
-          {perfis.length > 0 && (
-            <div className="divide-y divide-border/60 rounded-xl border border-border overflow-hidden">
-              {perfis.map((perfil) => (
-                <div
-                  key={perfil.id}
-                  className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/30"
-                >
-                  <Avatar value={perfil.avatar} label={perfil.nome} className="h-9 w-9 shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{perfil.nome}</p>
-                    <p className="text-xs text-muted-foreground">Avatar {getAvatarOption(perfil.avatar).label}</p>
-                  </div>
-                  <div className="flex gap-1.5">
-                    <Button
-                      aria-label="Editar perfil"
-                      className="h-8 w-8 rounded-lg px-0"
-                      variant="outline"
-                      onClick={() => editarPerfil(perfil)}
-                    >
-                      <PencilLine className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      aria-label="Excluir perfil"
-                      className="h-8 w-8 rounded-lg px-0 text-destructive hover:text-destructive"
-                      variant="outline"
-                      onClick={() => setPerfilExcluindo(perfil)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </motion.div>
-
-      {/* Dialog: Trocar senha */}
+      {/* ── Dialog: Trocar senha ── */}
       <Dialog open={senhaModalAberto} onOpenChange={setSenhaModalAberto}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -390,7 +480,9 @@ export function ConfiguracoesPage() {
               />
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <Button type="button" variant="outline" onClick={() => setSenhaModalAberto(false)}>Cancelar</Button>
+              <Button type="button" variant="outline" onClick={() => setSenhaModalAberto(false)}>
+                Cancelar
+              </Button>
               <Button type="submit" disabled={savingPassword} className="gap-2">
                 {savingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Confirmar
@@ -400,16 +492,16 @@ export function ConfiguracoesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog: Perfil financeiro */}
+      {/* ── Dialog: Perfil financeiro ── */}
       <Dialog
         open={perfilModalAberto}
         onOpenChange={(open) => { setPerfilModalAberto(open); if (!open) limparPerfil(); }}
       >
         <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>{perfilEditando ? "Editar perfil" : "Novo perfil"}</DialogTitle>
+            <DialogTitle>{perfilEditando ? "Editar perfil" : "Novo perfil financeiro"}</DialogTitle>
             <DialogDescription>
-              Defina o nome e o ícone usado para identificar o perfil financeiro.
+              Defina o nome e o ícone para identificar este perfil.
             </DialogDescription>
           </DialogHeader>
           <form className="grid gap-4" onSubmit={salvarPerfilFinanceiro}>
@@ -432,17 +524,18 @@ export function ConfiguracoesPage() {
                   const selected = perfilAvatar === avatar.value;
                   return (
                     <button
-                      aria-label={avatar.label}
-                      className={`flex h-11 items-center justify-center rounded-full border transition-colors ${
-                        selected
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-background text-muted-foreground hover:bg-accent"
-                      }`}
-                      disabled={!isPremium}
                       key={avatar.value}
+                      aria-label={avatar.label}
                       title={avatar.label}
                       type="button"
+                      disabled={!isPremium}
                       onClick={() => setPerfilAvatar(avatar.value)}
+                      className={cn(
+                        "flex h-11 items-center justify-center rounded-full border transition-colors",
+                        selected
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-muted-foreground hover:bg-accent",
+                      )}
                     >
                       <Icon className="h-5 w-5" />
                     </button>
@@ -451,17 +544,19 @@ export function ConfiguracoesPage() {
               </div>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <Button type="button" variant="outline" onClick={() => setPerfilModalAberto(false)}>Cancelar</Button>
+              <Button type="button" variant="outline" onClick={() => setPerfilModalAberto(false)}>
+                Cancelar
+              </Button>
               <Button type="submit" disabled={!isPremium || savingPerfil} className="gap-2">
                 {savingPerfil ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                {perfilEditando ? "Salvar perfil" : "Criar perfil"}
+                {perfilEditando ? "Salvar alterações" : "Criar perfil"}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog: Excluir perfil */}
+      {/* ── Dialog: Excluir perfil ── */}
       <Dialog
         open={Boolean(perfilExcluindo)}
         onOpenChange={(open) => { if (!open) setPerfilExcluindo(null); }}
@@ -481,7 +576,9 @@ export function ConfiguracoesPage() {
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <Button type="button" variant="outline" onClick={() => setPerfilExcluindo(null)}>Cancelar</Button>
+            <Button type="button" variant="outline" onClick={() => setPerfilExcluindo(null)}>
+              Cancelar
+            </Button>
             <Button
               variant="destructive"
               type="button"
@@ -496,5 +593,32 @@ export function ConfiguracoesPage() {
         </DialogContent>
       </Dialog>
     </motion.div>
+  );
+}
+
+function SettingRow({
+  icon,
+  iconBg,
+  label,
+  description,
+  action,
+}: {
+  icon: React.ReactNode;
+  iconBg: string;
+  label: string;
+  description: string;
+  action: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-4 px-5 py-4">
+      <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", iconBg)}>
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium">{label}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
+      </div>
+      <div className="shrink-0">{action}</div>
+    </div>
   );
 }
