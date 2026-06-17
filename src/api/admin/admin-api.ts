@@ -1,5 +1,5 @@
 import { api } from "../client";
-import type { AdminBuscaUsuarioResponse, AdminResumoResponse } from "./types";
+import type { AdminBuscaUsuarioResponse, AdminPendentesResponse, AdminResumoResponse } from "./types";
 
 export const adminApi = {
   async resumo() {
@@ -11,6 +11,11 @@ export const adminApi = {
     const { data } = await api.get<AdminBuscaUsuarioResponse>("/admin/usuarios/busca", {
       params: { q },
     });
+    return data;
+  },
+
+  async pendentes() {
+    const { data } = await api.get<AdminPendentesResponse>("/admin/pendentes");
     return data;
   },
 };

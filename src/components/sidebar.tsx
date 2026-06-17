@@ -13,6 +13,7 @@ import {
 import { NavLink } from "react-router-dom";
 import { cn } from "../lib/utils";
 import { useAuth } from "../providers/auth-provider";
+import { useAdminPendentes } from "../hooks/use-admin-pendentes";
 import { BrandLogo } from "./brand-logo";
 
 const menuItems = [
@@ -48,6 +49,7 @@ export function Sidebar({
   onNavigate,
 }: SidebarProps) {
   const { session } = useAuth();
+  const { total: pendentes } = useAdminPendentes();
 
   const planBadge = session?.usuario.plano === "PREMIUM" ? "VIP" : "FREE";
   const isVip = planBadge === "VIP";
@@ -61,6 +63,7 @@ export function Sidebar({
             href: "/app/gestao",
             icon: ShieldAlert,
             section: "Admin",
+            badge: "pendentes" as const,
           },
           { title: "Relatório admin", href: "/app/admin", icon: BarChart3 },
         ]
@@ -125,6 +128,11 @@ export function Sidebar({
                   Free
                 </span>
               )
+            )}
+            {item.badge === "pendentes" && pendentes > 0 && (
+              <span className="inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-none text-white">
+                {pendentes > 99 ? "99+" : pendentes}
+              </span>
             )}
           </>
         )}

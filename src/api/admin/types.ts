@@ -1,3 +1,9 @@
+export type AdminPendentesResponse = {
+  sugestoes: number;
+  contatos: number;
+  total: number;
+};
+
 export type AdminUsuarioDetalhe = {
   id: string;
   nome: string;
