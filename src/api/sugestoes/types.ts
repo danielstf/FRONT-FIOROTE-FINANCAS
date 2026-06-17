@@ -17,6 +17,7 @@ export type Sugestao = {
     id: string;
     nome: string;
     email: string;
+    plano: "FREE" | "PREMIUM";
   };
 };
 

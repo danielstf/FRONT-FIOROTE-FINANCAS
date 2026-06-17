@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   CheckCircle2,
+  Crown,
   Globe,
   HeartHandshake,
   Lightbulb,
@@ -157,6 +158,7 @@ export function GestaoPage() {
             status: item.status,
             criadoEm: item.criadoEm,
             autor: `${item.usuario.nome} | ${item.usuario.email}`,
+            vip: item.usuario.plano === "PREMIUM",
           }))}
           busyId={busyId}
           onFinalizar={(id) => { const item = sugestoes.find((s) => s.id === id); if (item) finalizarSugestao(item); }}
@@ -219,6 +221,7 @@ type ItemRow = {
   status: string;
   criadoEm: string;
   autor: string;
+  vip?: boolean;
 };
 
 function MensagensCard({
@@ -273,7 +276,15 @@ function MensagensCard({
                       <Icon2 className="h-5 w-5" />
                     </span>
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold uppercase text-primary">{config.label}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-xs font-semibold uppercase text-primary">{config.label}</p>
+                        {item.vip && (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-500">
+                            <Crown className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                            VIP
+                          </span>
+                        )}
+                      </div>
                       <h2 className="truncate font-semibold text-foreground">{item.titulo}</h2>
                       <p className="mt-1 text-xs text-muted-foreground">{item.autor}</p>
                     </div>
