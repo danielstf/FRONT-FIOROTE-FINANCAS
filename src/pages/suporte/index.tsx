@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { contatosApi } from "../../api/contatos/contatos-api";
+import { getApiErrorMessage } from "../../api/errors";
 import { BrandLogo } from "../../components/brand-logo";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -74,9 +76,7 @@ export function SuportePage() {
   const [loading, setLoading] = useState(false);
   const [enviado, setEnviado] = useState(false);
 
-  const tipoAtual = tipos.find((t) => t.value === tipo)!;
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const nomeVal = nome.trim();
@@ -90,30 +90,25 @@ export function SuportePage() {
     }
 
     setLoading(true);
-
-    const subject = `[${tipoAtual.label}] ${tituloVal} — FIOROTE`;
-    const body = [
-      `Tipo: ${tipoAtual.label}`,
-      `Nome: ${nomeVal}`,
-      `Email: ${emailVal}`,
-      "",
-      `Título: ${tituloVal}`,
-      "",
-      mensagemVal,
-    ].join("\n");
-
-    const mailtoUrl = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoUrl;
-
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await contatosApi.criar({
+        tipo,
+        titulo: tituloVal,
+        mensagem: mensagemVal,
+        nome: nomeVal,
+        email: emailVal,
+      });
       setEnviado(true);
       setNome("");
       setEmail("");
       setTitulo("");
       setMensagem("");
       setTipo("SUGESTAO");
-    }, 800);
+    } catch (err) {
+      toast.error(getApiErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -155,11 +150,11 @@ export function SuportePage() {
             <div className="space-y-1.5">
               <h2 className="text-lg font-bold">Mensagem preparada!</h2>
               <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-                Seu cliente de e-mail foi aberto com a mensagem pré-preenchida. Basta confirmar o envio.
+                Sua mensagem foi enviada para nossa equipe. Retornaremos em até 2 dias úteis.
               </p>
             </div>
             <p className="text-xs text-muted-foreground">
-              Prefere enviar diretamente?{" "}
+              Dúvidas urgentes? Fale diretamente:{" "}
               <a href={`mailto:${SUPPORT_EMAIL}`} className="font-medium text-primary underline-offset-4 hover:underline">
                 {SUPPORT_EMAIL}
               </a>
