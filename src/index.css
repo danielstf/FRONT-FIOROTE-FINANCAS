@@ -303,3 +303,32 @@ select {
   background-image: radial-gradient(circle, hsl(var(--primary) / 0.10) 1px, transparent 1px);
   background-size: 20px 20px;
 }
+
+/* Isola a página do tema global — sempre usa as variáveis do modo claro */
+.theme-static-light {
+  --background: 214 35% 93%;
+  --foreground: 222 47% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 9%;
+  --primary: 221 83% 53%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 28% 88%;
+  --secondary-foreground: 222 47% 9%;
+  --muted: 210 28% 87%;
+  --muted-foreground: 215 22% 28%;
+  --accent: 214 92% 88%;
+  --accent-foreground: 221 83% 22%;
+  --destructive: 0 72% 51%;
+  --border: 214 32% 68%;
+  --input: 214 32% 68%;
+  --ring: 221 83% 53%;
+  --sidebar: 214 35% 93%;
+  --sidebar-foreground: 222 47% 12%;
+  --sidebar-primary: 221 83% 53%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 214 80% 84%;
+  --sidebar-accent-foreground: 221 83% 22%;
+  --sidebar-border: 214 30% 78%;
+}

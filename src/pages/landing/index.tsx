@@ -182,7 +182,7 @@ function AnimatedSection({
 
 export function LandingPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="theme-static-light min-h-screen bg-background text-foreground">
       {/* ── Camada decorativa global (fixed, atrás de tudo) ─────────────────── */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         {/* Blob superior direito */}
@@ -196,7 +196,7 @@ export function LandingPage() {
       {/* ── HEADER ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:gap-4 lg:h-20 lg:px-8">
-          <BrandLogo className="min-w-0 flex-1 sm:flex-none" size="nav" />
+          <BrandLogo className="min-w-0 flex-1 sm:flex-none" size="nav" forceTheme="light" />
 
           <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground lg:flex xl:gap-8">
             <a className="transition-colors hover:text-foreground" href="#funcoes">
@@ -951,7 +951,7 @@ export function LandingPage() {
         />
         <div className="mx-auto w-full max-w-7xl px-4 py-12 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <BrandLogo size="nav" />
+            <BrandLogo size="nav" forceTheme="light" />
 
             <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
               <a className="transition-colors hover:text-foreground" href="#funcoes">
