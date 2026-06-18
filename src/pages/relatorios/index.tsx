@@ -181,17 +181,36 @@ function wsReceitas(grupos: Array<{ mes: string; receitas: Array<{ data?: string
 
 // ── Aba Despesas ───────────────────────────────────────────────────────────
 
-function wsDespesas(grupos: Array<{ mes: string; despesas: Array<{ dataVencimento?: string | null; nome: string; categoria?: string | null; formaPagamento?: string | null; valor: number; paga: boolean; fixa: boolean }> }>): string {
+function wsDespesas(grupos: Array<{ mes: string; despesas: Array<{ dataVencimento?: string | null; nome: string; categoria?: string | null; formaPagamento?: string | null; cartaoCreditoId?: string | null; cartaoCredito?: { id: string; nome: string } | null; valor: number; paga: boolean; fixa: boolean }> }>): string {
   const rows: string[] = [];
   rows.push(xrow(s("Mês", "sh_r"), s("Vencimento", "sh_r"), s("Nome", "sh_r"), s("Categoria", "sh_r"), s("Forma Pagamento", "sh_r"), s("Valor (R$)", "sh_r"), s("Paga", "sh_r"), s("Fixa", "sh_r")));
   for (const { mes, despesas } of grupos) {
-    rows.push(xrow(s(`${formatMonth(mes)} — ${despesas.length} lançamento(s)`, "sm_d", 8)));
-    if (despesas.length === 0) {
+    // Despesas diretas (não são compras de cartão de crédito)
+    const diretas = despesas.filter((d) => !(d.formaPagamento === "CARTAO_CREDITO" && d.cartaoCreditoId));
+    // Agrupa compras de cartão por cartão — uma linha resumo por cartão
+    const byCard = new Map<string, { nome: string; valor: number; paga: boolean; fixa: boolean }>();
+    for (const d of despesas) {
+      if (d.formaPagamento !== "CARTAO_CREDITO" || !d.cartaoCreditoId) continue;
+      const key = d.cartaoCreditoId;
+      if (!byCard.has(key)) byCard.set(key, { nome: d.cartaoCredito?.nome ?? "Cartão", valor: 0, paga: true, fixa: false });
+      const card = byCard.get(key)!;
+      card.valor += d.valor;
+      card.paga = card.paga && d.paga;
+      card.fixa = card.fixa || d.fixa;
+    }
+    const totalLinhas = diretas.length + byCard.size;
+    rows.push(xrow(s(`${formatMonth(mes)} — ${totalLinhas} lançamento(s)`, "sm_d", 8)));
+    if (totalLinhas === 0) {
       rows.push(xrow(s("Nenhuma despesa neste mês.", "it", 8)));
     } else {
-      despesas.forEach((d, i) => {
+      diretas.forEach((d, i) => {
         const alt = i % 2 === 1 ? "alt" : undefined;
         rows.push(xrow(s(formatMonth(mes, false), alt), s(brDate(d.dataVencimento), alt), s(d.nome, alt), s(d.categoria ?? "", alt), s(d.formaPagamento ?? "", alt), n(d.valor, "vd"), s(d.paga ? "Sim" : "Não", d.paga ? "vp" : "vo"), s(d.fixa ? "Sim" : "Não", alt)));
+      });
+      [...byCard.values()].forEach((card, i) => {
+        const idx = diretas.length + i;
+        const alt = idx % 2 === 1 ? "alt" : undefined;
+        rows.push(xrow(s(formatMonth(mes, false), alt), s("", alt), s(card.nome, alt), s("Cartão de Crédito", alt), s("Cartão de Crédito", alt), n(card.valor, "vd"), s(card.paga ? "Sim" : "Não", card.paga ? "vp" : "vo"), s(card.fixa ? "Sim" : "Não", alt)));
       });
       rows.push(xrow(s(`Total ${formatMonth(mes, false)}`, "st_d", 5), n(despesas.reduce((a, d) => a + d.valor, 0), "st_d"), s("", "st_d"), s("", "st_d")));
     }
