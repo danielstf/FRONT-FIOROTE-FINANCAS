@@ -18,6 +18,7 @@ import {
   WalletCards,
   Zap,
 } from "lucide-react";
+import { useLayoutEffect } from "react";
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { BrandLogo } from "../../components/brand-logo";
@@ -181,6 +182,15 @@ function AnimatedSection({
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export function LandingPage() {
+  useLayoutEffect(() => {
+    const html = document.documentElement;
+    const wasDark = html.classList.contains("dark");
+    if (wasDark) html.classList.remove("dark");
+    return () => {
+      if (wasDark) html.classList.add("dark");
+    };
+  }, []);
+
   return (
     <main className="theme-static-light min-h-screen bg-background text-foreground">
       {/* ── Camada decorativa global (fixed, atrás de tudo) ─────────────────── */}
