@@ -1,12 +1,14 @@
 export const CARD_GRADIENTS = [
-  { from: "#2563eb", to: "#60a5fa", label: "Azul" },
-  { from: "#7c3aed", to: "#a78bfa", label: "Violeta" },
-  { from: "#dc2626", to: "#f87171", label: "Vermelho" },
-  { from: "#059669", to: "#34d399", label: "Verde" },
-  { from: "#d97706", to: "#fbbf24", label: "Âmbar" },
-  { from: "#0891b2", to: "#22d3ee", label: "Ciano" },
-  { from: "#4338ca", to: "#818cf8", label: "Índigo" },
-  { from: "#db2777", to: "#f472b6", label: "Rosa" },
+  { from: "#1A56DB", to: "#1E3A8A", label: "Azul" },       // 0
+  { from: "#059669", to: "#065F46", label: "Verde" },       // 1
+  { from: "#DC2626", to: "#9B1C1C", label: "Vermelho" },   // 2
+  { from: "#7C3AED", to: "#4C1D95", label: "Roxo" },       // 3
+  { from: "#D97706", to: "#92400E", label: "Âmbar" },      // 4
+  { from: "#0891B2", to: "#0369A1", label: "Ciano" },      // 5
+  { from: "#DB2777", to: "#9D174D", label: "Rosa" },       // 6
+  { from: "#4338CA", to: "#3730A3", label: "Índigo" },     // 7
+  { from: "#F59E0B", to: "#B45309", label: "Amarelo" },    // 8
+  { from: "#8B5CF6", to: "#5B21B6", label: "Violeta" },   // 9
 ] as const;
 
 export function getCardGradient(index: number) {

@@ -31,22 +31,6 @@ import { pageVariants, sectionVariants } from "../../lib/motion";
 import { normalizeRequiredText, toUppercaseText } from "../../lib/text";
 import { useAuth } from "../../providers/auth-provider";
 
-const COLORS_KEY = "fiorote-card-colors";
-
-function loadColors(): Record<string, number> {
-  try {
-    const s = localStorage.getItem(COLORS_KEY);
-    return s ? (JSON.parse(s) as Record<string, number>) : {};
-  } catch {
-    return {};
-  }
-}
-
-function persistColor(cardId: string, index: number) {
-  try {
-    localStorage.setItem(COLORS_KEY, JSON.stringify({ ...loadColors(), [cardId]: index }));
-  } catch {}
-}
 
 function CardPreview({ nome, colorIndex }: { nome: string; colorIndex: number }) {
   const g = getCardGradient(colorIndex);
@@ -100,17 +84,12 @@ export function CartoesPage() {
   const [cartoes, setCartoes] = useState<CartaoCredito[]>([]);
   const [nome, setNome] = useState("");
   const [selectedColor, setSelectedColor] = useState(0);
-  const [cardColors, setCardColors] = useState<Record<string, number>>({});
   const [editando, setEditando] = useState<CartaoCredito | null>(null);
   const [excluindo, setExcluindo] = useState<CartaoCredito | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    setCardColors(loadColors());
-  }, []);
 
   async function carregarCartoes() {
     setError("");
@@ -133,14 +112,10 @@ export function CartoesPage() {
       const nomeNormalizado = normalizeRequiredText(nome);
       if (!nomeNormalizado) { toast.error("Informe o nome do cartão."); return; }
       if (editando) {
-        await cartoesApi.editar(editando.id, { nome: nomeNormalizado });
-        persistColor(editando.id, selectedColor);
-        setCardColors((prev) => ({ ...prev, [editando.id]: selectedColor }));
+        await cartoesApi.editar(editando.id, { nome: nomeNormalizado, cor: selectedColor });
         toast.success("Cartão atualizado com sucesso.");
       } else {
-        const created = await cartoesApi.criar({ nome: nomeNormalizado });
-        persistColor(created.id, selectedColor);
-        setCardColors((prev) => ({ ...prev, [created.id]: selectedColor }));
+        await cartoesApi.criar({ nome: nomeNormalizado, cor: selectedColor });
         toast.success("Cartão cadastrado com sucesso.");
       }
       setNome("");
@@ -173,7 +148,7 @@ export function CartoesPage() {
   function iniciarEdicao(cartao: CartaoCredito) {
     setEditando(cartao);
     setNome(toUppercaseText(cartao.nome));
-    setSelectedColor(cardColors[cartao.id] ?? 0);
+    setSelectedColor(cartao.cor ?? 0);
     setError("");
   }
 
@@ -314,9 +289,8 @@ export function CartoesPage() {
 
           {!loading && cartoes.length > 0 && (
             <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 xl:grid-cols-4">
-              {cartoes.map((cartao, index) => {
-                const ci = cardColors[cartao.id] ?? index;
-                const g = getCardGradient(ci);
+              {cartoes.map((cartao) => {
+                const g = getCardGradient(cartao.cor ?? 0);
                 return (
                   <div
                     key={cartao.id}
