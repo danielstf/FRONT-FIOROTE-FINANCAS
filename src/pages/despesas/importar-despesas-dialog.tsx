@@ -58,7 +58,7 @@ function parseBrDate(val: string): { mes: string; iso: string } | null {
   const [, day, month, year] = m;
   return {
     mes: `${year}-${month}`,
-    iso: `${year}-${month}-${day}T00:00:00.000Z`,
+    iso: `${year}-${month}-${day}`,   // API espera YYYY-MM-DD, sem hora
   };
 }
 
