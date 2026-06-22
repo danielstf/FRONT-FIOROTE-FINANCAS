@@ -69,6 +69,20 @@ function parseBrDate(val: string): { mes: string; iso: string } | null {
   return { mes: `${year}-${month}`, iso: `${year}-${month}-${day}` };
 }
 
+const PT_MONTHS: Record<string, string> = {
+  janeiro: "01", fevereiro: "02", março: "03", abril: "04",
+  maio: "05", junho: "06", julho: "07", agosto: "08",
+  setembro: "09", outubro: "10", novembro: "11", dezembro: "12",
+};
+
+// Parses section headers like "Julho de 2026 — 3 lançamento(s)" → "2026-07"
+function parseSectionMes(text: string): string | null {
+  const m = text.match(/^(\w+)(?:\s+de)?\s+(\d{4})/i);
+  if (!m) return null;
+  const num = PT_MONTHS[m[1].toLowerCase()];
+  return num ? `${m[2]}-${num}` : null;
+}
+
 function getWorksheet(xml: string, xmlName: string): string | null {
   const esc = xmlName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const m = xml.match(new RegExp(`<Worksheet ss:Name="${esc}">[\\s\\S]*?<\\/Worksheet>`));
@@ -90,8 +104,15 @@ function parseDespesasSheet(
   const ws = getWorksheet(xml, "Despesas");
   if (!ws) return [];
   const result: Omit<LinhaImportacao, "duplicata">[] = [];
+  let sectionMes = defaultMes;
   for (const [, row] of getRows(ws)) {
     const cells = getCells(row);
+    // Section header: 1 cell like "Julho de 2026 — N lançamento(s)"
+    if (cells.length === 1) {
+      sectionMes =
+        parseSectionMes(unescapeXml(cells[0]?.[2] ?? "")) ?? sectionMes;
+      continue;
+    }
     if (cells.length < 6) continue;
     const nome = unescapeXml(cells[2]?.[2] ?? "").trim();
     const valor =
@@ -106,7 +127,7 @@ function parseDespesasSheet(
       categoria: unescapeXml(cells[3]?.[2] ?? "").trim() || null,
       formaPagamento: fp as FormaPagamentoDespesa,
       cartaoNome: null,
-      mes: pd?.mes ?? defaultMes,
+      mes: pd?.mes ?? sectionMes,
       dataVencimento: pd?.iso ?? null,
       paga: unescapeXml(cells[6]?.[2] ?? "").trim().toLowerCase() === "sim",
       fixa: unescapeXml(cells[7]?.[2] ?? "").trim().toLowerCase() === "sim",
@@ -132,8 +153,15 @@ function parseCartoesSheets(
     const ws = getWorksheet(xml, xmlName);
     if (!ws) continue;
     const purchases: Omit<LinhaImportacao, "duplicata">[] = [];
+    let sectionMes = defaultMes;
     for (const [, row] of getRows(ws)) {
       const cells = getCells(row);
+      // Section header: 1 cell like "Julho de 2026 — N lançamento(s)"
+      if (cells.length === 1) {
+        sectionMes =
+          parseSectionMes(unescapeXml(cells[0]?.[2] ?? "")) ?? sectionMes;
+        continue;
+      }
       if (cells.length < 5) continue;
       const nome = unescapeXml(cells[2]?.[2] ?? "").trim();
       // Filters out header rows ("Nome") and total rows (cells[2] is Number)
@@ -148,10 +176,9 @@ function parseCartoesSheets(
         categoria: unescapeXml(cells[3]?.[2] ?? "").trim() || null,
         formaPagamento: "CARTAO_CREDITO",
         cartaoNome: displayName,
-        mes: pd?.mes ?? defaultMes,
+        mes: pd?.mes ?? sectionMes,
         dataVencimento: pd?.iso ?? null,
-        paga:
-          unescapeXml(cells[5]?.[2] ?? "").trim().toLowerCase() === "sim",
+        paga: unescapeXml(cells[5]?.[2] ?? "").trim().toLowerCase() === "sim",
         fixa: unescapeXml(cells[7]?.[2] ?? "").trim().toLowerCase() === "sim",
       });
     }
