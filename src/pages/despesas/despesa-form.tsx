@@ -223,6 +223,11 @@ export function DespesaForm({
       return;
     }
 
+    if (!dataVencimento) {
+      toast.error("Informe a data de vencimento.");
+      return;
+    }
+
     if (formaPagamento === "CARTAO_CREDITO" && !cartaoCreditoId) {
       toast.error("Selecione o cartão de crédito desta despesa.");
       return;
@@ -312,6 +317,11 @@ export function DespesaForm({
       return;
     }
 
+    if (!dataVencimento) {
+      toast.error("Informe a data de vencimento.");
+      return;
+    }
+
     if (formaPagamento === "CARTAO_CREDITO" && !cartaoCreditoId) {
       toast.error("Selecione o cartão de crédito desta despesa.");
       return;
@@ -377,7 +387,9 @@ export function DespesaForm({
                 <MonthPicker value={mes} onChange={setMes} />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="dataVencimento">Vencimento</Label>
+                <Label htmlFor="dataVencimento">
+                  Vencimento <span className="text-destructive">*</span>
+                </Label>
                 <DatePicker
                   id="dataVencimento"
                   value={dataVencimento}
