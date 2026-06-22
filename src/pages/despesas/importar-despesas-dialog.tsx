@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import * as XLSX from "xlsx";
 import {
   AlertCircle,
   Check,
@@ -44,10 +43,17 @@ type LinhaImportacao = {
   fixa: boolean;
 };
 
-function parseBrDate(val: unknown): { mes: string; iso: string } | null {
-  if (!val) return null;
-  const str = String(val).trim();
-  const m = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+function unescapeXml(str: string): string {
+  return str
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'");
+}
+
+function parseBrDate(val: string): { mes: string; iso: string } | null {
+  const m = val.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
   if (!m) return null;
   const [, day, month, year] = m;
   return {
@@ -56,30 +62,45 @@ function parseBrDate(val: unknown): { mes: string; iso: string } | null {
   };
 }
 
-function parseLinhas(aoa: unknown[][], defaultMes: string): LinhaImportacao[] {
+function parseSpreadsheetML(xml: string, defaultMes: string): LinhaImportacao[] {
+  // Localiza a aba "Despesas"
+  const wsMatch = xml.match(/<Worksheet ss:Name="Despesas">([\s\S]*?)<\/Worksheet>/);
+  if (!wsMatch) return [];
+
+  const worksheet = wsMatch[1];
+  // Extrai apenas linhas não auto-fechadas (as linhas de gap são <Row ss:Height="5"/>)
+  const rowMatches = [...worksheet.matchAll(/<Row[^/][^>]*>([\s\S]*?)<\/Row>/g)];
   const result: LinhaImportacao[] = [];
 
-  for (const row of aoa) {
-    const nome = row[2];
-    const valor = row[5];
+  for (const [, rowContent] of rowMatches) {
+    // Extrai os valores de cada célula: tipo + conteúdo
+    const cells = [...rowContent.matchAll(/<Data ss:Type="([^"]+)">([^<]*)<\/Data>/g)];
 
-    if (typeof nome !== "string" || !nome.trim()) continue;
-    if (typeof valor !== "number" || valor <= 0) continue;
+    // Linhas de cabeçalho de seção (1 célula com MergeAcross) e linhas de total têm < 6 células
+    if (cells.length < 6) continue;
 
-    const formaPagamento = String(row[4] ?? "").trim();
+    const nome = unescapeXml(cells[2]?.[2] ?? "").trim();
+    const valorStr = cells[5]?.[2] ?? "";
+    const isNumber = cells[5]?.[1] === "Number";
+    const valor = isNumber ? parseFloat(valorStr) : NaN;
+
+    if (!nome || isNaN(valor) || valor <= 0) continue;
+
+    const formaPagamento = unescapeXml(cells[4]?.[2] ?? "").trim();
     if (!FORMAS_VALIDAS.has(formaPagamento)) continue;
 
-    const parsed = parseBrDate(row[1]);
+    const dateStr = unescapeXml(cells[1]?.[2] ?? "").trim();
+    const parsed = parseBrDate(dateStr);
 
     result.push({
-      nome: nome.trim(),
+      nome,
       valor: Math.round(valor * 100) / 100,
-      categoria: typeof row[3] === "string" && row[3].trim() ? row[3].trim() : null,
+      categoria: unescapeXml(cells[3]?.[2] ?? "").trim() || null,
       formaPagamento: formaPagamento as FormaPagamentoDespesa,
       mes: parsed?.mes ?? defaultMes,
       dataVencimento: parsed?.iso ?? null,
-      paga: String(row[6] ?? "").trim().toLowerCase() === "sim",
-      fixa: String(row[7] ?? "").trim().toLowerCase() === "sim",
+      paga: unescapeXml(cells[6]?.[2] ?? "").trim().toLowerCase() === "sim",
+      fixa: unescapeXml(cells[7]?.[2] ?? "").trim().toLowerCase() === "sim",
     });
   }
 
@@ -106,21 +127,16 @@ export function ImportarDespesasDialog({ open, onOpenChange, defaultMes, onSucce
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        const data = new Uint8Array(e.target!.result as ArrayBuffer);
-        const wb = XLSX.read(data, { type: "array" });
+        const xml = e.target!.result as string;
 
-        const sheetName =
-          wb.SheetNames.find((name) => name.toLowerCase().includes("despesa")) ??
-          wb.SheetNames[0];
-
-        if (!sheetName) {
-          setErro("Arquivo inválido: nenhuma aba encontrada.");
+        if (!xml.includes("<Worksheet")) {
+          setErro(
+            "Arquivo inválido. Envie um relatório .xls exportado pelo Fiorote.",
+          );
           return;
         }
 
-        const ws = wb.Sheets[sheetName];
-        const aoa = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, raw: true });
-        const parsed = parseLinhas(aoa, defaultMes);
+        const parsed = parseSpreadsheetML(xml, defaultMes);
 
         if (parsed.length === 0) {
           setErro(
@@ -134,11 +150,11 @@ export function ImportarDespesasDialog({ open, onOpenChange, defaultMes, onSucce
         setStep("preview");
       } catch {
         setErro(
-          "Não foi possível ler o arquivo. Certifique-se de enviar um .xls ou .xlsx válido.",
+          "Não foi possível ler o arquivo. Certifique-se de enviar um .xls exportado pelo Fiorote.",
         );
       }
     };
-    reader.readAsArrayBuffer(file);
+    reader.readAsText(file, "UTF-8");
   }
 
   function toggleSelecionada(idx: number) {
