@@ -47,7 +47,7 @@ type LinhaImportacao = {
   formaPagamento: FormaPagamentoDespesa;
   cartaoNome: string | null;
   mes: string;
-  dataVencimento: string | null;
+  dataVencimento: string;
   paga: boolean;
   fixa: boolean;
   duplicata: boolean;
@@ -121,14 +121,15 @@ function parseDespesasSheet(
     const fp = unescapeXml(cells[4]?.[2] ?? "").trim();
     if (!FORMAS_VALIDAS.has(fp)) continue;
     const pd = parseBrDate(unescapeXml(cells[1]?.[2] ?? "").trim());
+    if (!pd) continue;
     result.push({
       nome,
       valor: Math.round(valor * 100) / 100,
       categoria: unescapeXml(cells[3]?.[2] ?? "").trim() || null,
       formaPagamento: fp as FormaPagamentoDespesa,
       cartaoNome: null,
-      mes: pd?.mes ?? sectionMes,
-      dataVencimento: pd?.iso ?? null,
+      mes: pd.mes,
+      dataVencimento: pd.iso,
       paga: unescapeXml(cells[6]?.[2] ?? "").trim().toLowerCase() === "sim",
       fixa: unescapeXml(cells[7]?.[2] ?? "").trim().toLowerCase() === "sim",
     });
@@ -170,14 +171,15 @@ function parseCartoesSheets(
         cells[4]?.[1] === "Number" ? parseFloat(cells[4]?.[2] ?? "") : NaN;
       if (isNaN(valor) || valor <= 0) continue;
       const pd = parseBrDate(unescapeXml(cells[1]?.[2] ?? "").trim());
+      if (!pd) continue;
       purchases.push({
         nome,
         valor: Math.round(valor * 100) / 100,
         categoria: unescapeXml(cells[3]?.[2] ?? "").trim() || null,
         formaPagamento: "CARTAO_CREDITO",
         cartaoNome: displayName,
-        mes: pd?.mes ?? sectionMes,
-        dataVencimento: pd?.iso ?? null,
+        mes: pd.mes,
+        dataVencimento: pd.iso,
         paga: unescapeXml(cells[5]?.[2] ?? "").trim().toLowerCase() === "sim",
         fixa: unescapeXml(cells[7]?.[2] ?? "").trim().toLowerCase() === "sim",
       });
