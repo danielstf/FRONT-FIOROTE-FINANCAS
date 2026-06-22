@@ -18,6 +18,15 @@ export function AdBanner() {
   useEffect(() => {
     if (!adsenseSlot) return;
 
+    // Injeta o script do AdSense apenas quando o banner é exibido
+    if (!document.querySelector('script[src*="adsbygoogle"]')) {
+      const script = document.createElement("script");
+      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`;
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      document.head.appendChild(script);
+    }
+
     try {
       window.adsbygoogle = window.adsbygoogle ?? [];
       window.adsbygoogle.push({});
