@@ -3,16 +3,20 @@ import {
   BadgeCheck,
   BarChart3,
   BellRing,
+  BookOpen,
   CheckCircle2,
   CreditCard,
   FileSpreadsheet,
+  HelpCircle,
   Layers3,
+  Lightbulb,
   LockKeyhole,
   MonitorSmartphone,
   PieChart,
   Repeat2,
   Smartphone,
   Star,
+  TrendingDown,
   TrendingUp,
   UserPlus,
   WalletCards,
@@ -112,6 +116,56 @@ const premiumItems = [
 ];
 
 const freeItems = ["Receitas, despesas e cartões", "Dashboard mensal"];
+
+const tips = [
+  {
+    icon: BookOpen,
+    title: "Registre tudo, inclusive os pequenos gastos",
+    body: "Um café, uma corrida de aplicativo, um lanche rápido — pequenos gastos diários podem representar até 20% do orçamento mensal sem que você perceba. O hábito de lançar cada saída no momento em que acontece é o primeiro passo para entender exatamente para onde vai o seu dinheiro.",
+  },
+  {
+    icon: Repeat2,
+    title: "Separe despesas fixas das variáveis",
+    body: "Despesas fixas repetem o mesmo valor todo mês: aluguel, plano de saúde, assinaturas. Variáveis mudam de período para período: supermercado, lazer, vestuário. Ao classificar cada gasto, fica claro onde há espaço para economizar e quais compromissos são obrigatórios.",
+  },
+  {
+    icon: TrendingDown,
+    title: "Revise seus gastos a cada semana",
+    body: "Reservar dez minutos semanais para conferir os lançamentos do mês evita que desvios se acumulem. Uma revisão rápida permite ajustar o comportamento antes que o orçamento feche no vermelho e cria o hábito de atenção contínua às finanças pessoais.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Planeje o próximo mês com antecedência",
+    body: "Antes de o mês começar, lance as despesas fixas já previstas e estime as variáveis com base nos meses anteriores. Essa previsão antecipada mostra o saldo esperado e ajuda a decidir com mais segurança sobre gastos extras ou quanto reservar para a poupança.",
+  },
+];
+
+const faqs = [
+  {
+    q: "O que é controle financeiro pessoal?",
+    a: "Controle financeiro pessoal é o hábito de registrar e acompanhar todas as receitas e despesas ao longo do mês. Com esse acompanhamento, você sabe exatamente para onde vai o seu dinheiro, identifica pontos de desperdício e toma decisões mais conscientes sobre gastos, dívidas e objetivos de poupança.",
+  },
+  {
+    q: "Por onde começo a organizar minhas finanças?",
+    a: "O primeiro passo é registrar todas as entradas e saídas do mês atual, sem julgamento. Separe por categorias básicas como alimentação, moradia, transporte e lazer. Com apenas alguns lançamentos, você já tem uma visão real do seu saldo e consegue identificar os maiores pontos de gasto.",
+  },
+  {
+    q: "Qual a diferença entre despesa fixa e variável?",
+    a: "Despesa fixa ocorre todo mês com o mesmo valor: aluguel, assinatura de streaming, plano de saúde. Despesa variável muda de mês para mês: supermercado, combustível, lazer. Separar essas categorias ajuda a entender o compromisso mínimo mensal e onde há flexibilidade para reduzir gastos.",
+  },
+  {
+    q: "Como controlar os gastos do cartão de crédito?",
+    a: "O segredo é lançar cada compra no momento em que acontece, antes de esperar a fatura fechar. Assim você acompanha o total acumulado em tempo real e evita surpresas. Vincular cada compra ao cartão correto no aplicativo também ajuda a ter uma visão separada dos gastos por conta de pagamento.",
+  },
+  {
+    q: "Quanto devo poupar por mês?",
+    a: "A regra clássica de finanças pessoais recomenda guardar pelo menos 10% da renda líquida mensal. O mais importante é criar o hábito, mesmo começando com valores menores. Ao acompanhar os gastos com regularidade, fica mais fácil identificar onde cortar e aumentar gradualmente o percentual poupado.",
+  },
+  {
+    q: "O Fiorote funciona no celular?",
+    a: "Sim. O Fiorote Controle Financeiro está disponível tanto na versão web, acessível por qualquer navegador, quanto no aplicativo para Android. Os dados ficam sincronizados em tempo real entre os dispositivos, então um lançamento feito pelo celular aparece imediatamente no computador.",
+  },
+];
 
 // ─── Animations ──────────────────────────────────────────────────────────────
 
@@ -498,6 +552,53 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* ── DICAS FINANCEIRAS ──────────────────────────────────────────────── */}
+      <section className="relative mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-0 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-primary/4 blur-3xl animate-float-slow"
+          style={{ animationDelay: "-3s" }}
+        />
+        <AnimatedSection className="mb-12 space-y-3">
+          <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary">
+            <Lightbulb className="h-3.5 w-3.5" />
+            Dicas práticas
+          </p>
+          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            Hábitos que fazem diferença no bolso
+          </h2>
+          <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
+            Pequenas mudanças na forma de registrar e acompanhar as finanças geram grandes resultados ao
+            longo do tempo. Veja por onde começar.
+          </p>
+        </AnimatedSection>
+
+        <div className="grid gap-5 md:grid-cols-2">
+          {tips.map((tip, i) => (
+            <motion.div
+              key={tip.title}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.15 }}
+              variants={fadeUp}
+              transition={delay(i * 0.07)}
+            >
+              <div className="group relative h-full rounded-2xl border border-border/60 bg-card p-6 shadow-sm transition-shadow hover:shadow-md">
+                <div
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+                />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <tip.icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-4 text-base font-semibold text-foreground">{tip.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{tip.body}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
       {/* ── FEATURES ───────────────────────────────────────────────────────── */}
       <section className="relative mx-auto w-full max-w-7xl px-4 py-20 lg:px-8" id="funcoes">
         {/* Blob decorativo atrás das features */}
@@ -850,6 +951,48 @@ export function LandingPage() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ────────────────────────────────────────────────────────────── */}
+      <section className="relative mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-primary/4 blur-3xl animate-drift"
+          style={{ animationDelay: "-4s" }}
+        />
+        <AnimatedSection className="mb-12 space-y-3">
+          <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary">
+            <HelpCircle className="h-3.5 w-3.5" />
+            Perguntas frequentes
+          </p>
+          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            Dúvidas sobre finanças pessoais
+          </h2>
+          <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
+            Respostas diretas sobre controle financeiro e como o Fiorote pode ajudar no seu
+            dia a dia.
+          </p>
+        </AnimatedSection>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {faqs.map((item, i) => (
+            <motion.div
+              key={item.q}
+              className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.15 }}
+              variants={fadeUp}
+              transition={delay(i * 0.06)}
+            >
+              <h3 className="flex items-start gap-2 text-sm font-semibold text-foreground">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                {item.q}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.a}</p>
+            </motion.div>
+          ))}
         </div>
       </section>
 
