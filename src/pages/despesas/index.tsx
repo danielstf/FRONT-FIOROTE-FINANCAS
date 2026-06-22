@@ -85,6 +85,7 @@ export function DespesasPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkEscopoFixas, setBulkEscopoFixas] = useState<"mes" | "todas">("todas");
   const [bulkPagarOpen, setBulkPagarOpen] = useState(false);
   const [bulkPagando, setBulkPagando] = useState(false);
   const [cadastroAberto, setCadastroAberto] = useState(false);
@@ -232,8 +233,9 @@ export function DespesasPage() {
       await Promise.all(
         [...selectedIds].map((id) => {
           const d = despesas.find((x) => x.id === id);
+          const temEscopo = d?.parcelamentoId || d?.fixa;
           return despesasApi.excluir(id, {
-            escopo: d?.parcelamentoId || d?.fixa ? "mes" : undefined,
+            escopo: temEscopo ? bulkEscopoFixas : undefined,
             mes,
           });
         }),
@@ -243,6 +245,7 @@ export function DespesasPage() {
       setBulkDeleteOpen(false);
       setSelectionMode(false);
       setSelectedIds(new Set());
+      setBulkEscopoFixas("todas");
       await carregarDespesas();
     } catch (requestError) {
       toast.error(getApiErrorMessage(requestError));
@@ -924,7 +927,7 @@ export function DespesasPage() {
           <DialogHeader>
             <DialogTitle>Excluir despesas selecionadas</DialogTitle>
             <DialogDescription>
-              Esta ação é irreversível. Despesas fixas e parceladas terão apenas a ocorrência deste mês removida.
+              Esta ação é irreversível. Para despesas fixas ou parceladas, escolha se deseja excluir permanentemente ou apenas deste mês.
             </DialogDescription>
           </DialogHeader>
 
@@ -947,11 +950,28 @@ export function DespesasPage() {
             {despesas.some(
               (d) => selectedIds.has(d.id) && (d.fixa || d.parcelamentoId),
             ) && (
-              <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-500/25 bg-amber-500/8 p-3 text-amber-700 dark:text-amber-400">
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                <p className="text-xs leading-relaxed">
-                  A seleção contém despesas fixas ou parceladas. Apenas a ocorrência deste mês será removida — as demais permanecerão.
-                </p>
+              <div className="mt-3 space-y-2 rounded-xl border border-amber-500/25 bg-amber-500/8 p-3">
+                <div className="flex items-start gap-2 text-amber-700 dark:text-amber-400">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <p className="text-xs font-medium">A seleção contém despesas fixas ou parceladas. Escolha como excluir:</p>
+                </div>
+                <div className="ml-6 flex flex-col gap-1.5">
+                  {(["todas", "mes"] as const).map((opcao) => (
+                    <label key={opcao} className="flex cursor-pointer items-center gap-2 text-xs text-foreground">
+                      <input
+                        type="radio"
+                        name="bulkEscopo"
+                        value={opcao}
+                        checked={bulkEscopoFixas === opcao}
+                        onChange={() => setBulkEscopoFixas(opcao)}
+                        className="mt-0.5 h-3.5 w-3.5 accent-primary"
+                      />
+                      {opcao === "todas"
+                        ? "Excluir permanentemente (todas as ocorrências)"
+                        : "Remover apenas deste mês"}
+                    </label>
+                  ))}
+                </div>
               </div>
             )}
           </div>
