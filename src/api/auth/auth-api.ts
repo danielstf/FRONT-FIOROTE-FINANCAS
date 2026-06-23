@@ -66,4 +66,8 @@ export const authApi = {
     );
     return data;
   },
+
+  async logout() {
+    await api.post("/logout");
+  },
 };
