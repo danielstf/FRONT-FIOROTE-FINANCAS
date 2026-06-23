@@ -181,9 +181,11 @@ export function DespesasPage() {
       });
       toast.success(
         despesaExcluindoParcelada && escopoExclusao === "todas"
-          ? "Parcelas excluídas com sucesso."
+          ? "Parcelamento excluído com sucesso."
           : despesaExcluindoParcelada && escopoExclusao === "mes"
             ? "Parcela removida deste mês."
+          : despesaExcluindoRecorrente && escopoExclusao === "todas"
+            ? "Despesa fixa removida deste mês em diante."
           : despesaExcluindoRecorrente && escopoExclusao === "mes"
             ? "Despesa removida deste mês."
           : "Despesa excluída com sucesso.",
