@@ -66,10 +66,7 @@ export function AppLayout() {
     let ignore = false;
 
     async function carregarPerfis() {
-      if (authLoading) {
-        setPerfisLoading(true);
-        return;
-      }
+      if (authLoading) return; // Aguarda login ativo terminar
 
       setPerfisLoading(true);
 

@@ -168,19 +168,19 @@ export function DespesasPage() {
 
     try {
       await despesasApi.excluir(despesaExcluindo.id, {
-        escopo: despesaExcluindoComEscopo ? escopoExclusao : undefined,
+        escopo: despesaExcluindoComEscopo
+          ? despesaExcluindoRecorrente ? "todas" : escopoExclusao
+          : undefined,
         mes,
       });
       toast.success(
-        despesaExcluindoParcelada && escopoExclusao === "todas"
-          ? "Parcelamento excluído com sucesso."
-          : despesaExcluindoParcelada && escopoExclusao === "mes"
-            ? "Parcela removida deste mês."
-          : despesaExcluindoRecorrente && escopoExclusao === "todas"
-            ? "Despesa fixa removida deste mês em diante."
-          : despesaExcluindoRecorrente && escopoExclusao === "mes"
-            ? "Despesa removida deste mês."
-          : "Despesa excluída com sucesso.",
+        despesaExcluindoRecorrente
+          ? "Despesa fixa removida deste mês em diante."
+          : despesaExcluindoParcelada && escopoExclusao === "todas"
+            ? "Parcelamento excluído com sucesso."
+            : despesaExcluindoParcelada && escopoExclusao === "mes"
+              ? "Parcela removida deste mês."
+              : "Despesa excluída com sucesso.",
       );
       setDespesaExcluindo(null);
       await carregarDespesas();
@@ -997,10 +997,10 @@ export function DespesasPage() {
           <DialogHeader>
             <DialogTitle>Excluir despesa</DialogTitle>
             <DialogDescription>
-              {despesaExcluindoParcelada
-                ? "Esta despesa faz parte de um parcelamento. Escolha se deseja remover apenas esta parcela ou excluir o parcelamento."
-                : despesaExcluindoRecorrente
-                  ? "Esta e todas as recorrências a partir deste mês serão excluídas. Para alterar, exclua e cadastre uma nova despesa fixa."
+              {despesaExcluindoRecorrente
+                ? "Esta despesa fixa e todas as ocorrências a partir deste mês serão excluídas permanentemente."
+                : despesaExcluindoParcelada
+                  ? "Esta despesa faz parte de um parcelamento. Escolha se deseja remover apenas esta parcela ou excluir o parcelamento."
                 : "Esta ação remove a despesa selecionada definitivamente."}
             </DialogDescription>
           </DialogHeader>
@@ -1011,7 +1011,16 @@ export function DespesasPage() {
               {formatCurrency(despesaExcluindo?.valor ?? 0)}
             </p>
 
-            {despesaExcluindoParcelada &&
+            {despesaExcluindoRecorrente && (
+              <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-destructive/25 bg-destructive/8 p-3 text-destructive">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <p className="text-xs leading-relaxed">
+                  Esta e todas as ocorrências desta despesa fixa a partir deste mês serão excluídas. Esta ação não pode ser desfeita.
+                </p>
+              </div>
+            )}
+
+            {despesaExcluindoParcelada && !despesaExcluindoRecorrente &&
               despesaExcluindo?.parcelaAtual &&
               despesaExcluindo.numeroParcelas && (
                 <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-destructive/25 bg-destructive/8 p-3 text-destructive">
@@ -1025,7 +1034,7 @@ export function DespesasPage() {
                 </div>
               )}
 
-            {despesaExcluindoParcelada && (
+            {despesaExcluindoParcelada && !despesaExcluindoRecorrente && (
               <div className="mt-3 grid gap-2">
                 {(["mes", "todas"] as const).map((opcao) => (
                   <label
@@ -1071,13 +1080,13 @@ export function DespesasPage() {
               {busyId === despesaExcluindo?.id && (
                 <Loader2 className="h-4 w-4 animate-spin" />
               )}
-              {despesaExcluindoParcelada && escopoExclusao === "todas"
-                ? "Excluir todas as parcelas"
-                : despesaExcluindoParcelada && escopoExclusao === "mes"
-                  ? "Remover esta parcela"
-                : despesaExcluindoRecorrente
-                  ? "Excluir esta e próximas"
-                : "Excluir"}
+              {despesaExcluindoRecorrente
+                ? "Excluir esta e próximas"
+                : despesaExcluindoParcelada && escopoExclusao === "todas"
+                  ? "Excluir parcelamento"
+                  : despesaExcluindoParcelada && escopoExclusao === "mes"
+                    ? "Remover esta parcela"
+                  : "Excluir"}
             </Button>
           </div>
         </DialogContent>

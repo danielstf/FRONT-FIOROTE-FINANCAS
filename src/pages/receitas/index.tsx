@@ -49,7 +49,6 @@ export function ReceitasPage() {
   const [cadastroAberto, setCadastroAberto] = useState(false);
   const [receitaEditando, setReceitaEditando] = useState<Receita | null>(null);
   const [receitaExcluindo, setReceitaExcluindo] = useState<Receita | null>(null);
-  const [escopoExclusao, setEscopoExclusao] = useState<"mes" | "todas">("mes");
   const [error, setError] = useState("");
 
   const maiorReceita = useMemo(
@@ -78,15 +77,13 @@ export function ReceitasPage() {
     setDeletingId(receitaExcluindo.id);
     try {
       await receitasApi.excluir(receitaExcluindo.id, {
-        escopo: receitaExcluindo.fixa ? escopoExclusao : undefined,
+        escopo: receitaExcluindo.fixa ? "todas" : undefined,
         mes,
       });
       toast.success(
-        receitaExcluindo.fixa && escopoExclusao === "mes"
-          ? "Receita removida deste mês."
-          : receitaExcluindo.fixa
-            ? "Receita removida deste mês em diante."
-            : "Receita excluída com sucesso.",
+        receitaExcluindo.fixa
+          ? "Receita fixa removida deste mês em diante."
+          : "Receita excluída com sucesso.",
       );
       setReceitaExcluindo(null);
       await carregarReceitas(mes);
@@ -254,7 +251,7 @@ export function ReceitasPage() {
                     variant="outline"
                     title="Excluir"
                     disabled={deletingId === receita.id}
-                    onClick={() => { setEscopoExclusao(receita.fixa ? "todas" : "mes"); setReceitaExcluindo(receita); }}
+                    onClick={() => { setReceitaExcluindo(receita); }}
                   >
                     {deletingId === receita.id
                       ? <Loader2 className="h-3.5 w-3.5 animate-spin" />

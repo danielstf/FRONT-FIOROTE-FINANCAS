@@ -50,17 +50,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [perfilFinanceiroId, setPerfilFinanceiroId] = useState<string | null>(() =>
     localStorage.getItem(perfilStorageKey),
   );
-  const [authLoading, setAuthLoading] = useState(() => !!getStoredSession());
+  // Começa em false: dados em cache do localStorage já estão disponíveis.
+  // Só vai para true durante o fluxo de login ativo para bloquear a UI.
+  const [authLoading, setAuthLoading] = useState(false);
 
-  // Atualiza os dados do usuário na sessão via cookie (sem precisar do token).
+  // Atualiza dados do usuário em background via cookie — não bloqueia a UI.
   useEffect(() => {
-    if (!session) {
-      setAuthLoading(false);
-      return;
-    }
+    if (!session) return;
 
     let ignore = false;
-    setAuthLoading(true);
 
     authApi
       .buscarPerfil()
@@ -71,16 +69,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession((s) => (s ? { ...s, usuario } : s));
       })
       .catch(() => {
-        // Mantém a sessão atual se o refresh falhar momentaneamente.
+        // Mantém a sessão em cache se o refresh falhar.
       })
       .finally(() => {
+        // Garante que authLoading seja false após login (que o define como true).
         if (!ignore) setAuthLoading(false);
       });
 
     return () => { ignore = true; };
-  // Roda uma vez por montagem — o sentinel não muda, então nunca re-dispara
-  // desnecessariamente. Se o token expirar, o servidor retorna 401 e o catch
-  // acima protege silenciosamente (o usuário vê o erro ao tentar uma ação).
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.token]);
 
@@ -107,15 +103,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authLoading,
       async login(payload) {
         setAuthLoading(true);
-        const data = await authApi.login(payload);
-        saveUsuario(data.usuario);
-        setSession({ token: COOKIE_SESSION_SENTINEL, usuario: data.usuario });
+        try {
+          const data = await authApi.login(payload);
+          saveUsuario(data.usuario);
+          setSession({ token: COOKIE_SESSION_SENTINEL, usuario: data.usuario });
+          // authLoading vai para false no finally do useEffect após buscarPerfil()
+        } catch (e) {
+          setAuthLoading(false);
+          throw e;
+        }
       },
       async loginGoogle(payload) {
         setAuthLoading(true);
-        const data = await authApi.loginGoogle(payload);
-        saveUsuario(data.usuario);
-        setSession({ token: COOKIE_SESSION_SENTINEL, usuario: data.usuario });
+        try {
+          const data = await authApi.loginGoogle(payload);
+          saveUsuario(data.usuario);
+          setSession({ token: COOKIE_SESSION_SENTINEL, usuario: data.usuario });
+        } catch (e) {
+          setAuthLoading(false);
+          throw e;
+        }
       },
       async cadastrar(payload) {
         await authApi.criarUsuario(payload);
