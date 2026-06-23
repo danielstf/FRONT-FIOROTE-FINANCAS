@@ -26,12 +26,12 @@ export function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [perfis, setPerfis] = useState<PerfilFinanceiro[]>([]);
-  const [perfisLoading, setPerfisLoading] = useState(true);
+  const [perfisLoading, setPerfisLoading] = useState(false);
   const perfilSelecionado =
     perfis.find((perfil) => perfil.id === perfilFinanceiroId) ?? null;
   const isPremium = hasPremiumAtivo(session?.usuario);
   const [shareOpen, setShareOpen] = useState(false);
-  const appContextLoading = authLoading || perfisLoading;
+  const appContextLoading = authLoading;
 
   function abrirWhatsApp() {
     const text = encodeURIComponent(
