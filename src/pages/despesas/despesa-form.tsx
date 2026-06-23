@@ -539,6 +539,16 @@ export function DespesaForm({
               </div>
             </div>
 
+            {fixa && (
+              <div className="flex items-start gap-2.5 rounded-lg border border-blue-500/25 bg-blue-500/8 p-3 text-xs text-blue-700 dark:text-blue-400">
+                <Repeat2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>
+                  <strong>Despesa fixa</strong> registra automaticamente <strong>60 meses</strong> (5 anos) a partir do mês escolhido.
+                  Você pode excluir ou editar individualmente ou em bloco. Após esse prazo, basta criar uma nova despesa fixa.
+                </span>
+              </div>
+            )}
+
             {mode === "edit" && despesa?.fixa && (
               <div className="grid gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
                 <p className="font-medium text-foreground">Como deseja editar?</p>
