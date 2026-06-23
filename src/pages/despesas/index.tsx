@@ -54,18 +54,6 @@ import {
 
 type StatusFilter = "todas" | "pendentes" | "pagas" | "vencidas";
 
-function ajustarDataParaMes(dataIso: string | null, mesDestino: string) {
-  if (!dataIso) return dataIso;
-
-  const [, month] = mesDestino.split("-").map(Number);
-  const [datePart] = dataIso.split("T");
-  const [, , day] = datePart.split("-").map(Number);
-  const [yearText] = mesDestino.split("-");
-  const ultimoDia = new Date(Number(yearText), month, 0).getDate();
-  const diaSeguro = Math.min(day || 1, ultimoDia);
-
-  return `${mesDestino}-${String(diaSeguro).padStart(2, "0")}T00:00:00.000Z`;
-}
 
 export function DespesasPage() {
   const { perfilFinanceiroId } = useAuth();
@@ -784,35 +772,24 @@ export function DespesasPage() {
                               <ThumbsDown className="h-4 w-4 fill-current" />
                             )}
                           </Button>
-                          <Button
-                            aria-label="Editar despesa"
-                            className="h-9 w-9 rounded-lg border-blue-500/25 px-0 text-blue-700 hover:bg-blue-500/10 dark:text-blue-400"
-                            title="Editar"
-                            variant="outline"
-                            onClick={() =>
-                              setDespesaEditando(
-                                despesa.fixa
-                                  ? {
-                                      ...despesa,
-                                      mesReferencia: `${mes}-01T00:00:00.000Z`,
-                                      dataVencimento: ajustarDataParaMes(
-                                        despesa.dataVencimento,
-                                        mes,
-                                      ),
-                                    }
-                                  : despesa,
-                              )
-                            }
-                          >
-                            <PencilLine className="h-4 w-4" />
-                          </Button>
+                          {!despesa.fixa && (
+                            <Button
+                              aria-label="Editar despesa"
+                              className="h-9 w-9 rounded-lg border-blue-500/25 px-0 text-blue-700 hover:bg-blue-500/10 dark:text-blue-400"
+                              title="Editar"
+                              variant="outline"
+                              onClick={() => setDespesaEditando(despesa)}
+                            >
+                              <PencilLine className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button
                             aria-label="Excluir despesa"
                             className="h-9 w-9 rounded-lg border-destructive/25 bg-destructive/5 px-0 text-destructive hover:bg-destructive/10"
                             title="Excluir"
                             variant="outline"
                             onClick={() => {
-                              setEscopoExclusao("mes");
+                              setEscopoExclusao(despesa.fixa ? "todas" : "mes");
                               setDespesaExcluindo(despesa);
                             }}
                             disabled={busyId === despesa.id}
@@ -1023,7 +1000,7 @@ export function DespesasPage() {
               {despesaExcluindoParcelada
                 ? "Esta despesa faz parte de um parcelamento. Escolha se deseja remover apenas esta parcela ou excluir o parcelamento."
                 : despesaExcluindoRecorrente
-                  ? "Esta despesa é fixa. Escolha se deseja remover apenas a selecionada ou esta e as próximas."
+                  ? "Esta e todas as recorrências a partir deste mês serão excluídas. Para alterar, exclua e cadastre uma nova despesa fixa."
                 : "Esta ação remove a despesa selecionada definitivamente."}
             </DialogDescription>
           </DialogHeader>
@@ -1048,7 +1025,7 @@ export function DespesasPage() {
                 </div>
               )}
 
-            {despesaExcluindoComEscopo && (
+            {despesaExcluindoParcelada && (
               <div className="mt-3 grid gap-2">
                 {(["mes", "todas"] as const).map((opcao) => (
                   <label
@@ -1065,22 +1042,10 @@ export function DespesasPage() {
                     />
                     <span>
                       <span className="block text-sm font-semibold text-foreground">
-                        {opcao === "mes"
-                          ? despesaExcluindoParcelada
-                            ? "Remover somente esta parcela"
-                            : "Remover somente a selecionada"
-                          : despesaExcluindoParcelada
-                            ? "Excluir parcelamento"
-                            : "Excluir esta e as próximas"}
+                        {opcao === "mes" ? "Remover somente esta parcela" : "Excluir parcelamento"}
                       </span>
                       <span className="mt-0.5 block text-xs text-muted-foreground">
-                        {opcao === "mes"
-                          ? despesaExcluindoParcelada
-                            ? "Mantém as outras parcelas deste parcelamento."
-                            : "Mantém a despesa fixa para os próximos meses."
-                          : despesaExcluindoParcelada
-                            ? "Remove todas as parcelas vinculadas."
-                            : "Mantém os meses anteriores e remove esta recorrência daqui para frente."}
+                        {opcao === "mes" ? "Mantém as outras parcelas deste parcelamento." : "Remove todas as parcelas vinculadas."}
                       </span>
                     </span>
                   </label>
@@ -1110,9 +1075,7 @@ export function DespesasPage() {
                 ? "Excluir todas as parcelas"
                 : despesaExcluindoParcelada && escopoExclusao === "mes"
                   ? "Remover esta parcela"
-                : despesaExcluindoRecorrente && escopoExclusao === "mes"
-                  ? "Remover selecionada"
-                : despesaExcluindoRecorrente && escopoExclusao === "todas"
+                : despesaExcluindoRecorrente
                   ? "Excluir esta e próximas"
                 : "Excluir"}
             </Button>

@@ -119,9 +119,6 @@ export function DespesaForm({
     despesa?.dataVencimento ? despesa.dataVencimento.slice(0, 10) : "",
   );
   const [fixa, setFixa] = useState(despesa?.fixa ?? false);
-  const [escopoEdicao, setEscopoEdicao] = useState<"selecionado" | "proximos">(
-    "selecionado",
-  );
   const [numeroParcelas, setNumeroParcelas] = useState(
     despesa?.numeroParcelas ? String(despesa.numeroParcelas) : "",
   );
@@ -255,21 +252,8 @@ export function DespesaForm({
       };
 
       if (mode === "edit" && despesa) {
-        if (despesa.fixa && escopoEdicao === "proximos") {
-          await despesasApi.excluir(despesa.id, {
-            escopo: "todas",
-            mes,
-          });
-          await despesasApi.criar({
-            ...payload,
-            fixa: true,
-            numeroParcelas: undefined,
-          });
-          toast.success("Despesa atualizada deste mês em diante.");
-        } else {
-          await despesasApi.editar(despesa.id, payload);
-          toast.success("Despesa atualizada com sucesso.");
-        }
+        await despesasApi.editar(despesa.id, payload);
+        toast.success("Despesa atualizada com sucesso.");
       } else {
         await despesasApi.criar(payload);
         toast.success(
@@ -540,50 +524,22 @@ export function DespesaForm({
             </div>
 
             {fixa && (
-              <div className="flex items-start gap-2.5 rounded-lg border border-blue-500/25 bg-blue-500/8 p-3 text-xs text-blue-700 dark:text-blue-400">
+              <div className="flex items-start gap-2.5 rounded-lg border border-violet-500/25 bg-violet-500/8 p-3 text-xs text-violet-700 dark:text-violet-400">
                 <Repeat2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>
-                  <strong>Despesa fixa</strong> registra automaticamente <strong>60 meses</strong> (5 anos) a partir do mês escolhido.
-                  Você pode excluir ou editar individualmente ou em bloco. Após esse prazo, basta criar uma nova despesa fixa.
+                  <strong>Despesa fixa</strong> registra automaticamente <strong>60 meses</strong> a partir do mês escolhido.
+                  Após o cadastro <strong>não é possível editar</strong> — para alterar, exclua e cadastre uma nova.
+                  Ao excluir, esta e todas as recorrências seguintes serão removidas.
                 </span>
               </div>
             )}
 
             {mode === "edit" && despesa?.fixa && (
-              <div className="grid gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
-                <p className="font-medium text-foreground">Como deseja editar?</p>
-                <label className="flex cursor-pointer items-start gap-2 rounded-md border border-border bg-background p-3">
-                  <input
-                    className="mt-1 h-4 w-4 accent-primary"
-                    type="radio"
-                    name="escopo-edicao-despesa"
-                    checked={escopoEdicao === "selecionado"}
-                    onChange={() => setEscopoEdicao("selecionado")}
-                  />
-                  <span>
-                    <span className="block font-medium">Somente a selecionada</span>
-                    <span className="text-xs text-muted-foreground">
-                      Cria uma alteração apenas para este mês.
-                    </span>
-                  </span>
-                </label>
-                <label className="flex cursor-pointer items-start gap-2 rounded-md border border-border bg-background p-3">
-                  <input
-                    className="mt-1 h-4 w-4 accent-primary"
-                    type="radio"
-                    name="escopo-edicao-despesa"
-                    checked={escopoEdicao === "proximos"}
-                    onChange={() => setEscopoEdicao("proximos")}
-                  />
-                  <span>
-                    <span className="block font-medium">
-                      Esta e as próximas
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Mantém meses anteriores e aplica o novo valor daqui para frente.
-                    </span>
-                  </span>
-                </label>
+              <div className="flex items-start gap-2.5 rounded-lg border border-violet-500/25 bg-violet-500/8 p-3 text-xs text-violet-700 dark:text-violet-400">
+                <Repeat2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>
+                  <strong>Despesa fixa não pode ser editada.</strong> Para alterar, exclua e cadastre uma nova despesa fixa a partir do mês desejado.
+                </span>
               </div>
             )}
 

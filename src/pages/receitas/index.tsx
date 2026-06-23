@@ -237,22 +237,24 @@ export function ReceitasPage() {
                   {formatCurrency(receita.valor)}
                 </span>
                 <div className="flex shrink-0 gap-1.5">
-                  <Button
-                    aria-label="Editar receita"
-                    className="h-8 w-8 rounded-lg px-0"
-                    variant="outline"
-                    title="Editar"
-                    onClick={() => setReceitaEditando(receita.fixa ? { ...receita, mes } : receita)}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
+                  {!receita.fixa && (
+                    <Button
+                      aria-label="Editar receita"
+                      className="h-8 w-8 rounded-lg px-0"
+                      variant="outline"
+                      title="Editar"
+                      onClick={() => setReceitaEditando(receita)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
                   <Button
                     aria-label="Excluir receita"
                     className="h-8 w-8 rounded-lg px-0 text-destructive hover:text-destructive"
                     variant="outline"
                     title="Excluir"
                     disabled={deletingId === receita.id}
-                    onClick={() => { setEscopoExclusao("mes"); setReceitaExcluindo(receita); }}
+                    onClick={() => { setEscopoExclusao(receita.fixa ? "todas" : "mes"); setReceitaExcluindo(receita); }}
                   >
                     {deletingId === receita.id
                       ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -322,7 +324,7 @@ export function ReceitasPage() {
             <DialogTitle>Excluir receita</DialogTitle>
             <DialogDescription>
               {receitaExcluindo?.fixa
-                ? "Escolha se deseja remover apenas este mês ou encerrar a receita fixa deste mês em diante."
+                ? "Esta e todas as recorrências a partir deste mês serão excluídas. Para alterar, exclua e cadastre uma nova receita fixa."
                 : "Esta ação remove a receita definitivamente."}
             </DialogDescription>
           </DialogHeader>
@@ -330,40 +332,11 @@ export function ReceitasPage() {
             <p className="text-sm font-semibold text-foreground">{receitaExcluindo?.nome}</p>
             <p className="mt-0.5 text-sm font-bold text-blue-500">{formatCurrency(receitaExcluindo?.valor ?? 0)}</p>
           </div>
-          {receitaExcluindo?.fixa && (
-            <div className="grid gap-2">
-              {(["mes", "todas"] as const).map((opcao) => (
-                <label key={opcao} className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-background p-3 transition-colors hover:bg-muted/40">
-                  <input
-                    className="mt-1 h-4 w-4 accent-primary"
-                    checked={escopoExclusao === opcao}
-                    name="escopo-receita"
-                    type="radio"
-                    onChange={() => setEscopoExclusao(opcao)}
-                  />
-                  <span>
-                    <span className="block text-sm font-semibold">
-                      {opcao === "mes" ? "Somente a selecionada" : "Esta e as próximas"}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {opcao === "mes"
-                        ? `Remove apenas ${formatMonth(mes)}.`
-                        : "Mantém os meses anteriores e encerra a recorrência."}
-                    </span>
-                  </span>
-                </label>
-              ))}
-            </div>
-          )}
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <Button variant="outline" onClick={() => setReceitaExcluindo(null)}>Cancelar</Button>
             <Button variant="destructive" disabled={deletingId === receitaExcluindo?.id} onClick={excluirReceita}>
               {deletingId === receitaExcluindo?.id && <Loader2 className="h-4 w-4 animate-spin" />}
-              {receitaExcluindo?.fixa && escopoExclusao === "mes"
-                ? "Excluir selecionada"
-                : receitaExcluindo?.fixa
-                  ? "Excluir esta e próximas"
-                  : "Excluir"}
+              {receitaExcluindo?.fixa ? "Excluir esta e próximas" : "Excluir"}
             </Button>
           </div>
         </DialogContent>
