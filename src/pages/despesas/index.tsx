@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   CalendarDays,
@@ -95,11 +95,18 @@ export function DespesasPage() {
   const [error, setError] = useState("");
   const [busca, setBusca] = useState("");
 
-  const despesasFiltradas = busca.trim()
-    ? despesas.filter((d) => d.nome.toLowerCase().includes(busca.trim().toLowerCase()))
-    : despesas;
+  const despesasFiltradas = useMemo(
+    () =>
+      busca.trim()
+        ? despesas.filter((d) => d.nome.toLowerCase().includes(busca.trim().toLowerCase()))
+        : despesas,
+    [despesas, busca],
+  );
 
-  const filtrosAtivos = [formaPagamento, cartaoId, status !== "todas" ? status : "", busca.trim()].filter(Boolean).length;
+  const filtrosAtivos = useMemo(
+    () => [formaPagamento, cartaoId, status !== "todas" ? status : "", busca.trim()].filter(Boolean).length,
+    [formaPagamento, cartaoId, status, busca],
+  );
 
   const despesaExcluindoParcelada = Boolean(despesaExcluindo?.parcelamentoId);
   const despesaExcluindoRecorrente = Boolean(despesaExcluindo?.fixa);

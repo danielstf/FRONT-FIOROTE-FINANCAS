@@ -31,7 +31,7 @@ export function AdBanner() {
       window.adsbygoogle = window.adsbygoogle ?? [];
       window.adsbygoogle.push({});
     } catch (error) {
-      console.warn("Nao foi possivel carregar anuncio do AdSense:", error);
+      if (import.meta.env.DEV) console.warn("AdSense load failed:", error);
     }
   }, []);
 

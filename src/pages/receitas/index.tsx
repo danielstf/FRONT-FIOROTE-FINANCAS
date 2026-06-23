@@ -98,7 +98,7 @@ export function ReceitasPage() {
   }
 
   useEffect(() => {
-    void carregarReceitas(initialMonth);
+    void carregarReceitas(mes);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [perfilFinanceiroId]);
 
