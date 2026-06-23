@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   CalendarDays,
   CreditCard,
-  FileSpreadsheet,
   Filter,
   Loader2,
   PencilLine,
@@ -43,7 +42,6 @@ import { cn } from "../../lib/utils";
 import { pageVariants, sectionVariants, listContainerVariants, listItemVariants } from "../../lib/motion";
 import { useAuth } from "../../providers/auth-provider";
 import { DespesaForm } from "./despesa-form";
-import { ImportarDespesasDialog } from "./importar-despesas-dialog";
 import { getCategoryColor, getCategoryIcon } from "./category-icons";
 import {
   formaPagamentoLabel,
@@ -91,7 +89,6 @@ export function DespesasPage() {
   const [bulkPagarOpen, setBulkPagarOpen] = useState(false);
   const [bulkPagando, setBulkPagando] = useState(false);
   const [cadastroAberto, setCadastroAberto] = useState(false);
-  const [importarAberto, setImportarAberto] = useState(false);
   const [despesaEditando, setDespesaEditando] = useState<Despesa | null>(null);
   const [despesaExcluindo, setDespesaExcluindo] = useState<Despesa | null>(null);
   const [escopoExclusao, setEscopoExclusao] = useState<"mes" | "todas">("mes");
@@ -281,14 +278,6 @@ export function DespesasPage() {
           subtitle={formatMonthName(mes)}
           right={
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                className="h-10 gap-2"
-                onClick={() => setImportarAberto(true)}
-              >
-                <FileSpreadsheet className="h-4 w-4" />
-                <span className="hidden sm:inline">Importar</span>
-              </Button>
               <Button
                 variant="destructive"
                 className="h-10 gap-2"
@@ -1124,12 +1113,6 @@ export function DespesasPage() {
         </DialogContent>
       </Dialog>
 
-      <ImportarDespesasDialog
-        open={importarAberto}
-        onOpenChange={setImportarAberto}
-        defaultMes={mes}
-        onSuccess={() => void carregarDespesas()}
-      />
     </motion.div>
   );
 }
