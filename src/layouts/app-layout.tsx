@@ -26,7 +26,6 @@ export function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [perfis, setPerfis] = useState<PerfilFinanceiro[]>([]);
-  const [perfisLoading, setPerfisLoading] = useState(false);
   const perfilSelecionado =
     perfis.find((perfil) => perfil.id === perfilFinanceiroId) ?? null;
   const isPremium = hasPremiumAtivo(session?.usuario);
@@ -66,15 +65,12 @@ export function AppLayout() {
     let ignore = false;
 
     async function carregarPerfis() {
-      if (authLoading) return; // Aguarda login ativo terminar
-
-      setPerfisLoading(true);
+      if (authLoading) return;
 
       if (!isPremium) {
         if (ignore) return;
         setPerfis([]);
         selecionarPerfilFinanceiro(null);
-        setPerfisLoading(false);
         return;
       }
       try {
@@ -90,8 +86,6 @@ export function AppLayout() {
       } catch {
         if (ignore) return;
         setPerfis([]);
-      } finally {
-        if (!ignore) setPerfisLoading(false);
       }
     }
     void carregarPerfis();
